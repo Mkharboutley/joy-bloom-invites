@@ -39,6 +39,39 @@ export type Database = {
         }
         Relationships: []
       }
+      invitation_templates: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          media_type: string | null
+          media_url: string | null
+          message: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          media_type?: string | null
+          media_url?: string | null
+          message: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          media_type?: string | null
+          media_url?: string | null
+          message?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_logs: {
         Row: {
           created_at: string
@@ -72,6 +105,44 @@ export type Database = {
         }
         Relationships: []
       }
+      template_media: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          template_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_media_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "invitation_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_contacts: {
         Row: {
           created_at: string
@@ -79,7 +150,10 @@ export type Database = {
           is_sent: boolean
           name: string
           phone_number: string
+          selected: boolean | null
           sent_at: string | null
+          source: string | null
+          template_id: string | null
         }
         Insert: {
           created_at?: string
@@ -87,7 +161,10 @@ export type Database = {
           is_sent?: boolean
           name: string
           phone_number: string
+          selected?: boolean | null
           sent_at?: string | null
+          source?: string | null
+          template_id?: string | null
         }
         Update: {
           created_at?: string
@@ -95,9 +172,20 @@ export type Database = {
           is_sent?: boolean
           name?: string
           phone_number?: string
+          selected?: boolean | null
           sent_at?: string | null
+          source?: string | null
+          template_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_contacts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "invitation_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

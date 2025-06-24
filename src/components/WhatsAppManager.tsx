@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Upload, Send, Plus } from 'lucide-react';
+import { Upload, Send, Plus, AlertTriangle } from 'lucide-react';
 import { getWhatsAppContacts, addWhatsAppContact, addBulkWhatsAppContacts, markWhatsAppContactAsSent, type WhatsAppContact } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -45,7 +44,7 @@ const WhatsAppManager = () => {
 
     setLoading(true);
     try {
-      await addWhatsAppContact(newContact);
+      await addWhatsAppContact({ ...newContact, source: 'manual' });
       setNewContact({ name: '', phone_number: '' });
       await loadContacts();
       toast({
@@ -74,14 +73,15 @@ const WhatsAppManager = () => {
     }
 
     const lines = bulkContacts.split('\n').filter(line => line.trim());
-    const contactsToAdd: Array<{ name: string; phone_number: string }> = [];
+    const contactsToAdd: Array<{ name: string; phone_number: string; source: string }> = [];
 
     for (const line of lines) {
       const parts = line.trim().split(',');
       if (parts.length >= 2) {
         contactsToAdd.push({
           name: parts[0].trim(),
-          phone_number: parts[1].trim()
+          phone_number: parts[1].trim(),
+          source: 'manual'
         });
       }
     }
@@ -157,10 +157,25 @@ ${window.location.origin}
 
   return (
     <div className="space-y-6">
+      {/* Legacy Warning */}
+      <Card className="bg-yellow-500/10 backdrop-blur-md border-yellow-400/30">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3" dir="rtl">
+            <AlertTriangle className="w-5 h-5 text-yellow-400" />
+            <div>
+              <h3 className="text-yellow-400 font-semibold">إدارة WhatsApp القديمة</h3>
+              <p className="text-yellow-300 text-sm">
+                استخدم التبويبات الجديدة: "استيراد جهات الاتصال" و "إعداد الدعوات" و "إرسال الدعوات" للحصول على تجربة أفضل
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
           <CardTitle className="text-white text-center" dir="rtl">
-            إدارة رسائل WhatsApp
+            إدارة رسائل WhatsApp (قديم)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
