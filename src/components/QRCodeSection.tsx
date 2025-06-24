@@ -13,7 +13,7 @@ const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProp
 
   return (
     <div 
-      className="text-center p-6 rounded-2xl relative bg-cover bg-center bg-no-repeat flex items-center justify-center min-h-[300px]"
+      className="text-center p-6 rounded-2xl relative bg-cover bg-center bg-no-repeat flex items-center justify-center min-h-[225px]"
       style={{
         backgroundImage: `url('/lovable-uploads/1bf2a91d-f9cf-4b6f-8efb-7e3191c192f8.png')`
       }}
@@ -21,7 +21,7 @@ const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProp
       <QRCode
         id="qr-code"
         value={qrData}
-        size={250}
+        size={187}
         style={{ margin: '0 auto' }}
         fgColor="#000000"
         bgColor="#FFFFFF"
