@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Send, CheckAll, Users, MessageSquare } from 'lucide-react';
+import { Send, Check, Users, MessageSquare } from 'lucide-react';
 import { 
   getWhatsAppContacts, 
   getInvitationTemplates, 
@@ -270,7 +269,7 @@ const SendInvitations = () => {
                 variant="outline"
                 className="border-white/20 text-white hover:bg-white/10"
               >
-                <CheckAll className="w-4 h-4 ml-2" />
+                <Check className="w-4 h-4 ml-2" />
                 {selectAll ? 'إلغاء التحديد' : 'تحديد الكل'}
               </Button>
             </div>
