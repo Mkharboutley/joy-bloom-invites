@@ -125,7 +125,8 @@ const QRScanResult = () => {
                 <img 
                   src="/lovable-uploads/1adfbfa7-5732-495d-88ba-048a36661d96.png" 
                   alt="موقع الخريطة" 
-                  className="w-12 h-12"
+                  className="h-12"
+                  style={{ width: '52.8px' }}
                 />
                 <span>تشغيل خرائط جوجل</span>
               </a>
