@@ -103,7 +103,7 @@ const Index = () => {
                 placeholder="الرجاء إدخال الإسم الكامل"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/80 placeholder:text-xs backdrop-blur-md rounded-2xl h-14 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 placeholder:text-xs backdrop-blur-md rounded-2xl h-14 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
                 dir="rtl"
               />
             </div>
