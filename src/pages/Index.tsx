@@ -113,7 +113,7 @@ const Index = () => {
               <img 
                 src="/logo.png" 
                 alt="Logo" 
-                className="w-23 h-23 object-contain"
+                className="w-12 h-12 object-contain opacity-60"
               />
             </div>
           </div>
