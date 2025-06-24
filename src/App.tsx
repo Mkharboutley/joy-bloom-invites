@@ -3,11 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import QRScanResult from "./pages/QRScanResult";
-import AttendanceDashboard from "./pages/AttendanceDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -23,7 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
           <Route path="/scan/:invitationId" element={<QRScanResult />} />
-          <Route path="/admin/dashboard" element={<AttendanceDashboard />} />
+          <Route path="/admin/dashboard" element={<Navigate to="/admin/full" replace />} />
           <Route path="/admin/full" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
