@@ -8,11 +8,8 @@ interface QRCodeSectionProps {
 }
 
 const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProps) => {
-  const qrData = JSON.stringify({
-    guestName,
-    invitationId,
-    timestamp
-  });
+  // Generate the actual URL that should be opened when QR code is scanned
+  const qrData = `${window.location.origin}/scan/${invitationId}`;
 
   return (
     <div 
