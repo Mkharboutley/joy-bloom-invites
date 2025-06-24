@@ -26,7 +26,7 @@ export interface InvitationTemplate {
   name: string;
   message: string;
   media_url?: string;
-  media_type?: 'image' | 'video' | 'document';
+  media_type?: 'image' | 'video' | 'document' | 'link';
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

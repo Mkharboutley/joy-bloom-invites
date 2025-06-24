@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Image, Video, FileText, Save } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, Video, FileText, Save, Link } from 'lucide-react';
 import { getInvitationTemplates, addInvitationTemplate, updateInvitationTemplate, deleteInvitationTemplate, type InvitationTemplate } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,7 +17,7 @@ const InvitationConfig = () => {
     name: '',
     message: '',
     media_url: '',
-    media_type: '' as 'image' | 'video' | 'document' | ''
+    media_type: '' as 'image' | 'video' | 'document' | 'link' | ''
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -129,6 +129,7 @@ const InvitationConfig = () => {
       case 'image': return <Image className="w-4 h-4" />;
       case 'video': return <Video className="w-4 h-4" />;
       case 'document': return <FileText className="w-4 h-4" />;
+      case 'link': return <Link className="w-4 h-4" />;
       default: return null;
     }
   };
@@ -160,12 +161,13 @@ const InvitationConfig = () => {
               <option value="image">صورة</option>
               <option value="video">فيديو</option>
               <option value="document">مستند</option>
+              <option value="link">رابط</option>
             </select>
           </div>
           
           {newTemplate.media_type && (
             <Input
-              placeholder="رابط الوسائط (اختياري)"
+              placeholder={newTemplate.media_type === 'link' ? "رابط الموقع أو الصفحة" : "رابط الوسائط (اختياري)"}
               value={newTemplate.media_url}
               onChange={(e) => setNewTemplate(prev => ({ ...prev, media_url: e.target.value }))}
               className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
@@ -248,6 +250,7 @@ const InvitationConfig = () => {
                             {template.media_type === 'image' && 'صورة'}
                             {template.media_type === 'video' && 'فيديو'}
                             {template.media_type === 'document' && 'مستند'}
+                            {template.media_type === 'link' && 'رابط'}
                           </span>
                         </Badge>
                       ) : (
