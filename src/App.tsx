@@ -22,7 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
           <Route path="/scan/:invitationId" element={<QRScanResult />} />
-          <Route path="/admin/dashboard" element={<Navigate to="/admin/full" replace />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/full" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
