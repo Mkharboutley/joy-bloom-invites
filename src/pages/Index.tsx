@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -70,11 +68,11 @@ const Index = () => {
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
         <GlassCard className="w-full max-w-md mx-auto">
           <div className="p-8 space-y-8">
-            {/* Header with new Arabic calligraphy image */}
+            {/* Header with Untitled.png image */}
             <div className="text-center space-y-6">
               <img 
-                src="/lovable-uploads/1a88c531-9dc9-43c7-b715-a7926cd933ed.png" 
-                alt="Arabic Calligraphy" 
+                src="/Untitled.png" 
+                alt="Wedding Header" 
                 className="w-full max-w-xs mx-auto"
               />
             </div>
@@ -125,4 +123,3 @@ const Index = () => {
 };
 
 export default Index;
-
