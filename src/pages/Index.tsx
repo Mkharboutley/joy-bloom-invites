@@ -83,14 +83,14 @@ const Index = () => {
 
             {/* Wedding Date */}
             <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center justify-center">
-              <p className="text-white font-medium text-center text-sm" dir="rtl">
+              <p className="text-white font-normal text-center text-sm" dir="rtl">
                 ٤ يوليو ٢٠٢٥
               </p>
             </div>
 
             {/* Wedding Venue */}
             <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center justify-center">
-              <p className="text-white font-medium text-center text-sm" dir="rtl">
+              <p className="text-white font-normal text-center text-sm" dir="rtl">
                 فندق نادي الضباط، قاعة إرث
               </p>
             </div>
@@ -111,7 +111,7 @@ const Index = () => {
             <Button
               onClick={handleConfirmation}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 rounded-2xl h-14 text-lg border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-normal py-4 rounded-2xl h-14 text-lg border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
             >
               {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
             </Button>
