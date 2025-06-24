@@ -46,7 +46,7 @@ const ConfirmationPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center">
+      <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
         <div className="relative z-10 text-white text-xl">جاري التحميل...</div>
       </div>
@@ -55,7 +55,7 @@ const ConfirmationPage = () => {
 
   if (!guest) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center">
+      <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
         <div className="relative z-10 text-white text-xl">لم يتم العثور على الدعوة</div>
       </div>
@@ -65,7 +65,7 @@ const ConfirmationPage = () => {
   const timestamp = guest.confirmationTimestamp?.toDate?.()?.toISOString() || new Date().toISOString();
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
 
       {/* Main Content */}
