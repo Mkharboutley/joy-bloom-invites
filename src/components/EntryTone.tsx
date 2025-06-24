@@ -89,23 +89,6 @@ const EntryTone = ({ autoPlay = true }: EntryToneProps) => {
     }
   };
 
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-      } else {
-        audio.play().then(() => {
-          setIsPlaying(true);
-          setHasPlayed(true);
-        }).catch(err => {
-          console.error('Failed to play audio:', err);
-        });
-      }
-    }
-  };
-
   return (
     <>
       <audio
@@ -119,25 +102,8 @@ const EntryTone = ({ autoPlay = true }: EntryToneProps) => {
         Your browser does not support the audio element.
       </audio>
 
-      {/* Audio Control Buttons */}
-      <div className="fixed top-4 left-4 z-50 flex gap-2">
-        <button
-          onClick={togglePlay}
-          className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full p-3 hover:bg-white/30 transition-all duration-300"
-          title={isPlaying ? "إيقاف الصوت" : "تشغيل الصوت"}
-        >
-          {isPlaying ? (
-            <div className="w-5 h-5 text-white flex items-center justify-center">
-              <div className="w-2 h-4 bg-white rounded-sm mr-1"></div>
-              <div className="w-2 h-4 bg-white rounded-sm"></div>
-            </div>
-          ) : (
-            <div className="w-5 h-5 text-white flex items-center justify-center">
-              <div className="w-0 h-0 border-l-[10px] border-l-white border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1"></div>
-            </div>
-          )}
-        </button>
-        
+      {/* Audio Control Button - Only Mute/Unmute */}
+      <div className="fixed top-4 left-4 z-50">
         <button
           onClick={toggleMute}
           className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full p-3 hover:bg-white/30 transition-all duration-300"
