@@ -9,7 +9,7 @@ interface QRCodeSectionProps {
 
 const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProps) => {
   // Generate the actual URL that should be opened when QR code is scanned
-  const qrData = `https://khajah.me/scan/${invitationId}`;
+  const qrData = `${window.location.origin}/scan/${invitationId}`;
 
   return (
     <div 

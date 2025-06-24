@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -86,7 +85,7 @@ const SendInvitations = () => {
   };
 
   const generateWhatsAppMessage = (template: InvitationTemplate, contactName: string) => {
-    const confirmationLink = `https://khajah.me/confirmation/guest-${Date.now()}`;
+    const confirmationLink = `${window.location.origin}/`;
     return template.message
       .replace(/{name}/g, contactName)
       .replace(/{link}/g, confirmationLink);
