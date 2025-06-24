@@ -155,13 +155,13 @@ const InvitationConfig = () => {
             <select
               value={newTemplate.media_type}
               onChange={(e) => setNewTemplate(prev => ({ ...prev, media_type: e.target.value as any }))}
-              className="bg-white/10 border border-white/20 text-white rounded-md px-3 py-2"
+              className="bg-gray-800/90 border border-white/20 text-white rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-transparent"
             >
-              <option value="">بدون وسائط</option>
-              <option value="image">صورة</option>
-              <option value="video">فيديو</option>
-              <option value="document">مستند</option>
-              <option value="link">رابط</option>
+              <option value="" className="bg-gray-800 text-white">بدون وسائط</option>
+              <option value="image" className="bg-gray-800 text-white">صورة</option>
+              <option value="video" className="bg-gray-800 text-white">فيديو</option>
+              <option value="document" className="bg-gray-800 text-white">مستند</option>
+              <option value="link" className="bg-gray-800 text-white">رابط</option>
             </select>
           </div>
           
