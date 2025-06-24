@@ -36,7 +36,7 @@ const ActionButtons = ({ guestName, invitationId }: ActionButtonsProps) => {
   };
 
   const handleShareQR = async () => {
-    const shareUrl = window.location.origin + `/scan/${invitationId}`;
+    const shareUrl = `https://khajah.me/scan/${invitationId}`;
     
     // Check if Web Share API is available and supported
     if (navigator.share && navigator.canShare) {
