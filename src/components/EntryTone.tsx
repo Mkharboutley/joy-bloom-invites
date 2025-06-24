@@ -56,6 +56,7 @@ const EntryTone = ({ autoPlay = true }: EntryToneProps) => {
         ref={audioRef}
         preload="auto"
         muted={isMuted}
+        loop
       >
         <source src="/entry-tone.mp3" type="audio/mpeg" />
         <source src="/entry-tone.wav" type="audio/wav" />
