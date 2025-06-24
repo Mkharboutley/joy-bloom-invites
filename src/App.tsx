@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import QRScanResult from "./pages/QRScanResult";
 import AttendanceDashboard from "./pages/AttendanceDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
           <Route path="/scan/:invitationId" element={<QRScanResult />} />
           <Route path="/admin/dashboard" element={<AttendanceDashboard />} />
+          <Route path="/admin/full" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

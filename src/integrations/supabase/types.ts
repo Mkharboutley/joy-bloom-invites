@@ -9,7 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      admin_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notification_type: string
+          phone_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notification_type: string
+          phone_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notification_type?: string
+          phone_number?: string | null
+        }
+        Relationships: []
+      }
+      notification_logs: {
+        Row: {
+          created_at: string
+          guest_id: string
+          guest_name: string
+          id: string
+          notification_type: string
+          sent_to: string
+          sent_via: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          guest_id: string
+          guest_name: string
+          id?: string
+          notification_type: string
+          sent_to: string
+          sent_via: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          guest_id?: string
+          guest_name?: string
+          id?: string
+          notification_type?: string
+          sent_to?: string
+          sent_via?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      whatsapp_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          is_sent: boolean
+          name: string
+          phone_number: string
+          sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_sent?: boolean
+          name: string
+          phone_number: string
+          sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_sent?: boolean
+          name?: string
+          phone_number?: string
+          sent_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

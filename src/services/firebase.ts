@@ -1,6 +1,7 @@
 
 import { db } from '@/lib/firebase';
 import { collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc, query, where } from 'firebase/firestore';
+import { sendAdminNotifications } from './notificationService';
 
 export interface Guest {
   id?: string;
@@ -22,6 +23,10 @@ export const confirmAttendance = async (fullName: string): Promise<string> => {
     };
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
+    
+    // Send admin notifications
+    await sendAdminNotifications(fullName, docRef.id, 'confirmation');
+    
     return docRef.id;
   } catch (error) {
     console.error('Error confirming attendance:', error);
@@ -35,10 +40,14 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
     const guestDoc = querySnapshot.docs.find(doc => doc.data().invitationId === invitationId);
     
     if (guestDoc) {
+      const guestData = guestDoc.data();
       await updateDoc(doc(db, 'guests', guestDoc.id), {
         status: 'apologized',
         apologyTimestamp: serverTimestamp()
       });
+      
+      // Send admin notifications
+      await sendAdminNotifications(guestData.fullName, guestDoc.id, 'apology');
     } else {
       throw new Error('Guest not found');
     }
