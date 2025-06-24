@@ -82,15 +82,15 @@ const Index = () => {
             </div>
 
             {/* Wedding Date */}
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center">
-              <p className="text-white font-semibold text-center w-full" dir="rtl">
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center justify-center">
+              <p className="text-white font-medium text-center text-sm" dir="rtl">
                 ٤ يوليو ٢٠٢٥
               </p>
             </div>
 
             {/* Wedding Venue */}
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center">
-              <p className="text-white font-semibold text-center w-full" dir="rtl">
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center justify-center">
+              <p className="text-white font-medium text-center text-sm" dir="rtl">
                 فندق نادي الضباط، قاعة إرث
               </p>
             </div>
@@ -102,7 +102,7 @@ const Index = () => {
                 placeholder="الرجاء إدخال الإسم الكامل"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="text-right bg-white/25 border-white/40 text-white placeholder:text-white/80 backdrop-blur-md rounded-2xl h-14 text-lg shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/80 placeholder:text-sm backdrop-blur-md rounded-2xl h-14 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
                 dir="rtl"
               />
             </div>
