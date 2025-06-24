@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
@@ -70,11 +69,11 @@ const ConfirmationPage = () => {
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <GlassCard className="w-full max-w-md p-6 space-y-4">
-          {/* Confirmation Message - moved up by 15px and added bottom margin */}
-          <div className="text-center space-y-1 -mt-4 mb-4" dir="rtl">
-            <h2 className="text-white text-2xl font-bold">تم تأكيد الحضور</h2>
-            <p className="text-white/90 text-lg">بحضوركم تكتمل سعادتنا</p>
+        <GlassCard className="w-full max-w-md p-5 space-y-3">
+          {/* Confirmation Message - reduced margin and spacing */}
+          <div className="text-center space-y-1 -mt-3 mb-3" dir="rtl">
+            <h2 className="text-white text-xl font-bold">تم تأكيد الحضور</h2>
+            <p className="text-white/90 text-base">بحضوركم تكتمل سعادتنا</p>
           </div>
 
           <QRCodeSection 
@@ -90,8 +89,8 @@ const ConfirmationPage = () => {
             invitationId={guest.invitationId}
           />
 
-          {/* Footer Note */}
-          <div className="text-center text-white/80 text-xs space-y-2 mt-4" dir="rtl">
+          {/* Footer Note - reduced spacing */}
+          <div className="text-center text-white/80 text-xs space-y-1 mt-3" dir="rtl">
             <p>امسح هذا الرمز للوصول إلى تفاصيل دعوتك وموقع المناسبة</p>
             <p>يرجى حفظ هذا الرمز وإحضاره معك إلى المناسبة</p>
           </div>
