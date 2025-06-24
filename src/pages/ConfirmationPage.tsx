@@ -91,7 +91,7 @@ const ConfirmationPage = () => {
           />
 
           {/* Footer Note */}
-          <div className="text-center text-white/80 text-base space-y-2" dir="rtl">
+          <div className="text-center text-white/80 text-xs space-y-2 mt-4" dir="rtl">
             <p>امسح هذا الرمز للوصول إلى تفاصيل دعوتك وموقع المناسبة</p>
             <p>يرجى حفظ هذا الرمز وإحضاره معك إلى المناسبة</p>
           </div>
