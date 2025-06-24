@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Map } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import VideoBackground from '@/components/VideoBackground';
 import { getGuestByInvitationId, Guest } from '@/services/firebase';
@@ -118,12 +117,16 @@ const QRScanResult = () => {
                 href={venueLocation}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-4 px-4 rounded-lg text-center transition-all duration-300 border border-white/20 hover:border-white/40"
+                className="flex items-center justify-center gap-3 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-4 px-4 rounded-lg text-center transition-all duration-300 border border-white/20 hover:border-white/40"
                 style={{ 
                   boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3)' 
                 }}
               >
-                <Map size={24} />
+                <img 
+                  src="/lovable-uploads/1adfbfa7-5732-495d-88ba-048a36661d96.png" 
+                  alt="موقع الخريطة" 
+                  className="w-6 h-6"
+                />
                 <span>فتح الموقع في خرائط جوجل</span>
               </a>
             </div>
