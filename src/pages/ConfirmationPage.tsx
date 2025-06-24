@@ -89,12 +89,6 @@ const ConfirmationPage = () => {
             guestName={guest.fullName}
             invitationId={guest.invitationId}
           />
-
-          {/* Footer Note */}
-          <div className="text-center text-white/80 text-sm space-y-2" dir="rtl">
-            <p>امسح هذا الرمز للوصول إلى تفاصيل دعوتك وموقع المناسبة</p>
-            <p>يرجى حفظ هذا الرمز وإحضاره معك إلى المناسبة</p>
-          </div>
         </GlassCard>
       </div>
     </div>
