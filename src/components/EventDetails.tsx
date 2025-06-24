@@ -1,26 +1,26 @@
 
-import GlassCard from './GlassCard';
-
 const EventDetails = () => {
   return (
-    <GlassCard className="p-6 space-y-4">
-      <h3 className="text-white text-xl font-bold text-center" dir="rtl">تفاصيل المناسبة</h3>
+    <div className="text-center space-y-6 py-8" dir="rtl">
+      <h3 className="text-white/80 text-xl font-light tracking-wide">تفاصيل المناسبة</h3>
       
-      <div className="space-y-3 text-white" dir="rtl">
-        <div className="flex justify-between">
-          <span className="font-semibold">التاريخ:</span>
-          <span>٤ يوليو ٢٠٢٥</span>
+      <div className="space-y-8 text-white">
+        <div className="space-y-2">
+          <div className="text-white/70 text-sm font-light">التاريخ</div>
+          <div className="text-lg font-light">الجمعة، ٤ يوليو ٢٠٢٥</div>
         </div>
-        <div className="flex justify-between">
-          <span className="font-semibold">الوقت:</span>
-          <span>٦:٠٠ مساءً</span>
+        
+        <div className="space-y-2">
+          <div className="text-white/70 text-sm font-light">الوقت</div>
+          <div className="text-lg font-light">الساعة ٦:٠٠ مساءً</div>
         </div>
-        <div className="flex justify-between">
-          <span className="font-semibold">المكان:</span>
-          <span>فندق نادي الضباط، قاعة إرث</span>
+        
+        <div className="space-y-2">
+          <div className="text-white/70 text-sm font-light">المكان</div>
+          <div className="text-lg font-light">فندق نادي الضباط - قاعة إرث</div>
         </div>
       </div>
-    </GlassCard>
+    </div>
   );
 };
 
