@@ -59,7 +59,7 @@ const QRScanResult = () => {
     );
   }
 
-  const venueLocation = "https://maps.google.com/?q=فندق+نادي+الضباط+قاعة+إرث";
+  const venueLocation = "https://maps.app.goo.gl/ini1momzSFJN5g4DA";
 
   return (
     <div className="min-h-screen relative overflow-hidden">
