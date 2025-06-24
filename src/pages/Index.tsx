@@ -75,7 +75,7 @@ const Index = () => {
 
             {/* Wedding Date */}
             <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl">
-              <p className="text-white font-bold text-lg text-center tracking-wide" dir="rtl">
+              <p className="text-white font-semibold text-center" dir="rtl">
                 ٤ يوليو ٢٠٢٥
               </p>
             </div>
