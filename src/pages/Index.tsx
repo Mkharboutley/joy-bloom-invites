@@ -74,15 +74,15 @@ const Index = () => {
             </div>
 
             {/* Wedding Date */}
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl">
-              <p className="text-white font-semibold text-center" dir="rtl">
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center">
+              <p className="text-white font-semibold text-center w-full" dir="rtl">
                 ٤ يوليو ٢٠٢٥
               </p>
             </div>
 
             {/* Wedding Venue */}
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl">
-              <p className="text-white font-semibold text-center" dir="rtl">
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center">
+              <p className="text-white font-semibold text-center w-full" dir="rtl">
                 فندق نادي الضباط، قاعة إرث
               </p>
             </div>
