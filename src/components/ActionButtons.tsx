@@ -36,22 +36,36 @@ const ActionButtons = ({ guestName, invitationId }: ActionButtonsProps) => {
   };
 
   const handleShareQR = async () => {
-    if (navigator.share) {
+    const shareUrl = window.location.origin + `/scan/${invitationId}`;
+    
+    // Check if Web Share API is available and supported
+    if (navigator.share && navigator.canShare) {
       try {
         await navigator.share({
           title: 'دعوة حفل الزفاف',
           text: `تم تأكيد حضور ${guestName}`,
-          url: window.location.origin + `/scan/${invitationId}`
+          url: shareUrl
         });
+        return; // Successfully shared, exit function
       } catch (error) {
-        console.log('Error sharing:', error);
+        console.log('Web Share API failed, falling back to clipboard:', error);
+        // Continue to clipboard fallback
       }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.origin + `/scan/${invitationId}`);
+    }
+    
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl);
       toast({
         title: "تم النسخ",
-        description: "تم نسخ رابط الدعوة"
+        description: "تم نسخ رابط الدعوة إلى الحافظة"
+      });
+    } catch (clipboardError) {
+      console.log('Clipboard API failed:', clipboardError);
+      toast({
+        title: "خطأ",
+        description: "لم يتم نسخ الرابط. يرجى المحاولة مرة أخرى",
+        variant: "destructive"
       });
     }
   };
