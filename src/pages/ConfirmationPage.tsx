@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
 import VideoBackground from '@/components/VideoBackground';
+import EntryTone from '@/components/EntryTone';
 import QRCodeSection from '@/components/QRCodeSection';
 import EventDetails from '@/components/EventDetails';
 import ActionButtons from '@/components/ActionButtons';
@@ -47,6 +48,7 @@ const ConfirmationPage = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+        <EntryTone autoPlay={true} />
         <div className="relative z-10 text-white text-xl">جاري التحميل...</div>
       </div>
     );
@@ -56,6 +58,7 @@ const ConfirmationPage = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+        <EntryTone autoPlay={true} />
         <div className="relative z-10 text-white text-xl">لم يتم العثور على الدعوة</div>
       </div>
     );
@@ -66,6 +69,7 @@ const ConfirmationPage = () => {
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+      <EntryTone autoPlay={true} />
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
