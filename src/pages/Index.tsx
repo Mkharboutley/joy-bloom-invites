@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ const Index = () => {
               />
             </div>
 
-            {/* Wedding Date and Venue Combined */}
+            {/* Wedding Date and Venue */}
             <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl flex items-center justify-center">
               <div className="text-white font-normal text-center text-sm space-y-1" dir="rtl">
                 <p>٤ يوليو ٢٠٢٥</p>
@@ -112,7 +113,7 @@ const Index = () => {
               <img 
                 src="/logo.png" 
                 alt="Logo" 
-                className="w-16 h-16 object-contain"
+                className="w-32 h-32 object-contain"
               />
             </div>
           </div>
