@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -112,7 +111,8 @@ const Index = () => {
             <Button
               onClick={handleConfirmation}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-normal py-4 rounded-2xl h-14 text-lg border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
+              className="w-full text-black font-medium py-4 rounded-xl h-14 text-lg transform hover:scale-105 transition-all duration-200"
+              size="lg"
             >
               {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
             </Button>
