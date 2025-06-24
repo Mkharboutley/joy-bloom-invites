@@ -90,11 +90,11 @@ const QRScanResult = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
         <GlassCard className="w-full max-w-md mx-auto">
-          <div className="p-6 space-y-6">
+          <div className="p-5 space-y-5">
             {/* Welcome Section - reduced spacing */}
             <div className="text-center space-y-1" dir="rtl">
-              <h2 className="text-white text-xl font-bold">مرحباً بك</h2>
-              <h3 className="text-white text-lg">{guest.fullName}</h3>
+              <h2 className="text-white text-lg font-bold">مرحباً بك</h2>
+              <h3 className="text-white text-base">{guest.fullName}</h3>
               <p className="text-white/80 text-xs">رقم الدعوة: {guest.invitationId}</p>
               {guest.status === 'apologized' && (
                 <p className="text-red-400 text-xs font-semibold">تم الإعتذار عن الحضور</p>
@@ -102,10 +102,10 @@ const QRScanResult = () => {
             </div>
 
             {/* Event Details Card - reduced padding */}
-            <GlassCard className="p-4 space-y-3">
-              <h3 className="text-white text-base font-bold text-center" dir="rtl">تفاصيل المناسبة</h3>
+            <GlassCard className="p-3 space-y-2">
+              <h3 className="text-white text-sm font-bold text-center" dir="rtl">تفاصيل المناسبة</h3>
               
-              <div className="space-y-2 text-white" dir="rtl">
+              <div className="space-y-1 text-white" dir="rtl">
                 <div className="flex justify-between">
                   <span className="font-medium text-xs">التاريخ:</span>
                   <span className="text-xs">٤ يوليو ٢٠٢٥</span>
@@ -124,12 +124,12 @@ const QRScanResult = () => {
             {/* Map Integration - reduced spacing */}
             {guest.status !== 'apologized' && (
               <div className="space-y-2">
-                <h4 className="text-white text-base font-semibold text-center" dir="rtl">موقع المناسبة</h4>
+                <h4 className="text-white text-sm font-semibold text-center" dir="rtl">موقع المناسبة</h4>
                 <a
                   href={venueLocation}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-4 rounded-2xl text-center transition-all duration-300 border border-white/20 hover:border-white/40"
+                  className="flex items-center justify-center gap-2 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-2 px-3 rounded-2xl text-center transition-all duration-300 border border-white/20 hover:border-white/40"
                   style={{ 
                     boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3), 0 0 8px rgba(255, 255, 255, 0.2)',
                     filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))'
@@ -138,20 +138,20 @@ const QRScanResult = () => {
                   <img 
                     src="/lovable-uploads/1adfbfa7-5732-495d-88ba-048a36661d96.png" 
                     alt="موقع الخريطة" 
-                    className="h-10"
+                    className="h-8"
                     style={{ 
-                      width: '48px',
+                      width: '40px',
                       filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.8))'
                     }}
                   />
-                  <span className="text-sm">تشغيل خرائط جوجل</span>
+                  <span className="text-xs">تشغيل خرائط جوجل</span>
                 </a>
               </div>
             )}
 
             {/* Apology Button - reduced spacing */}
             {guest.status !== 'apologized' && invitationId && (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <ApologyDialog 
                   invitationId={invitationId} 
                   onApologySuccess={handleApologySuccess}
@@ -160,7 +160,7 @@ const QRScanResult = () => {
             )}
 
             {/* Footer Note - reduced text size */}
-            <div className="text-center text-white/90 text-base font-semibold" dir="rtl">
+            <div className="text-center text-white/90 text-sm font-semibold" dir="rtl">
               {guest.status === 'apologized' ? (
                 <p>نتفهم ظروفك ونتطلع لرؤيتك في مناسبة قادمة</p>
               ) : (

@@ -13,6 +13,7 @@ const GlassCard = ({ children, className }: GlassCardProps) => {
       "relative overflow-hidden",
       "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/15 before:via-white/3 before:to-transparent before:pointer-events-none",
       "after:absolute after:inset-0 after:bg-gradient-to-t after:from-black/5 after:to-transparent after:pointer-events-none",
+      "scale-y-[0.87]", // Reduces height by 13%
       className
     )}>
       <div 

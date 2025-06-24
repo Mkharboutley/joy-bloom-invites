@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -71,9 +69,9 @@ const Index = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
         <GlassCard className="w-full max-w-md mx-auto">
-          <div className="p-6 space-y-6">
+          <div className="p-5 space-y-5">
             {/* Header with Untitled.png image */}
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-3">
               <img 
                 src="/Untitled.png" 
                 alt="Wedding Header" 
@@ -82,7 +80,7 @@ const Index = () => {
             </div>
 
             {/* Wedding Date and Venue */}
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-4 border border-white/30 shadow-xl flex items-center justify-center">
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-3 border border-white/30 shadow-xl flex items-center justify-center">
               <div className="text-white font-normal text-center text-sm space-y-1" dir="rtl">
                 <p>٤ يوليو ٢٠٢٥</p>
                 <p>فندق نادي الضباط، قاعة إرث</p>
@@ -96,7 +94,7 @@ const Index = () => {
                 placeholder="الرجاء إدخال الإسم الكامل"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 placeholder:text-xs backdrop-blur-md rounded-2xl h-12 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 placeholder:text-xs backdrop-blur-md rounded-2xl h-10 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
                 dir="rtl"
               />
             </div>
@@ -105,14 +103,14 @@ const Index = () => {
             <Button
               onClick={handleConfirmation}
               disabled={isLoading}
-              className="w-full font-medium py-3 rounded-xl h-12 text-lg transform hover:scale-105 transition-all duration-200"
+              className="w-full font-medium py-2 rounded-xl h-10 text-lg transform hover:scale-105 transition-all duration-200"
               size="lg"
             >
               {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
             </Button>
 
             {/* Logo Footer */}
-            <div className="flex justify-center pt-4">
+            <div className="flex justify-center pt-3">
               <img 
                 src="/logo2.png" 
                 alt="Logo" 
@@ -127,4 +125,3 @@ const Index = () => {
 };
 
 export default Index;
-
