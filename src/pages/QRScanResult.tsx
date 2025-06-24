@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
 import VideoBackground from '@/components/VideoBackground';
+import ApologyDialog from '@/components/ApologyDialog';
 import { getGuestByInvitationId, Guest } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,6 +33,10 @@ const QRScanResult = () => {
 
     fetchGuest();
   }, [invitationId, toast]);
+
+  const handleApologySuccess = () => {
+    setGuest(prev => prev ? { ...prev, status: 'apologized' } : null);
+  };
 
   const handleVideoError = () => {
     console.log('Video failed to load from /background.mp4 on QRScanResult page');
@@ -88,6 +93,9 @@ const QRScanResult = () => {
               <h2 className="text-white text-2xl font-bold">مرحباً بك</h2>
               <h3 className="text-white text-xl">{guest.fullName}</h3>
               <p className="text-white/80 text-sm">رقم الدعوة: {guest.invitationId}</p>
+              {guest.status === 'apologized' && (
+                <p className="text-red-400 text-sm font-semibold">تم الإعتذار عن الحضور</p>
+              )}
             </div>
 
             {/* Event Details Card */}
@@ -111,34 +119,50 @@ const QRScanResult = () => {
             </GlassCard>
 
             {/* Map Integration */}
-            <div className="space-y-3">
-              <h4 className="text-white text-lg font-semibold text-center" dir="rtl">موقع المناسبة</h4>
-              <a
-                href={venueLocation}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-4 px-4 rounded-2xl text-center transition-all duration-300 border border-white/20 hover:border-white/40"
-                style={{ 
-                  boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3), 0 0 8px rgba(255, 255, 255, 0.2)',
-                  filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))'
-                }}
-              >
-                <img 
-                  src="/lovable-uploads/1adfbfa7-5732-495d-88ba-048a36661d96.png" 
-                  alt="موقع الخريطة" 
-                  className="h-12"
+            {guest.status !== 'apologized' && (
+              <div className="space-y-3">
+                <h4 className="text-white text-lg font-semibold text-center" dir="rtl">موقع المناسبة</h4>
+                <a
+                  href={venueLocation}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-3 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-4 px-4 rounded-2xl text-center transition-all duration-300 border border-white/20 hover:border-white/40"
                   style={{ 
-                    width: '58.08px',
-                    filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.8))'
+                    boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3), 0 0 8px rgba(255, 255, 255, 0.2)',
+                    filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))'
                   }}
+                >
+                  <img 
+                    src="/lovable-uploads/1adfbfa7-5732-495d-88ba-048a36661d96.png" 
+                    alt="موقع الخريطة" 
+                    className="h-12"
+                    style={{ 
+                      width: '58.08px',
+                      filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.8))'
+                    }}
+                  />
+                  <span>تشغيل خرائط جوجل</span>
+                </a>
+              </div>
+            )}
+
+            {/* Apology Button */}
+            {guest.status !== 'apologized' && invitationId && (
+              <div className="space-y-3">
+                <ApologyDialog 
+                  invitationId={invitationId} 
+                  onApologySuccess={handleApologySuccess}
                 />
-                <span>تشغيل خرائط جوجل</span>
-              </a>
-            </div>
+              </div>
+            )}
 
             {/* Footer Note */}
             <div className="text-center text-white/90 text-lg font-semibold" dir="rtl">
-              <p>بحضوركم تكتمل سعادتنا</p>
+              {guest.status === 'apologized' ? (
+                <p>نتفهم ظروفك ونتطلع لرؤيتك في مناسبة قادمة</p>
+              ) : (
+                <p>بحضوركم تكتمل سعادتنا</p>
+              )}
             </div>
           </div>
         </GlassCard>

@@ -33,6 +33,9 @@ const AttendanceDashboard = () => {
     }).format(date);
   };
 
+  const confirmedGuests = guests.filter(guest => guest.status !== 'apologized');
+  const apologizedGuests = guests.filter(guest => guest.status === 'apologized');
+
   if (loading) {
     return (
       <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
@@ -57,12 +60,20 @@ const AttendanceDashboard = () => {
           </Card>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 max-w-md mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
             <Card className="bg-green-500/20 backdrop-blur-md border-green-400/30">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-400">{guests.length}</div>
-                  <p className="text-green-300" dir="rtl">إجمالي المؤكدين</p>
+                  <div className="text-3xl font-bold text-green-400">{confirmedGuests.length}</div>
+                  <p className="text-green-300" dir="rtl">المؤكدين</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-red-500/20 backdrop-blur-md border-red-400/30">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-red-400">{apologizedGuests.length}</div>
+                  <p className="text-red-300" dir="rtl">المعتذرين</p>
                 </div>
               </CardContent>
             </Card>
@@ -71,7 +82,7 @@ const AttendanceDashboard = () => {
           {/* Guests Table */}
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle className="text-white text-center" dir="rtl">قائمة المؤكدين</CardTitle>
+              <CardTitle className="text-white text-center" dir="rtl">قائمة المدعوين</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border border-white/20 overflow-hidden">
@@ -80,6 +91,7 @@ const AttendanceDashboard = () => {
                     <TableRow className="border-white/20 hover:bg-white/5">
                       <TableHead className="text-white text-right text-lg" dir="rtl">الاسم الكامل</TableHead>
                       <TableHead className="text-white text-right text-lg" dir="rtl">رقم الدعوة</TableHead>
+                      <TableHead className="text-white text-right text-lg" dir="rtl">الحالة</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -90,6 +102,13 @@ const AttendanceDashboard = () => {
                         </TableCell>
                         <TableCell className="text-white/80 text-right font-mono">
                           {guest.invitationId}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {guest.status === 'apologized' ? (
+                            <span className="text-red-400 font-semibold" dir="rtl">إعتذر عن الحضور</span>
+                          ) : (
+                            <span className="text-green-400 font-semibold" dir="rtl">مؤكد</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}

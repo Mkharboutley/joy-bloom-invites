@@ -1,12 +1,14 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc, query, where } from 'firebase/firestore';
 
 export interface Guest {
   id?: string;
   fullName: string;
   confirmationTimestamp: any;
   invitationId: string;
+  status?: 'confirmed' | 'apologized';
+  apologyTimestamp?: any;
 }
 
 export const confirmAttendance = async (fullName: string): Promise<string> => {
@@ -15,13 +17,33 @@ export const confirmAttendance = async (fullName: string): Promise<string> => {
     const guestData = {
       fullName,
       confirmationTimestamp: serverTimestamp(),
-      invitationId
+      invitationId,
+      status: 'confirmed'
     };
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
     return docRef.id;
   } catch (error) {
     console.error('Error confirming attendance:', error);
+    throw error;
+  }
+};
+
+export const apologizeForAttendance = async (invitationId: string): Promise<void> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'guests'));
+    const guestDoc = querySnapshot.docs.find(doc => doc.data().invitationId === invitationId);
+    
+    if (guestDoc) {
+      await updateDoc(doc(db, 'guests', guestDoc.id), {
+        status: 'apologized',
+        apologyTimestamp: serverTimestamp()
+      });
+    } else {
+      throw new Error('Guest not found');
+    }
+  } catch (error) {
+    console.error('Error apologizing for attendance:', error);
     throw error;
   }
 };
