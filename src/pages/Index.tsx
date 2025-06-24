@@ -1,4 +1,5 @@
 
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -115,7 +116,7 @@ const Index = () => {
               <img 
                 src="/logo2.png" 
                 alt="Logo" 
-                className="w-24 h-24 object-contain opacity-60"
+                className="w-[130px] h-[50px] object-contain opacity-60"
               />
             </div>
           </div>
@@ -126,3 +127,4 @@ const Index = () => {
 };
 
 export default Index;
+
