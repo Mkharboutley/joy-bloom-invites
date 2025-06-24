@@ -13,7 +13,7 @@ const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProp
 
   return (
     <div 
-      className="text-center p-8 rounded-3xl relative flex items-center justify-center aspect-square"
+      className="text-center p-6 rounded-2xl relative flex items-center justify-center"
       style={{
         background: 'rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(20px)',
@@ -23,12 +23,14 @@ const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProp
           0 8px 32px rgba(0, 0, 0, 0.1),
           inset 0 1px 0 rgba(255, 255, 255, 0.3),
           inset 0 -1px 0 rgba(255, 255, 255, 0.1)
-        `
+        `,
+        width: 'fit-content',
+        margin: '0 auto'
       }}
     >
       {/* Subtle inner glow */}
       <div 
-        className="absolute inset-4 rounded-2xl"
+        className="absolute inset-3 rounded-xl"
         style={{
           background: 'rgba(255, 255, 255, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -38,7 +40,7 @@ const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProp
       
       {/* QR Code container with clean glass effect */}
       <div 
-        className="relative z-10 p-6 rounded-2xl"
+        className="relative z-10 p-4 rounded-xl"
         style={{
           background: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(10px)',
@@ -62,25 +64,25 @@ const QRCodeSection = ({ guestName, invitationId, timestamp }: QRCodeSectionProp
       
       {/* Elegant corner highlights */}
       <div 
-        className="absolute top-2 left-2 w-8 h-8 rounded-tl-2xl"
+        className="absolute top-1 left-1 w-6 h-6 rounded-tl-xl"
         style={{
           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%)'
         }}
       />
       <div 
-        className="absolute top-2 right-2 w-8 h-8 rounded-tr-2xl"
+        className="absolute top-1 right-1 w-6 h-6 rounded-tr-xl"
         style={{
           background: 'linear-gradient(225deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%)'
         }}
       />
       <div 
-        className="absolute bottom-2 left-2 w-8 h-8 rounded-bl-2xl"
+        className="absolute bottom-1 left-1 w-6 h-6 rounded-bl-xl"
         style={{
           background: 'linear-gradient(45deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%)'
         }}
       />
       <div 
-        className="absolute bottom-2 right-2 w-8 h-8 rounded-br-2xl"
+        className="absolute bottom-1 right-1 w-6 h-6 rounded-br-xl"
         style={{
           background: 'linear-gradient(315deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%)'
         }}
