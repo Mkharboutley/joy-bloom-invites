@@ -36,7 +36,7 @@ export const getAdminContacts = async (): Promise<AdminContact[]> => {
     .eq('is_active', true);
   
   if (error) throw error;
-  return data || [];
+  return (data || []) as AdminContact[];
 };
 
 export const addAdminContact = async (contact: Omit<AdminContact, 'id'>): Promise<void> => {
@@ -73,7 +73,7 @@ export const getWhatsAppContacts = async (): Promise<WhatsAppContact[]> => {
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return data || [];
+  return (data || []) as WhatsAppContact[];
 };
 
 export const addWhatsAppContact = async (contact: Omit<WhatsAppContact, 'id' | 'is_sent' | 'sent_at'>): Promise<void> => {
@@ -118,5 +118,5 @@ export const getNotificationLogs = async (): Promise<NotificationLog[]> => {
     .order('created_at', { ascending: false });
   
   if (error) throw error;
-  return data || [];
+  return (data || []) as NotificationLog[];
 };
