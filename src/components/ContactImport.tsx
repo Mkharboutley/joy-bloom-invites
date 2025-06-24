@@ -85,54 +85,78 @@ const ContactImport = () => {
     }
   };
 
+  const checkContactsApiSupport = () => {
+    return 'contacts' in navigator && 'ContactsManager' in window;
+  };
+
   const handlePhoneImport = async () => {
     setPhoneImporting(true);
     
     try {
-      // Check if the browser supports the Contacts API
-      if ('contacts' in navigator && 'ContactsManager' in window) {
-        // Request contacts access
-        const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: true });
-        
-        if (contacts && contacts.length > 0) {
-          const formattedContacts = contacts.map((contact: any) => ({
-            name: contact.name?.[0] || 'جهة اتصال',
-            phone_number: contact.tel?.[0] || '',
-            source: 'phone'
-          })).filter((contact: any) => contact.phone_number);
+      console.log('Checking browser support for Contacts API...');
+      console.log('Navigator has contacts:', 'contacts' in navigator);
+      console.log('Window has ContactsManager:', 'ContactsManager' in window);
+      
+      if (!checkContactsApiSupport()) {
+        toast({
+          title: "غير مدعوم",
+          description: "متصفحك لا يدعم استيراد جهات الاتصال مباشرة. هذه الميزة تعمل فقط على Chrome للأندرويد أو Safari على iOS. الرجاء استخدام الطرق الأخرى للاستيراد.",
+          variant: "destructive"
+        });
+        return;
+      }
 
-          if (formattedContacts.length > 0) {
-            await addBulkWhatsAppContacts(formattedContacts);
-            toast({
-              title: "تم بنجاح",
-              description: `تم استيراد ${formattedContacts.length} جهة اتصال من الهاتف`
-            });
-          } else {
-            toast({
-              title: "تنبيه",
-              description: "لم يتم العثور على جهات اتصال صالحة",
-              variant: "destructive"
-            });
-          }
+      console.log('Attempting to access contacts...');
+      
+      // Request contacts access
+      const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: true });
+      
+      console.log('Contacts received:', contacts);
+      
+      if (contacts && contacts.length > 0) {
+        const formattedContacts = contacts.map((contact: any) => ({
+          name: contact.name?.[0] || contact.name || 'جهة اتصال',
+          phone_number: contact.tel?.[0] || '',
+          source: 'phone'
+        })).filter((contact: any) => contact.phone_number);
+
+        console.log('Formatted contacts:', formattedContacts);
+
+        if (formattedContacts.length > 0) {
+          await addBulkWhatsAppContacts(formattedContacts);
+          toast({
+            title: "تم بنجاح",
+            description: `تم استيراد ${formattedContacts.length} جهة اتصال من الهاتف`
+          });
         } else {
           toast({
             title: "تنبيه",
-            description: "لم يتم اختيار أي جهات اتصال",
+            description: "لم يتم العثور على جهات اتصال صالحة مع أرقام هواتف",
+            variant: "destructive"
           });
         }
       } else {
-        // Fallback for browsers that don't support Contacts API
         toast({
-          title: "غير مدعوم",
-          description: "متصفحك لا يدعم استيراد جهات الاتصال. الرجاء استخدام الطرق الأخرى للاستيراد.",
-          variant: "destructive"
+          title: "تنبيه",
+          description: "لم يتم اختيار أي جهات اتصال أو تم إلغاء العملية",
         });
       }
     } catch (error) {
       console.error('Error importing contacts:', error);
+      
+      let errorMessage = "فشل في استيراد جهات الاتصال من الهاتف.";
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "تم رفض الإذن للوصول إلى جهات الاتصال. الرجاء منح الإذن والمحاولة مرة أخرى.";
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = "متصفحك لا يدعم هذه الميزة. استخدم Chrome على الأندرويد أو Safari على iOS.";
+        }
+      }
+      
       toast({
         title: "خطأ",
-        description: "فشل في استيراد جهات الاتصال من الهاتف. تأكد من منح الإذن للوصول إلى جهات الاتصال.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -163,9 +187,12 @@ const ContactImport = () => {
               <Phone className="w-4 h-4 ml-2" />
               {phoneImporting ? 'جاري الاستيراد...' : 'استيراد من الهاتف'}
             </Button>
-            <p className="text-white/50 text-xs" dir="rtl">
-              ملاحظة: هذه الميزة تعمل على المتصفحات الحديثة والهواتف المحمولة فقط
-            </p>
+            <div className="text-white/50 text-xs space-y-1" dir="rtl">
+              <p>⚠️ هذه الميزة تعمل فقط على:</p>
+              <p>• Chrome على أجهزة الأندرويد</p>
+              <p>• Safari على أجهزة iOS</p>
+              <p>• قد لا تعمل على أجهزة الكمبيوتر المكتبية</p>
+            </div>
           </div>
 
           {/* File Upload */}
@@ -215,7 +242,7 @@ const ContactImport = () => {
               <li>• استخدم الفاصلة للفصل بين الاسم ورقم الهاتف</li>
               <li>• كل جهة اتصال في سطر منفصل</li>
               <li>• تأكد من صحة البيانات قبل الاستيراد</li>
-              <li>• للاستيراد من الهاتف، امنح الإذن عند طلبه</li>
+              <li>• للاستيراد من الهاتف، استخدم هاتف محمول بمتصفح متوافق</li>
             </ul>
           </div>
         </CardContent>
