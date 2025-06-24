@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -79,14 +80,14 @@ const Index = () => {
 
             {/* Wedding Date */}
             <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center justify-center">
-              <p className="text-white font-normal text-center text-xs" dir="rtl">
+              <p className="text-white font-normal text-center text-sm" dir="rtl">
                 ٤ يوليو ٢٠٢٥
               </p>
             </div>
 
             {/* Wedding Venue */}
             <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl h-14 flex items-center justify-center">
-              <p className="text-white font-normal text-center text-xs" dir="rtl">
+              <p className="text-white font-normal text-center text-sm" dir="rtl">
                 فندق نادي الضباط، قاعة إرث
               </p>
             </div>
