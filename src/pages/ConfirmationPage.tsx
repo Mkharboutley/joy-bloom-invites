@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
@@ -71,18 +70,17 @@ const ConfirmationPage = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <GlassCard className="w-full max-w-md p-8 space-y-6">
+          {/* Confirmation Message - moved to top */}
+          <div className="text-center space-y-2" dir="rtl">
+            <h2 className="text-white text-2xl font-bold">تم تأكيد الحضور</h2>
+            <p className="text-white/90 text-lg">بحضوركم تكتمل سعادتنا</p>
+          </div>
+
           <QRCodeSection 
             guestName={guest.fullName}
             invitationId={guest.invitationId}
             timestamp={timestamp}
           />
-
-          {/* Greeting Message */}
-          <div className="text-center space-y-2" dir="rtl">
-            <h2 className="text-white text-2xl font-bold">تم تأكيد الحضور</h2>
-            <h3 className="text-white text-xl">أهلاً وسهلاً</h3>
-            <p className="text-white/90 text-lg">بحضوركم تكتمل سعادتنا</p>
-          </div>
 
           <EventDetails />
 
