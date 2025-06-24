@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -39,17 +40,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="/background.mp4" type="video/mp4" />
-      </video>
-      
       {/* Dark Overlay for very dark gray/black background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-black/85 to-gray-800/90" />
       <div className="absolute inset-0 bg-black/60" />
@@ -111,7 +101,7 @@ const Index = () => {
             <Button
               onClick={handleConfirmation}
               disabled={isLoading}
-              className="w-full text-black font-medium py-4 rounded-xl h-14 text-lg transform hover:scale-105 transition-all duration-200"
+              className="w-full font-medium py-4 rounded-xl h-14 text-lg transform hover:scale-105 transition-all duration-200"
               size="lg"
             >
               {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
