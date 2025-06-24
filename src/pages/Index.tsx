@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -112,9 +113,9 @@ const Index = () => {
             {/* Logo Footer */}
             <div className="flex justify-center pt-4">
               <img 
-                src="/logo.png" 
+                src="/logo2.png" 
                 alt="Logo" 
-                className="w-12 h-12 object-contain opacity-60"
+                className="w-24 h-24 object-contain opacity-60"
               />
             </div>
           </div>
