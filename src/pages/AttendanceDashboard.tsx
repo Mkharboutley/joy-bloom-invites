@@ -49,9 +49,6 @@ const AttendanceDashboard = () => {
             <CardTitle className="text-white text-2xl text-center" dir="rtl">
               لوحة تحكم تأكيدات الحضور
             </CardTitle>
-            <p className="text-white/80 text-center" dir="rtl">
-              إجمالي المؤكدين: {guests.length}
-            </p>
           </CardHeader>
         </Card>
 
