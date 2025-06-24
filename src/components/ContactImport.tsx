@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 const ContactImport = () => {
   const [csvData, setCsvData] = useState('');
   const [loading, setLoading] = useState(false);
+  const [phoneImporting, setPhoneImporting] = useState(false);
   const { toast } = useToast();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,10 +86,58 @@ const ContactImport = () => {
   };
 
   const handlePhoneImport = async () => {
-    toast({
-      title: "قريباً",
-      description: "سيتم إضافة ميزة استيراد جهات الاتصال من الهاتف قريباً",
-    });
+    setPhoneImporting(true);
+    
+    try {
+      // Check if the browser supports the Contacts API
+      if ('contacts' in navigator && 'ContactsManager' in window) {
+        // Request contacts access
+        const contacts = await (navigator as any).contacts.select(['name', 'tel'], { multiple: true });
+        
+        if (contacts && contacts.length > 0) {
+          const formattedContacts = contacts.map((contact: any) => ({
+            name: contact.name?.[0] || 'جهة اتصال',
+            phone_number: contact.tel?.[0] || '',
+            source: 'phone'
+          })).filter((contact: any) => contact.phone_number);
+
+          if (formattedContacts.length > 0) {
+            await addBulkWhatsAppContacts(formattedContacts);
+            toast({
+              title: "تم بنجاح",
+              description: `تم استيراد ${formattedContacts.length} جهة اتصال من الهاتف`
+            });
+          } else {
+            toast({
+              title: "تنبيه",
+              description: "لم يتم العثور على جهات اتصال صالحة",
+              variant: "destructive"
+            });
+          }
+        } else {
+          toast({
+            title: "تنبيه",
+            description: "لم يتم اختيار أي جهات اتصال",
+          });
+        }
+      } else {
+        // Fallback for browsers that don't support Contacts API
+        toast({
+          title: "غير مدعوم",
+          description: "متصفحك لا يدعم استيراد جهات الاتصال. الرجاء استخدام الطرق الأخرى للاستيراد.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error importing contacts:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في استيراد جهات الاتصال من الهاتف. تأكد من منح الإذن للوصول إلى جهات الاتصال.",
+        variant: "destructive"
+      });
+    } finally {
+      setPhoneImporting(false);
+    }
   };
 
   return (
@@ -104,15 +153,19 @@ const ContactImport = () => {
           <div className="space-y-4 p-4 bg-white/5 rounded-lg border border-white/10">
             <h3 className="text-white font-semibold" dir="rtl">استيراد من الهاتف</h3>
             <p className="text-white/70 text-sm" dir="rtl">
-              استيراد جهات الاتصال مباشرة من هاتفك
+              استيراد جهات الاتصال مباشرة من هاتفك (يتطلب إذن الوصول)
             </p>
             <Button
               onClick={handlePhoneImport}
-              className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
+              disabled={phoneImporting}
+              className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30 disabled:opacity-50"
             >
               <Phone className="w-4 h-4 ml-2" />
-              استيراد من الهاتف
+              {phoneImporting ? 'جاري الاستيراد...' : 'استيراد من الهاتف'}
             </Button>
+            <p className="text-white/50 text-xs" dir="rtl">
+              ملاحظة: هذه الميزة تعمل على المتصفحات الحديثة والهواتف المحمولة فقط
+            </p>
           </div>
 
           {/* File Upload */}
@@ -162,6 +215,7 @@ const ContactImport = () => {
               <li>• استخدم الفاصلة للفصل بين الاسم ورقم الهاتف</li>
               <li>• كل جهة اتصال في سطر منفصل</li>
               <li>• تأكد من صحة البيانات قبل الاستيراد</li>
+              <li>• للاستيراد من الهاتف، امنح الإذن عند طلبه</li>
             </ul>
           </div>
         </CardContent>
