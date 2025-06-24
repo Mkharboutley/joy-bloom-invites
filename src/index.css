@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -51,6 +52,9 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Set Tajawal as the global font */
+    font-family: 'Tajawal', sans-serif;
   }
 
   .dark {
@@ -99,5 +103,12 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Tajawal', sans-serif;
+  }
+
+  /* RTL Support for Arabic text */
+  html[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
   }
 }
