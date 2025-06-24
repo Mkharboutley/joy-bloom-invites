@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import VideoBackground from '@/components/VideoBackground';
 import AdminContactsManager from '@/components/AdminContactsManager';
 import WhatsAppManager from '@/components/WhatsAppManager';
+import AttendanceStatusView from '@/components/AttendanceStatusView';
 
 const AdminDashboard = () => {
   const handleVideoError = () => {
@@ -31,8 +32,15 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Admin Dashboard Tabs */}
-          <Tabs defaultValue="notifications" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-md">
+          <Tabs defaultValue="attendance" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-md">
+              <TabsTrigger 
+                value="attendance" 
+                className="data-[state=active]:bg-white/20 text-white"
+                dir="rtl"
+              >
+                حالة الحضور
+              </TabsTrigger>
               <TabsTrigger 
                 value="notifications" 
                 className="data-[state=active]:bg-white/20 text-white"
@@ -48,6 +56,10 @@ const AdminDashboard = () => {
                 رسائل WhatsApp
               </TabsTrigger>
             </TabsList>
+            
+            <TabsContent value="attendance" className="space-y-6 mt-6">
+              <AttendanceStatusView />
+            </TabsContent>
             
             <TabsContent value="notifications" className="space-y-6 mt-6">
               <AdminContactsManager />
