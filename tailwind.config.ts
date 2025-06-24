@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -21,6 +20,7 @@ export default {
 		extend: {
 			fontFamily: {
 				'sans': ['Tajwal', 'sans-serif'],
+				'tajawal': ['Tajawal', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
