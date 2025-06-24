@@ -93,20 +93,20 @@ const QRScanResult = () => {
 
             {/* Event Details Card */}
             <GlassCard className="p-6 space-y-4">
-              <h3 className="text-white text-xl font-bold text-center" dir="rtl">تفاصيل المناسبة</h3>
+              <h3 className="text-white text-lg font-bold text-center" dir="rtl">تفاصيل المناسبة</h3>
               
               <div className="space-y-3 text-white" dir="rtl">
                 <div className="flex justify-between">
-                  <span className="font-semibold">التاريخ:</span>
-                  <span>٤ يوليو ٢٠٢٥</span>
+                  <span className="font-medium text-sm">التاريخ:</span>
+                  <span className="text-sm">٤ يوليو ٢٠٢٥</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-semibold">الوقت:</span>
-                  <span>٦:٠٠ مساءً</span>
+                  <span className="font-medium text-sm">الوقت:</span>
+                  <span className="text-sm">٦:٠٠ مساءً</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-semibold">المكان:</span>
-                  <span>فندق نادي الضباط، قاعة إرث</span>
+                  <span className="font-medium text-sm">المكان:</span>
+                  <span className="text-sm">فندق نادي الضباط، قاعة إرث</span>
                 </div>
               </div>
             </GlassCard>
