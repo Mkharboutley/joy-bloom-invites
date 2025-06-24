@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import InvitationLanding from "./pages/InvitationLanding";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import QRScanResult from "./pages/QRScanResult";
 import AttendanceDashboard from "./pages/AttendanceDashboard";
@@ -21,7 +20,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/invitation" element={<InvitationLanding />} />
           <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
           <Route path="/scan/:invitationId" element={<QRScanResult />} />
           <Route path="/admin/dashboard" element={<AttendanceDashboard />} />

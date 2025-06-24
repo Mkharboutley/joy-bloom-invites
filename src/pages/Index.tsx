@@ -1,75 +1,108 @@
 
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import GlassCard from '@/components/GlassCard';
+import { confirmAttendance } from '@/services/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
+  const [fullName, setFullName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleConfirmation = async () => {
+    if (!fullName.trim()) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إدخال الاسم الكامل",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const guestId = await confirmAttendance(fullName);
+      navigate(`/confirmation/${guestId}`);
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء تأكيد الحضور، يرجى المحاولة مرة أخرى",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            نظام تأكيد حضور الزفاف
-          </h1>
-          <p className="text-xl text-white/80" dir="rtl">
-            منصة شاملة لإدارة دعوات الزفاف وتأكيد الحضور
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      {/* Video Background */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        autoPlay
+        loop
+        muted
+        playsInline
+      >
+        <source src="/wedding-bg.mp4" type="video/mp4" />
+      </video>
+      
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/20 z-1" />
+
+      {/* Main Content */}
+      <GlassCard className="w-full max-w-md p-8 space-y-6 z-10">
+        {/* Wedding Logo/Image */}
+        <div className="text-center">
+          <img 
+            src="/wedding-logo.png" 
+            alt="Wedding Logo" 
+            className="w-32 h-32 mx-auto object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        </div>
+
+        {/* Wedding Date */}
+        <div className="bg-white/30 backdrop-blur-sm rounded-full px-6 py-3 text-center border border-white/40">
+          <p className="text-white font-semibold text-lg" dir="rtl">
+            ٤ يوليو ٢٠٢٥
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all">
-            <CardHeader>
-              <CardTitle className="text-white text-xl" dir="rtl">دعوة الضيوف</CardTitle>
-              <CardDescription className="text-white/70" dir="rtl">
-                صفحة الدعوة الرئيسية لتأكيد الحضور
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to="/invitation">
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-                  عرض الدعوة
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 hover:bg-white/20 transition-all">
-            <CardHeader>
-              <CardTitle className="text-white text-xl" dir="rtl">لوحة التحكم</CardTitle>
-              <CardDescription className="text-white/70" dir="rtl">
-                إدارة ومتابعة تأكيدات الحضور
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to="/admin/dashboard">
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                  لوحة التحكم
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        {/* Wedding Venue */}
+        <div className="bg-white/30 backdrop-blur-sm rounded-full px-6 py-3 text-center border border-white/40">
+          <p className="text-white font-semibold text-lg" dir="rtl">
+            فندق نادي الضباط، قاعة إرث
+          </p>
         </div>
 
-        <div className="text-center space-y-4">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-            <h2 className="text-2xl font-bold text-white mb-4" dir="rtl">المميزات</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white/80">
-              <div className="space-y-2">
-                <div className="text-lg font-semibold" dir="rtl">تأكيد فوري</div>
-                <div className="text-sm" dir="rtl">تأكيد الحضور بضغطة واحدة</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-lg font-semibold" dir="rtl">رمز QR</div>
-                <div className="text-sm" dir="rtl">رمز QR فريد لكل ضيف</div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-lg font-semibold" dir="rtl">متابعة حية</div>
-                <div className="text-sm" dir="rtl">تحديثات فورية في الوقت الفعلي</div>
-              </div>
-            </div>
-          </div>
+        {/* Guest Name Input */}
+        <div className="space-y-4">
+          <Input
+            type="text"
+            placeholder="الرجاء إدخال الإسم الكامل"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="text-right bg-white/30 border-white/40 text-white placeholder:text-white/70 backdrop-blur-sm"
+            dir="rtl"
+          />
+          
+          <Button
+            onClick={handleConfirmation}
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-full"
+          >
+            {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
+          </Button>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 };
