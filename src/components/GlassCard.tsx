@@ -18,8 +18,8 @@ const GlassCard = ({ children, className }: GlassCardProps) => {
       <div 
         className="absolute inset-0 rounded-3xl pointer-events-none"
         style={{
-          border: '0.2px solid #8cfffb',
-          boxShadow: '0 0 20px rgba(140, 255, 251, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+          border: '0.4px solid #d5e7dc',
+          boxShadow: '0 0 20px rgba(213, 231, 220, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
         }}
       />
       <div className="relative z-10">
