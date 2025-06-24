@@ -51,8 +51,9 @@ const Index = () => {
         <source src="/background.mp4" type="video/mp4" />
       </video>
       
-      {/* Overlay for better contrast */}
-      <div className="absolute inset-0 bg-black/30" />
+      {/* Dark Overlay for very dark gray/black background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-black/85 to-gray-800/90" />
+      <div className="absolute inset-0 bg-black/60" />
       
       {/* Large Floating Orbs */}
       <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse" />
