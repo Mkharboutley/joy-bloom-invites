@@ -34,6 +34,14 @@ const ConfirmationPage = () => {
     fetchGuest();
   }, [guestId, toast]);
 
+  const handleVideoError = () => {
+    console.log('Video failed to load from /background.mp4');
+  };
+
+  const handleVideoLoad = () => {
+    console.log('Video loaded successfully from /background.mp4');
+  };
+
   const handleDownloadQR = () => {
     const svg = document.getElementById('qr-code');
     if (!svg) return;
@@ -87,6 +95,8 @@ const ConfirmationPage = () => {
           loop
           muted
           className="absolute inset-0 w-full h-full object-cover z-0"
+          onError={handleVideoError}
+          onLoadedData={handleVideoLoad}
         >
           <source src="/background.mp4" type="video/mp4" />
         </video>
@@ -104,6 +114,8 @@ const ConfirmationPage = () => {
           loop
           muted
           className="absolute inset-0 w-full h-full object-cover z-0"
+          onError={handleVideoError}
+          onLoadedData={handleVideoLoad}
         >
           <source src="/background.mp4" type="video/mp4" />
         </video>
@@ -126,7 +138,10 @@ const ConfirmationPage = () => {
         autoPlay
         loop
         muted
+        playsInline
         className="absolute inset-0 w-full h-full object-cover z-0"
+        onError={handleVideoError}
+        onLoadedData={handleVideoLoad}
       >
         <source src="/background.mp4" type="video/mp4" />
       </video>
