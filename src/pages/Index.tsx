@@ -69,11 +69,11 @@ const Index = () => {
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
         <GlassCard className="w-full max-w-md mx-auto">
           <div className="p-8 space-y-8">
-            {/* Header with uploaded image as placeholder */}
+            {/* Header with new Arabic calligraphy image */}
             <div className="text-center space-y-6">
               <img 
-                src="/lovable-uploads/f25bded9-eae2-45c9-bc13-e3b268a73351.png" 
-                alt="Wedding Invitation" 
+                src="/lovable-uploads/1a88c531-9dc9-43c7-b715-a7926cd933ed.png" 
+                alt="Arabic Calligraphy" 
                 className="w-full max-w-xs mx-auto"
               />
             </div>
