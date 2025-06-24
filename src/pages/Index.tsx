@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import GlassCard from '@/components/GlassCard';
+import VideoBackground from '@/components/VideoBackground';
 import { confirmAttendance } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -38,18 +38,17 @@ const Index = () => {
     }
   };
 
+  const handleVideoError = () => {
+    console.log('Video failed to load from /background.mp4 on Index page');
+  };
+
+  const handleVideoLoad = () => {
+    console.log('Video loaded successfully from /background.mp4 on Index page');
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 w-full h-full object-cover z-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url('/lovable-uploads/f25bded9-eae2-45c9-bc13-e3b268a73351.png')`
-        }}
-      />
-      
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/40 z-1" />
+      <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
       
       {/* Large Floating Orbs */}
       <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse z-2" />

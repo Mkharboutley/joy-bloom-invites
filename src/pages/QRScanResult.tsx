@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
+import VideoBackground from '@/components/VideoBackground';
 import { getGuestByInvitationId, Guest } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,10 +32,19 @@ const QRScanResult = () => {
     fetchGuest();
   }, [invitationId, toast]);
 
+  const handleVideoError = () => {
+    console.log('Video failed to load from /background.mp4 on QRScanResult page');
+  };
+
+  const handleVideoLoad = () => {
+    console.log('Video loaded successfully from /background.mp4 on QRScanResult page');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
-        <div className="text-white text-xl">جاري التحميل...</div>
+        <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+        <div className="relative z-10 text-white text-xl">جاري التحميل...</div>
       </div>
     );
   }
@@ -43,7 +52,8 @@ const QRScanResult = () => {
   if (!guest) {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
-        <div className="text-white text-xl">دعوة غير صالحة</div>
+        <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+        <div className="relative z-10 text-white text-xl">دعوة غير صالحة</div>
       </div>
     );
   }
@@ -52,19 +62,7 @@ const QRScanResult = () => {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
-      {/* Video Background */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src="/wedding-bg.mp4" type="video/mp4" />
-      </video>
-      
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/20 z-1" />
+      <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
 
       {/* Main Content */}
       <GlassCard className="w-full max-w-md p-8 space-y-6 z-10">
