@@ -1,7 +1,6 @@
-
 const EventDetails = () => {
   return (
-    <div className="text-center space-y-3 py-4" dir="rtl" style={{ paddingTop: '6px' }}>
+    <div className="text-center space-y-3 py-4" dir="rtl" style={{ paddingTop: '-9px' }}>
       <h3 className="text-white/80 text-base font-light tracking-wide">تفاصيل المناسبة</h3>
       
       <div className="space-y-3 text-white">
