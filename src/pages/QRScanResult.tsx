@@ -109,7 +109,7 @@ const QRScanResult = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium text-xs">الوقت:</span>
-                  <span className="text-xs">٦:٠٠ مساءً</span>
+                  <span className="text-xs">٨:٣٠ مساءً</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium text-xs">المكان:</span>

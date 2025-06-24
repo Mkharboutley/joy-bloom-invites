@@ -12,7 +12,7 @@ const EventDetails = () => {
         
         <div className="space-y-0.5">
           <div className="text-white/70 text-xs font-light">الوقت</div>
-          <div className="text-sm font-light">الساعة ٦:٠٠ مساءً</div>
+          <div className="text-sm font-light">الساعة ٨:٣٠ مساءً</div>
         </div>
         
         <div className="space-y-0.5">
