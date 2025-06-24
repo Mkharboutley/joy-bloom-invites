@@ -127,7 +127,7 @@ const QRScanResult = () => {
                   alt="موقع الخريطة" 
                   className="w-6 h-6"
                 />
-                <span>فتح الموقع في خرائط جوجل</span>
+                <span>تشغيل خرائط جوجل</span>
               </a>
             </div>
 
