@@ -67,7 +67,7 @@ const AttendanceDashboard = () => {
         {/* Guests Table */}
         <Card className="bg-white/10 backdrop-blur-md border-white/20">
           <CardHeader>
-            <CardTitle className="text-white" dir="rtl">قائمة المؤكدين</CardTitle>
+            <CardTitle className="text-white text-center" dir="rtl">قائمة المؤكدين</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border border-white/20 overflow-hidden">
