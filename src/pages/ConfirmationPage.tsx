@@ -73,11 +73,11 @@ const ConfirmationPage = () => {
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <GlassCard className="w-full max-w-md p-4 space-y-2">
+        <GlassCard className="w-full max-w-md p-5 space-y-3">
           {/* Confirmation Message - reduced margin and spacing */}
-          <div className="text-center space-y-1 -mt-2 mb-2" dir="rtl">
-            <h2 className="text-white text-lg font-bold">تم تأكيد الحضور</h2>
-            <p className="text-white/90 text-sm">بحضوركم تكتمل سعادتنا</p>
+          <div className="text-center space-y-1 -mt-3 mb-3" dir="rtl">
+            <h2 className="text-white text-xl font-bold">تم تأكيد الحضور</h2>
+            <p className="text-white/90 text-base">بحضوركم تكتمل سعادتنا</p>
           </div>
 
           <QRCodeSection 
@@ -94,7 +94,7 @@ const ConfirmationPage = () => {
           />
 
           {/* Footer Note - reduced spacing */}
-          <div className="text-center text-white/80 text-xs space-y-1 mt-2" dir="rtl">
+          <div className="text-center text-white/80 text-xs space-y-1 mt-3" dir="rtl">
             <p>امسح هذا الرمز للوصول إلى تفاصيل دعوتك وموقع المناسبة</p>
             <p>يرجى حفظ هذا الرمز وإحضاره معك إلى المناسبة</p>
           </div>
