@@ -64,7 +64,7 @@ const ActionButtons = ({ guestName, invitationId }: ActionButtonsProps) => {
         dir="rtl"
       >
         <Download className="w-4 h-4 ml-2" />
-        تحميل الرمز
+        تنزيل الرمز
       </Button>
       
       <Button
