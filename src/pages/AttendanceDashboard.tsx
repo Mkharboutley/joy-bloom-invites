@@ -74,8 +74,8 @@ const AttendanceDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-white/5">
-                    <TableHead className="text-white text-right" dir="rtl">الاسم الكامل</TableHead>
-                    <TableHead className="text-white text-right" dir="rtl">رقم الدعوة</TableHead>
+                    <TableHead className="text-white text-right text-lg" dir="rtl">الاسم الكامل</TableHead>
+                    <TableHead className="text-white text-right text-lg" dir="rtl">رقم الدعوة</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
