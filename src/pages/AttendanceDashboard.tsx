@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -109,7 +108,6 @@ const AttendanceDashboard = () => {
                 <TableHeader>
                   <TableRow className="border-white/20 hover:bg-white/5">
                     <TableHead className="text-white text-right" dir="rtl">الاسم الكامل</TableHead>
-                    <TableHead className="text-white text-right" dir="rtl">وقت التأكيد</TableHead>
                     <TableHead className="text-white text-right" dir="rtl">رقم الدعوة</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -118,9 +116,6 @@ const AttendanceDashboard = () => {
                     <TableRow key={guest.id} className="border-white/20 hover:bg-white/5">
                       <TableCell className="text-white text-right font-medium" dir="rtl">
                         {guest.fullName}
-                      </TableCell>
-                      <TableCell className="text-white/80 text-right" dir="rtl">
-                        {formatTimestamp(guest.confirmationTimestamp)}
                       </TableCell>
                       <TableCell className="text-white/80 text-right font-mono">
                         {guest.invitationId}
