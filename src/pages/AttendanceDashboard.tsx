@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -55,43 +56,12 @@ const AttendanceDashboard = () => {
         </Card>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 max-w-md mx-auto">
           <Card className="bg-green-500/20 backdrop-blur-md border-green-400/30">
             <CardContent className="p-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400">{guests.length}</div>
                 <p className="text-green-300" dir="rtl">إجمالي المؤكدين</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-blue-500/20 backdrop-blur-md border-blue-400/30">
-            <CardContent className="p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400">
-                  {guests.filter(g => {
-                    const today = new Date();
-                    const confirmDate = g.confirmationTimestamp?.toDate?.() || new Date();
-                    return confirmDate.toDateString() === today.toDateString();
-                  }).length}
-                </div>
-                <p className="text-blue-300" dir="rtl">تأكيدات اليوم</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-purple-500/20 backdrop-blur-md border-purple-400/30">
-            <CardContent className="p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-400">
-                  {guests.filter(g => {
-                    const lastWeek = new Date();
-                    lastWeek.setDate(lastWeek.getDate() - 7);
-                    const confirmDate = g.confirmationTimestamp?.toDate?.() || new Date();
-                    return confirmDate >= lastWeek;
-                  }).length}
-                </div>
-                <p className="text-purple-300" dir="rtl">تأكيدات الأسبوع</p>
               </div>
             </CardContent>
           </Card>
