@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
@@ -54,7 +53,13 @@ const QRScanResult = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
-        <div className="relative z-10 text-white text-xl">دعوة غير صالحة</div>
+        
+        {/* Header Placeholder for Invalid Invitation */}
+        <div className="relative z-10 text-center space-y-4">
+          <div className="text-white text-3xl font-bold" dir="rtl">مرحباً بك</div>
+          <div className="text-white/80 text-lg" dir="rtl">رقم الدعوة: {invitationId || 'MXKML3YNS'}</div>
+          <div className="text-white text-xl">دعوة غير صالحة</div>
+        </div>
       </div>
     );
   }
@@ -71,6 +76,16 @@ const QRScanResult = () => {
       <div className="absolute bottom-40 left-12 w-56 h-56 bg-gradient-to-r from-pink-400/35 to-purple-500/35 rounded-full blur-2xl animate-bounce z-2" style={{ animationDuration: '3s' }} />
       <div className="absolute bottom-32 right-16 w-40 h-40 bg-gradient-to-r from-orange-400/40 to-red-400/40 rounded-full blur-xl animate-pulse z-2" style={{ animationDelay: '1s' }} />
       
+      {/* Header Placeholder */}
+      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
+        <GlassCard className="px-8 py-4">
+          <div className="text-center space-y-2" dir="rtl">
+            <h1 className="text-white text-3xl font-bold">مرحباً بك</h1>
+            <p className="text-white/80 text-lg">رقم الدعوة: {invitationId || 'MXKML3YNS'}</p>
+          </div>
+        </GlassCard>
+      </div>
+
       {/* Medium Floating Elements */}
       <div className="absolute top-1/4 left-1/4 w-24 h-24 bg-gradient-to-r from-cyan-400/50 to-blue-500/50 rounded-full blur-lg animate-bounce z-2" style={{ animationDuration: '4s', animationDelay: '0.5s' }} />
       <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-yellow-400/40 to-orange-400/40 rounded-full blur-lg animate-pulse z-2" style={{ animationDelay: '2s' }} />
@@ -80,7 +95,7 @@ const QRScanResult = () => {
       <div className="absolute bottom-1/4 right-8 w-20 h-20 bg-gradient-to-r from-rose-400/50 to-pink-500/50 rounded-full blur-md z-2" />
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-6 pt-32">
         <GlassCard className="w-full max-w-md mx-auto">
           <div className="p-8 space-y-8">
             {/* Welcome Section */}
