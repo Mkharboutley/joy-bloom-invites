@@ -1,5 +1,6 @@
 
 import { Button } from '@/components/ui/button';
+import { Download, Share } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ActionButtonsProps {
@@ -59,15 +60,19 @@ const ActionButtons = ({ guestName, invitationId }: ActionButtonsProps) => {
     <div className="space-y-3">
       <Button
         onClick={handleDownloadQR}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3"
+        className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-medium rounded-2xl border border-emerald-400/30 shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+        dir="rtl"
       >
+        <Download className="w-4 h-4 ml-2" />
         تحميل الرمز
       </Button>
       
       <Button
         onClick={handleShareQR}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
+        className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-2xl border border-blue-400/30 shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+        dir="rtl"
       >
+        <Share className="w-4 h-4 ml-2" />
         مشاركة الرمز
       </Button>
     </div>
