@@ -9,11 +9,12 @@ interface GlassCardProps {
 const GlassCard = ({ children, className }: GlassCardProps) => {
   return (
     <div className={cn(
-      "backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl",
+      "backdrop-blur-2xl bg-white/15 border border-white/30 rounded-3xl shadow-2xl",
       "relative overflow-hidden",
+      "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:via-white/10 before:to-transparent before:pointer-events-none",
+      "after:absolute after:inset-0 after:bg-gradient-to-t after:from-black/5 after:to-transparent after:pointer-events-none",
       className
     )}>
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent pointer-events-none" />
       <div className="relative z-10">
         {children}
       </div>

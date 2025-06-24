@@ -40,74 +40,80 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-pink-900" />
+      {/* Main Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700" />
       
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full opacity-60 blur-xl animate-pulse" />
-      <div className="absolute top-40 right-16 w-24 h-24 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full opacity-50 blur-lg animate-bounce" />
-      <div className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full opacity-40 blur-md" />
-      <div className="absolute bottom-20 right-10 w-28 h-28 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full opacity-30 blur-lg animate-pulse" />
+      {/* Large Floating Orbs */}
+      <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse" />
+      <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-full blur-3xl" />
+      <div className="absolute bottom-40 left-12 w-56 h-56 bg-gradient-to-r from-pink-400/35 to-purple-500/35 rounded-full blur-2xl animate-bounce" style={{ animationDuration: '3s' }} />
+      <div className="absolute bottom-32 right-16 w-40 h-40 bg-gradient-to-r from-orange-400/40 to-red-400/40 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
       
-      {/* Spiral/Wave Elements */}
-      <div className="absolute top-10 right-5 w-16 h-64 bg-gradient-to-b from-orange-500 to-red-500 opacity-30 transform rotate-45 rounded-full blur-sm" />
-      <div className="absolute bottom-10 left-5 w-12 h-48 bg-gradient-to-b from-cyan-500 to-blue-500 opacity-20 transform -rotate-45 rounded-full blur-sm" />
+      {/* Medium Floating Elements */}
+      <div className="absolute top-1/4 left-1/4 w-24 h-24 bg-gradient-to-r from-cyan-400/50 to-blue-500/50 rounded-full blur-lg animate-bounce" style={{ animationDuration: '4s', animationDelay: '0.5s' }} />
+      <div className="absolute top-1/3 right-1/3 w-32 h-32 bg-gradient-to-r from-yellow-400/40 to-orange-400/40 rounded-full blur-lg animate-pulse" style={{ animationDelay: '2s' }} />
+      
+      {/* Small Accent Orbs */}
+      <div className="absolute top-1/2 left-8 w-16 h-16 bg-gradient-to-r from-green-400/60 to-teal-400/60 rounded-full blur-md animate-pulse" />
+      <div className="absolute bottom-1/4 right-8 w-20 h-20 bg-gradient-to-r from-rose-400/50 to-pink-500/50 rounded-full blur-md" />
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <GlassCard className="w-full max-w-sm p-8 space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-4">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                <span className="text-2xl">💒</span>
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+        <GlassCard className="w-full max-w-md mx-auto">
+          <div className="p-8 space-y-8">
+            {/* Header with Icon */}
+            <div className="text-center space-y-6">
+              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center shadow-2xl">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-3xl">💒</span>
+                </div>
               </div>
+              <h1 className="text-white text-2xl font-bold tracking-wide" dir="rtl">
+                دعوة حفل الزفاف
+              </h1>
             </div>
-            <h1 className="text-white text-xl font-bold" dir="rtl">
-              دعوة حفل الزفاف
-            </h1>
-          </div>
 
-          {/* Wedding Date */}
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
-            <p className="text-white font-semibold text-center" dir="rtl">
-              ٤ يوليو ٢٠٢٥
-            </p>
-          </div>
+            {/* Wedding Date */}
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl">
+              <p className="text-white font-bold text-lg text-center tracking-wide" dir="rtl">
+                ٤ يوليو ٢٠٢٥
+              </p>
+            </div>
 
-          {/* Wedding Venue */}
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
-            <p className="text-white font-semibold text-center text-sm" dir="rtl">
-              فندق نادي الضباط، قاعة إرث
-            </p>
-          </div>
+            {/* Wedding Venue */}
+            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-5 border border-white/30 shadow-xl">
+              <p className="text-white font-semibold text-center" dir="rtl">
+                فندق نادي الضباط، قاعة إرث
+              </p>
+            </div>
 
-          {/* Guest Name Input */}
-          <div className="space-y-4">
-            <Input
-              type="text"
-              placeholder="الرجاء إدخال الإسم الكامل"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="text-right bg-white/20 border-white/30 text-white placeholder:text-white/70 backdrop-blur-sm rounded-2xl h-12"
-              dir="rtl"
-            />
-          </div>
+            {/* Guest Name Input */}
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="الرجاء إدخال الإسم الكامل"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="text-right bg-white/25 border-white/40 text-white placeholder:text-white/80 backdrop-blur-md rounded-2xl h-14 text-lg shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                dir="rtl"
+              />
+            </div>
 
-          {/* Confirmation Button */}
-          <Button
-            onClick={handleConfirmation}
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold py-3 rounded-2xl h-12 border-0"
-          >
-            {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
-          </Button>
+            {/* Confirmation Button */}
+            <Button
+              onClick={handleConfirmation}
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 rounded-2xl h-14 text-lg border-0 shadow-2xl transform hover:scale-105 transition-all duration-200"
+            >
+              {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
+            </Button>
 
-          {/* Bottom Dots */}
-          <div className="flex justify-center space-x-2 pt-4">
-            <div className="w-2 h-2 bg-white/40 rounded-full"></div>
-            <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-            <div className="w-2 h-2 bg-white rounded-full"></div>
+            {/* Decorative Bottom Dots */}
+            <div className="flex justify-center space-x-3 pt-6">
+              <div className="w-3 h-3 bg-white/50 rounded-full"></div>
+              <div className="w-3 h-3 bg-white/70 rounded-full"></div>
+              <div className="w-3 h-3 bg-white rounded-full shadow-lg"></div>
+            </div>
           </div>
         </GlassCard>
       </div>
