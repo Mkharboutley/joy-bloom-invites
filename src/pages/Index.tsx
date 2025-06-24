@@ -72,16 +72,13 @@ const Index = () => {
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
         <GlassCard className="w-full max-w-md mx-auto">
           <div className="p-8 space-y-8">
-            {/* Header with Icon */}
+            {/* Header with PNG Image */}
             <div className="text-center space-y-6">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center shadow-2xl">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                  <span className="text-3xl">💒</span>
-                </div>
-              </div>
-              <h1 className="text-white text-2xl font-bold tracking-wide" dir="rtl">
-                دعوة حفل الزفاف
-              </h1>
+              <img 
+                src="/Untitled.png" 
+                alt="Wedding Invitation" 
+                className="w-full max-w-xs mx-auto"
+              />
             </div>
 
             {/* Wedding Date */}
