@@ -103,30 +103,35 @@ const ConfirmationPage = () => {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4">
-      {/* Video Background */}
-      <video
-        className="absolute inset-0 w-full h-full object-cover z-0"
-        autoPlay
-        loop
-        muted
-        playsInline
-      >
-        <source src="/wedding-bg.mp4" type="video/mp4" />
-      </video>
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 w-full h-full object-cover z-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/lovable-uploads/f25bded9-eae2-45c9-bc13-e3b268a73351.png')`
+        }}
+      />
       
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/20 z-1" />
 
       {/* Main Content */}
       <GlassCard className="w-full max-w-md p-8 space-y-6 z-10">
-        {/* QR Code */}
-        <div className="text-center bg-white p-4 rounded-2xl">
-          <QRCode
-            id="qr-code"
-            value={qrData}
-            size={200}
-            style={{ margin: '0 auto' }}
-          />
+        {/* QR Code with background image */}
+        <div 
+          className="text-center p-4 rounded-2xl relative bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/lovable-uploads/f25bded9-eae2-45c9-bc13-e3b268a73351.png')`
+          }}
+        >
+          <div className="absolute inset-0 bg-white/80 rounded-2xl"></div>
+          <div className="relative z-10">
+            <QRCode
+              id="qr-code"
+              value={qrData}
+              size={200}
+              style={{ margin: '0 auto' }}
+            />
+          </div>
         </div>
 
         {/* Greeting Message */}
