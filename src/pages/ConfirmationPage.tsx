@@ -69,9 +69,9 @@ const ConfirmationPage = () => {
 
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <GlassCard className="w-full max-w-md p-8 space-y-6">
-          {/* Confirmation Message - moved to top */}
-          <div className="text-center space-y-2" dir="rtl">
+        <GlassCard className="w-full max-w-md p-6 space-y-4">
+          {/* Confirmation Message - moved to very top with minimal spacing */}
+          <div className="text-center space-y-1 pt-2" dir="rtl">
             <h2 className="text-white text-2xl font-bold">تم تأكيد الحضور</h2>
             <p className="text-white/90 text-lg">بحضوركم تكتمل سعادتنا</p>
           </div>
