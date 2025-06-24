@@ -5,12 +5,13 @@ import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   // Add your Firebase configuration here
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
+  apiKey: "AIzaSyC2GHe8k-8ceL0ikWmkoUUILIyuQCBfWSk",
+  authDomain: "wedding-f09cd.firebaseapp.com",
+  projectId: "wedding-f09cd",
+  storageBucket: "wedding-f09cd.firebasestorage.app",
+  messagingSenderId: "1024579602427",
+  appId: "1:1024579602427:web:eefb44a0779632ad88ed5e",
+  measurementId: "G-N7Q3EF4796"
 };
 
 const app = initializeApp(firebaseConfig);
