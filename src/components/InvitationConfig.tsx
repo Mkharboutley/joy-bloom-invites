@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -176,12 +177,15 @@ const InvitationConfig = () => {
           )}
 
           {/* Media Preview */}
-          {newTemplate.media_url && newTemplate.media_type && (
+          {newTemplate.media_url && newTemplate.media_type && newTemplate.media_type !== '' && (
             <div>
               <p className="text-white/80 text-sm mb-2" dir="rtl">معاينة الوسائط:</p>
               <MultimediaPreview template={{
-                ...newTemplate,
                 id: 'preview',
+                name: newTemplate.name,
+                message: newTemplate.message,
+                media_url: newTemplate.media_url,
+                media_type: newTemplate.media_type as 'image' | 'video' | 'document' | 'link',
                 is_active: true
               }} />
             </div>
