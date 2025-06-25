@@ -1,12 +1,10 @@
 
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import GlassCard from '@/components/GlassCard';
 import VideoBackground from '@/components/VideoBackground';
-import EntryTone from '@/components/EntryTone';
 import { confirmAttendance } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,7 +50,6 @@ const Index = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
-      <EntryTone autoPlay={true} />
       
       {/* Large Floating Orbs */}
       <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse z-2" />
@@ -127,4 +124,3 @@ const Index = () => {
 };
 
 export default Index;
-
