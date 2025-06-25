@@ -66,7 +66,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
           <p className="text-lg md:text-xl mb-8"></p>
           <button
             onClick={handleStart}
-            className="text-white text-lg px-6 py-3 rounded-[18px] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 shadow-xl transition-all"
+            className="text-white text-lg w-[240px] h-[64px] rounded-[18px] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 shadow-[0_0_12px_rgba(255,255,255,0.5)] animate-pulse transition-all"
           >
             الرجاء إضغط هنا للإستمرار
           </button>
