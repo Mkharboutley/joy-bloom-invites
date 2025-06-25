@@ -74,18 +74,18 @@
     }
     
     .end-content {
-      max-width: 90%;
-      padding: 30px;
+      max-width: 65%; /* Reduced from 90% by 28% */
+      padding: 21.6px; /* Reduced from 30px by 28% */
       background: rgba(255,255,255,0.1);
-      border-radius: 20px;
+      border-radius: 14.4px; /* Reduced from 20px by 28% */
       border: 1px solid rgba(255,255,255,0.2);
       backdrop-filter: blur(20px);
     }
     
     .end-title {
-      font-size: 32px;
+      font-size: 23px; /* Reduced from 32px by 28% */
       font-weight: bold;
-      margin-bottom: 20px;
+      margin-bottom: 14.4px; /* Reduced from 20px by 28% */
       background: linear-gradient(45deg, #fff, #f0f0f0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -93,46 +93,51 @@
     }
     
     .end-subtitle {
-      font-size: 20px;
-      margin-bottom: 30px;
+      font-size: 14.4px; /* Reduced from 20px by 28% */
+      margin-bottom: 21.6px; /* Reduced from 30px by 28% */
       opacity: 0.9;
       line-height: 1.6;
     }
     
     .attend-button {
-      padding: 18px 50px;
-      font-size: 22px;
+      padding: 13px 36px; /* Reduced from 18px 50px by 28% */
+      font-size: 15.8px; /* Reduced from 22px by 28% */
       font-weight: bold;
       background: linear-gradient(135deg, #4CAF50, #45a049);
       border: none;
-      border-radius: 20px;
+      border-radius: 14.4px; /* Reduced from 20px by 28% */
       cursor: pointer;
       transition: all 0.3s ease;
       color: white;
       font-family: 'Tajawal', sans-serif;
-      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+      box-shadow: 0 7.2px 21.6px rgba(76, 175, 80, 0.3); /* Reduced from 0 10px 30px by 28% */
       text-decoration: none;
       display: inline-block;
     }
     
     .attend-button:hover {
       background: linear-gradient(135deg, #45a049, #4CAF50);
-      transform: translateY(-3px);
-      box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+      transform: translateY(-2.2px); /* Reduced from -3px by 28% */
+      box-shadow: 0 10.8px 28.8px rgba(76, 175, 80, 0.4); /* Reduced from 0 15px 40px by 28% */
     }
     
     @media (max-width: 768px) {
+      .end-content {
+        max-width: 72%; /* Reduced from 90% by 20% for mobile */
+        padding: 18px; /* Reduced from 25px by 28% */
+      }
+      
       .end-title {
-        font-size: 28px;
+        font-size: 20px; /* Reduced from 28px by 28% */
       }
       
       .end-subtitle {
-        font-size: 18px;
+        font-size: 13px; /* Reduced from 18px by 28% */
       }
       
       .attend-button {
-        font-size: 18px;
-        padding: 14px 30px;
+        font-size: 13px; /* Reduced from 18px by 28% */
+        padding: 10px 21.6px; /* Reduced from 14px 30px by 28% */
       }
       
       .loading-text {
