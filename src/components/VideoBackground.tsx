@@ -14,40 +14,56 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
+      // Stop any other videos that might be playing
+      const allVideos = document.querySelectorAll('video');
+      allVideos.forEach((v) => {
+        if (v !== video && !v.paused) {
+          v.pause();
+          v.currentTime = 0;
+        }
+      });
+
+      // Reset video to start
+      video.currentTime = 0;
+      video.muted = true;
+      
       // Try to play the video
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            // Video started playing, now try to unmute
+            console.log('Video started playing successfully');
+            // Try to unmute after 1 second
             setTimeout(() => {
-              if (video) {
+              if (video && !video.paused) {
                 video.muted = false;
                 setIsMuted(false);
+                console.log('Video unmuted successfully');
               }
-            }, 1000); // Wait 1 second then unmute
+            }, 1000);
           })
           .catch((error) => {
             console.log('Video autoplay failed:', error);
-            // If autoplay fails, the video will still be visible but paused
           });
       }
     }
+
+    // Cleanup function to pause video when component unmounts
+    return () => {
+      if (video && !video.paused) {
+        video.pause();
+      }
+    };
   }, []);
 
   const handleError = (e: any) => {
     console.log('Video background failed to load:', e);
-    console.log('Video error details:', e.target?.error);
     if (onError) onError();
   };
 
   const handleLoad = () => {
     console.log('Video background loaded successfully');
     if (onLoad) onLoad();
-  };
-
-  const handleCanPlay = () => {
-    console.log('Video can play - background should be visible');
   };
 
   const toggleMute = () => {
@@ -62,14 +78,12 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       {/* Video Background */}
       <video
         ref={videoRef}
-        autoPlay
         loop
         muted={isMuted}
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-1"
         onError={handleError}
         onLoadedData={handleLoad}
-        onCanPlay={handleCanPlay}
         preload="auto"
         style={{ zIndex: 1 }}
       >
@@ -86,10 +100,10 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
       </button>
       
-      {/* Fallback background only if video fails */}
+      {/* Fallback background */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 z-0" />
       
-      {/* Subtle overlay to ensure text readability */}
+      {/* Subtle overlay */}
       <div className="absolute inset-0 bg-black/20 z-2" />
     </>
   );
