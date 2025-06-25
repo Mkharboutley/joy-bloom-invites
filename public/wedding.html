@@ -53,6 +53,85 @@
       background: black;
     }
     
+    /* Start screen overlay - Always shown first */
+    .start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+    
+    .start-content {
+      max-width: 80%;
+      padding: 30px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(12px);
+    }
+    
+    .start-logo {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 20px rgba(255,255,255,0.6));
+    }
+    
+    .start-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, #fff, #f0f0f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .start-subtitle {
+      font-size: 16px;
+      margin-bottom: 25px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    .start-button {
+      padding: 15px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #374151, #1f2937);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      box-shadow: 
+        0 8px 25px rgba(55, 65, 81, 0.3),
+        0 0 0 1px rgba(255,255,255,0.4),
+        0 0 10px rgba(255,255,255,0.3);
+    }
+    
+    .start-button:hover {
+      background: linear-gradient(135deg, #1f2937, #111827);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 30px rgba(55, 65, 81, 0.4),
+        0 0 0 1px rgba(255,255,255,0.6),
+        0 0 15px rgba(255,255,255,0.4);
+    }
+    
     /* Play button overlay for manual play */
     .play-button-overlay {
       position: absolute;
@@ -65,7 +144,7 @@
       border-radius: 50%;
       width: 80px;
       height: 80px;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       cursor: pointer;
@@ -88,8 +167,8 @@
       margin-left: 4px;
     }
     
-    .play-button-overlay.hidden {
-      display: none;
+    .play-button-overlay.show {
+      display: flex;
     }
     
     /* Mobile-specific adjustments */
@@ -109,6 +188,29 @@
           radial-gradient(circle at 80% 80%, rgba(25, 25, 25, 0.6) 0%, transparent 50%),
           radial-gradient(circle at 40% 60%, rgba(35, 35, 35, 0.4) 0%, transparent 50%),
           linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
+      }
+      
+      .start-content {
+        max-width: 90%;
+        padding: 25px;
+      }
+      
+      .start-logo {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .start-title {
+        font-size: 24px;
+      }
+      
+      .start-subtitle {
+        font-size: 14px;
+      }
+      
+      .start-button {
+        font-size: 16px;
+        padding: 12px 30px;
       }
       
       .play-button-overlay {
@@ -139,7 +241,7 @@
       bottom: 0;
       left: 0;
       background: black;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 5;
@@ -531,6 +633,16 @@
   <div class="play-button-overlay" id="playButton"></div>
 </div>
 
+<!-- Start screen - Always shown first -->
+<div class="start-screen" id="startScreen">
+  <div class="start-content">
+    <img src="wedding-logo.png" alt="شعار الزفاف" class="start-logo" />
+    <h1 class="start-title">دعوة زفاف</h1>
+    <p class="start-subtitle">يشرفنا حضوركم في هذه المناسبة السعيدة<br>٤ يوليو ٢٠٢٥ - فندق نادي الضباط</p>
+    <button class="start-button" id="startButton">ابدأ المشاهدة</button>
+  </div>
+</div>
+
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-text">جاري تحميل الدعوة...</div>
   <div class="spinner"></div>
@@ -554,9 +666,11 @@
   const backgroundImage = document.getElementById('backgroundImage');
   const playButton = document.getElementById('playButton');
   const videoContainer = document.getElementById('videoContainer');
+  const startScreen = document.getElementById('startScreen');
+  const startButton = document.getElementById('startButton');
   
   let videoPlayed = false;
-  let autoplayFailed = false;
+  let userInteracted = false;
 
   function showEndOverlayWithTransition() {
     video.classList.add('video-fade-out');
@@ -569,30 +683,54 @@
   }
 
   function attemptVideoPlay() {
+    if (!userInteracted) {
+      console.log('Cannot play video without user interaction');
+      playButton.classList.add('show');
+      return;
+    }
+
     const playPromise = video.play();
     
     if (playPromise !== undefined) {
       playPromise.then(() => {
-        console.log('Video autoplay successful');
+        console.log('Video play successful');
         videoPlayed = true;
-        playButton.classList.add('hidden');
+        playButton.classList.remove('show');
         loadingOverlay.style.display = 'none';
         
-        // Try to unmute after successful play
+        // Try to unmute after successful play (only if user interacted)
         setTimeout(() => {
-          video.muted = false;
+          if (userInteracted) {
+            video.muted = false;
+          }
         }, 1000);
       }).catch((error) => {
-        console.log('Video autoplay failed:', error);
-        autoplayFailed = true;
+        console.log('Video play failed:', error);
         loadingOverlay.style.display = 'none';
-        playButton.classList.remove('hidden');
+        playButton.classList.add('show');
       });
     }
   }
 
+  // Start button click handler - This provides the required user interaction
+  startButton.addEventListener('click', () => {
+    console.log('User clicked start button - interaction registered');
+    userInteracted = true;
+    startScreen.style.display = 'none';
+    loadingOverlay.style.display = 'flex';
+    
+    // Now we can attempt to play the video
+    setTimeout(() => {
+      attemptVideoPlay();
+    }, 500);
+  });
+
   // Manual play button click handler
   playButton.addEventListener('click', () => {
+    if (!userInteracted) {
+      userInteracted = true;
+    }
+    
     video.muted = false; // Unmute on user interaction
     const playPromise = video.play();
     
@@ -600,7 +738,7 @@
       playPromise.then(() => {
         console.log('Manual video play successful');
         videoPlayed = true;
-        playButton.classList.add('hidden');
+        playButton.classList.remove('show');
       }).catch((error) => {
         console.error('Manual video play failed:', error);
         // If manual play also fails, show end overlay
@@ -611,7 +749,7 @@
 
   // Video container click handler (alternative to play button)
   videoContainer.addEventListener('click', () => {
-    if (!videoPlayed && autoplayFailed) {
+    if (!videoPlayed && playButton.classList.contains('show')) {
       playButton.click();
     }
   });
@@ -619,10 +757,10 @@
   // Video event listeners
   video.addEventListener('loadeddata', () => {
     console.log('Video loaded successfully');
-    loadingOverlay.style.display = 'none';
-    
-    // Try autoplay after video loads
-    attemptVideoPlay();
+    if (userInteracted) {
+      loadingOverlay.style.display = 'none';
+      attemptVideoPlay();
+    }
   });
 
   video.addEventListener('ended', () => {
@@ -637,24 +775,25 @@
     }, 1000);
   });
 
-  // Fallback: if nothing happens within 8 seconds, show end overlay
-  setTimeout(() => {
-    if (!videoPlayed && loadingOverlay.style.display !== 'none') {
-      console.log('Fallback: showing end overlay after timeout');
-      loadingOverlay.style.display = 'none';
-      showEndOverlayWithTransition();
-    }
-  }, 8000);
+  // Fallback: if video doesn't play within 5 seconds after user interaction
+  let fallbackTimeout;
+  
+  function setFallbackTimeout() {
+    if (fallbackTimeout) clearTimeout(fallbackTimeout);
+    
+    fallbackTimeout = setTimeout(() => {
+      if (!videoPlayed && userInteracted) {
+        console.log('Fallback: showing play button after timeout');
+        loadingOverlay.style.display = 'none';
+        playButton.classList.add('show');
+      }
+    }, 5000);
+  }
 
-  // Additional fallback: if video is paused and not playing after 3 seconds
-  setTimeout(() => {
-    if (video.paused && !videoPlayed && !autoplayFailed) {
-      console.log('Video appears to be paused, showing play button');
-      autoplayFailed = true;
-      loadingOverlay.style.display = 'none';
-      playButton.classList.remove('hidden');
-    }
-  }, 3000);
+  // Set fallback when user interacts
+  startButton.addEventListener('click', () => {
+    setFallbackTimeout();
+  });
 </script>
 
 </body>
