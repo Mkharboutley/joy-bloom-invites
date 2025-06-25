@@ -60,18 +60,20 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       {/* Force user interaction to enable sound */}
       {!started && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 text-white text-center px-6">
-          <h1 className="text-2xl md:text-4xl font-medium mb-4"> يشرفنا دعوتكم إلى حفل الزفاف </h1>
+          <h1 className="text-xl md:text-2xl font-medium mb-4">
+            يشرفنا دعوتكم إلى حفل الزفاف
+          </h1>
           <p className="text-lg md:text-xl mb-8"></p>
           <button
             onClick={handleStart}
-            className="text-white text-lg px-6 py-3 bg-gray-600 hover:bg-blue-700 rounded-full shadow-lg transition-all"
+            className="text-white text-lg px-6 py-3 rounded-[18px] backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 shadow-xl transition-all"
           >
             الرجاء إضغط هنا للإستمرار
           </button>
         </div>
       )}
 
-      {/* Volume control (optional, can remove) */}
+      {/* Volume control */}
       {started && (
         <button
           onClick={toggleMute}
@@ -82,7 +84,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         </button>
       )}
 
-      {/* Optional black overlay for text readability */}
+      {/* Overlay for text readability */}
       <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
     </>
   );
