@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دعوة زفاف سعد و هديل</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: black;
+      font-family: 'Tajawal', sans-serif;
+    }
+    
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      flex-direction: column;
+      text-align: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .welcome-content {
+      max-width: 90%;
+      padding: 20px;
+    }
+    
+    .welcome-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .welcome-subtitle {
+      font-size: 18px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+    
+    .button {
+      margin-top: 20px;
+      padding: 16px 40px;
+      font-size: 20px;
+      font-weight: 600;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
+      border: 2px solid rgba(255,255,255,0.8);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    .button:hover {
+      background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,1));
+      color: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    
+    .end-overlay {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6));
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      flex-direction: column;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    
+    .end-content {
+      max-width: 90%;
+      padding: 30px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(20px);
+    }
+    
+    .end-title {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #fff, #f0f0f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .end-subtitle {
+      font-size: 20px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    .attend-button {
+      padding: 18px 50px;
+      font-size: 22px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+      font-family: 'Tajawal', sans-serif;
+      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .attend-button:hover {
+      background: linear-gradient(135deg, #45a049, #4CAF50);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(76, 175, 80, 0.4);
+    }
+    
+    @media (max-width: 768px) {
+      .welcome-title {
+        font-size: 24px;
+      }
+      
+      .welcome-subtitle {
+        font-size: 16px;
+      }
+      
+      .end-title {
+        font-size: 28px;
+      }
+      
+      .end-subtitle {
+        font-size: 18px;
+      }
+      
+      .button, .attend-button {
+        font-size: 18px;
+        padding: 14px 30px;
+      }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<video id="weddingVideo" muted playsinline preload="auto">
+  <source src="G22.mp4" type="video/mp4" />
+  متصفحك لا يدعم تشغيل الفيديو.
+</video>
+
+<div class="overlay" id="startOverlay">
+  <div class="welcome-content">
+    <h1 class="welcome-title">يشرفنا دعوتكم لحضور حفل زفاف</h1>
+    <h2 class="welcome-title">سعد و هديل</h2>
+    <p class="welcome-subtitle">نتطلع لمشاركتكم أجمل لحظات حياتنا</p>
+    <button class="button" onclick="enableAudio()">اضغط هنا للدخول</button>
+  </div>
+</div>
+
+<div class="end-overlay" id="endOverlay">
+  <div class="end-content">
+    <h1 class="end-title">بحضوركم تكتمل سعادتنا</h1>
+    <p class="end-subtitle">يشرفنا حضوركم في هذه المناسبة السعيدة<br>٤ يوليو ٢٠٢٥ - فندق نادي الضباط</p>
+    <a href="/" class="attend-button">اضغط هنا لتأكيد الحضور</a>
+  </div>
+</div>
+
+<script>
+  const video = document.getElementById('weddingVideo');
+  const startOverlay = document.getElementById('startOverlay');
+  const endOverlay = document.getElementById('endOverlay');
+
+  function enableAudio() {
+    startOverlay.style.display = 'none';
+    video.muted = false;
+    video.currentTime = 0;
+    
+    // Try to play the video
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log('Autoplay failed:', error);
+        // If autoplay fails, try muted first then unmute
+        video.muted = true;
+        video.play().then(() => {
+          // After a short delay, try to unmute
+          setTimeout(() => {
+            video.muted = false;
+          }, 1000);
+        }).catch(e => {
+          console.error('Video play failed completely:', e);
+        });
+      });
+    }
+  }
+
+  video.addEventListener('ended', () => {
+    endOverlay.style.display = 'flex';
+  });
+
+  // Handle video loading errors
+  video.addEventListener('error', (e) => {
+    console.error('Video failed to load:', e);
+    // Show end overlay if video fails to load
+    setTimeout(() => {
+      endOverlay.style.display = 'flex';
+    }, 2000);
+  });
+
+  // Preload video
+  video.addEventListener('loadeddata', () => {
+    console.log('Video loaded successfully');
+  });
+</script>
+
+</body>
+</html>
