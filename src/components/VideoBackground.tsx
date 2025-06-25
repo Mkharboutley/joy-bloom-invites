@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from 'react';
 
 interface VideoBackgroundProps {
@@ -48,6 +47,16 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
 
   return (
     <>
+      {/* Background image layer - 22.png */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{
+          backgroundImage: 'url(/22.png)',
+          opacity: 0.3, // Faded effect
+          transition: 'opacity 2s ease-out'
+        }}
+      />
+
       {/* Background video */}
       <video
         ref={videoRef}
@@ -55,7 +64,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         loop
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 w-full h-full object-cover z-5"
         onError={handleError}
         onLoadedData={handleLoad}
       >
