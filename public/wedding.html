@@ -19,64 +19,40 @@
       object-fit: cover;
     }
     
-    .overlay {
+    .loading-overlay {
       position: absolute;
       top: 0;
       right: 0;
       bottom: 0;
       left: 0;
-      background: rgba(0,0,0,0.7);
+      background: black;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10;
+      z-index: 5;
       color: white;
       font-family: 'Tajawal', sans-serif;
       flex-direction: column;
       text-align: center;
-      backdrop-filter: blur(5px);
     }
     
-    .welcome-content {
-      max-width: 90%;
-      padding: 20px;
-    }
-    
-    .welcome-title {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    
-    .welcome-subtitle {
-      font-size: 18px;
-      margin-bottom: 30px;
-      opacity: 0.9;
-      line-height: 1.5;
-    }
-    
-    .button {
-      margin-top: 20px;
-      padding: 16px 40px;
+    .loading-text {
       font-size: 20px;
-      font-weight: 600;
-      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
-      border: 2px solid rgba(255,255,255,0.8);
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: white;
-      font-family: 'Tajawal', sans-serif;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
     }
     
-    .button:hover {
-      background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,1));
-      color: #333;
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     
     .end-overlay {
@@ -146,14 +122,6 @@
     }
     
     @media (max-width: 768px) {
-      .welcome-title {
-        font-size: 24px;
-      }
-      
-      .welcome-subtitle {
-        font-size: 16px;
-      }
-      
       .end-title {
         font-size: 28px;
       }
@@ -162,9 +130,13 @@
         font-size: 18px;
       }
       
-      .button, .attend-button {
+      .attend-button {
         font-size: 18px;
         padding: 14px 30px;
+      }
+      
+      .loading-text {
+        font-size: 18px;
       }
     }
   </style>
@@ -174,18 +146,14 @@
 </head>
 <body>
 
-<video id="weddingVideo" muted playsinline preload="auto">
+<video id="weddingVideo" autoplay muted playsinline preload="auto">
   <source src="wedding-invitation.mp4" type="video/mp4" />
   متصفحك لا يدعم تشغيل الفيديو.
 </video>
 
-<div class="overlay" id="startOverlay">
-  <div class="welcome-content">
-    <h1 class="welcome-title">يشرفنا دعوتكم لحضور حفل زفاف</h1>
-    <h2 class="welcome-title">سعد و هديل</h2>
-    <p class="welcome-subtitle">نتطلع لمشاركتكم أجمل لحظات حياتنا</p>
-    <button class="button" onclick="enableAudio()">اضغط هنا للدخول</button>
-  </div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-text">جاري تحميل الدعوة...</div>
+  <div class="spinner"></div>
 </div>
 
 <div class="end-overlay" id="endOverlay">
@@ -198,33 +166,23 @@
 
 <script>
   const video = document.getElementById('weddingVideo');
-  const startOverlay = document.getElementById('startOverlay');
+  const loadingOverlay = document.getElementById('loadingOverlay');
   const endOverlay = document.getElementById('endOverlay');
 
-  function enableAudio() {
-    startOverlay.style.display = 'none';
-    video.muted = false;
-    video.currentTime = 0;
-    
-    // Try to play the video
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(error => {
-        console.log('Autoplay failed:', error);
-        // If autoplay fails, try muted first then unmute
-        video.muted = true;
-        video.play().then(() => {
-          // After a short delay, try to unmute
-          setTimeout(() => {
-            video.muted = false;
-          }, 1000);
-        }).catch(e => {
-          console.error('Video play failed completely:', e);
-        });
-      });
-    }
-  }
+  // Hide loading overlay when video starts playing
+  video.addEventListener('loadeddata', () => {
+    console.log('Video loaded successfully');
+    loadingOverlay.style.display = 'none';
+  });
 
+  // Try to unmute after a short delay (some browsers allow this)
+  video.addEventListener('play', () => {
+    setTimeout(() => {
+      video.muted = false;
+    }, 1000);
+  });
+
+  // Show end overlay when video ends
   video.addEventListener('ended', () => {
     endOverlay.style.display = 'flex';
   });
@@ -232,16 +190,20 @@
   // Handle video loading errors
   video.addEventListener('error', (e) => {
     console.error('Video failed to load:', e);
+    loadingOverlay.style.display = 'none';
     // Show end overlay if video fails to load
     setTimeout(() => {
       endOverlay.style.display = 'flex';
-    }, 2000);
+    }, 1000);
   });
 
-  // Preload video
-  video.addEventListener('loadeddata', () => {
-    console.log('Video loaded successfully');
-  });
+  // Fallback: if video doesn't load within 10 seconds, show end overlay
+  setTimeout(() => {
+    if (loadingOverlay.style.display !== 'none') {
+      loadingOverlay.style.display = 'none';
+      endOverlay.style.display = 'flex';
+    }
+  }, 10000);
 </script>
 
 </body>
