@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
 import QRCodeSection from '@/components/QRCodeSection';
 import EventDetails from '@/components/EventDetails';
 import ActionButtons from '@/components/ActionButtons';
+import VideoBackground from '@/components/VideoBackground';
 import { getGuestById, Guest } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -35,18 +35,28 @@ const ConfirmationPage = () => {
     fetchGuest();
   }, [guestId, toast]);
 
+  const handleVideoError = () => {
+    console.log('Video failed to load from /G22.mp4');
+  };
+
+  const handleVideoLoad = () => {
+    console.log('Video loaded successfully from /G22.mp4');
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <div className="relative z-10 text-white text-xl">جاري التحميل...</div>
+      <div className="min-h-screen relative flex items-center justify-center">
+        <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+        <div className="relative z-20 text-white text-xl">جاري التحميل...</div>
       </div>
     );
   }
 
   if (!guest) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <div className="relative z-10 text-white text-xl">لم يتم العثور على الدعوة</div>
+      <div className="min-h-screen relative flex items-center justify-center">
+        <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+        <div className="relative z-20 text-white text-xl">لم يتم العثور على الدعوة</div>
       </div>
     );
   }
@@ -54,9 +64,11 @@ const ConfirmationPage = () => {
   const timestamp = guest.confirmationTimestamp?.toDate?.()?.toISOString() || new Date().toISOString();
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen relative overflow-hidden">
+      <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+      
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div className="relative z-20 min-h-screen flex items-center justify-center p-4">
         <GlassCard className="w-full max-w-md p-5 space-y-3">
           {/* Confirmation Message - reduced margin and spacing */}
           <div className="text-center space-y-1 -mt-3 mb-3" dir="rtl">
