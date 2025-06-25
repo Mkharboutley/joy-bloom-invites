@@ -17,6 +17,11 @@
       width: 100vw;
       height: 100vh;
       object-fit: cover;
+      transition: opacity 2s ease-out;
+    }
+    
+    .video-fade-out {
+      opacity: 0 !important;
     }
     
     .loading-overlay {
@@ -192,6 +197,19 @@
   const loadingOverlay = document.getElementById('loadingOverlay');
   const endOverlay = document.getElementById('endOverlay');
 
+  function showEndOverlayWithTransition() {
+    // Start video fade-out
+    video.classList.add('video-fade-out');
+    
+    // Show end overlay immediately (it will fade in via CSS animation)
+    endOverlay.style.display = 'flex';
+    
+    // Optional: Hide video completely after fade-out completes
+    setTimeout(() => {
+      video.style.display = 'none';
+    }, 2000);
+  }
+
   // Hide loading overlay when video starts playing
   video.addEventListener('loadeddata', () => {
     console.log('Video loaded successfully');
@@ -205,26 +223,26 @@
     }, 1000);
   });
 
-  // Show end overlay when video ends
+  // Show end overlay with synchronized transition when video ends
   video.addEventListener('ended', () => {
-    endOverlay.style.display = 'flex';
+    showEndOverlayWithTransition();
   });
 
   // Handle video loading errors
   video.addEventListener('error', (e) => {
     console.error('Video failed to load:', e);
     loadingOverlay.style.display = 'none';
-    // Show end overlay if video fails to load
+    // Show end overlay with transition if video fails to load
     setTimeout(() => {
-      endOverlay.style.display = 'flex';
+      showEndOverlayWithTransition();
     }, 1000);
   });
 
-  // Fallback: if video doesn't load within 10 seconds, show end overlay
+  // Fallback: if video doesn't load within 10 seconds, show end overlay with transition
   setTimeout(() => {
     if (loadingOverlay.style.display !== 'none') {
       loadingOverlay.style.display = 'none';
-      endOverlay.style.display = 'flex';
+      showEndOverlayWithTransition();
     }
   }, 10000);
 </script>
