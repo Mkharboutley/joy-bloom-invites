@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import VideoBackground from '@/components/VideoBackground';
 import AdminContactsManager from '@/components/AdminContactsManager';
 import AttendanceStatusView from '@/components/AttendanceStatusView';
 import ContactImport from '@/components/ContactImport';
@@ -10,17 +9,16 @@ import InvitationConfig from '@/components/InvitationConfig';
 import SendInvitations from '@/components/SendInvitations';
 
 const AdminDashboard = () => {
-  const handleVideoError = () => {
-    console.log('Video failed to load from /background.mp4 on Admin Dashboard');
-  };
-
-  const handleVideoLoad = () => {
-    console.log('Video loaded successfully from /background.mp4 on Admin Dashboard');
-  };
-
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
+      {/* Image Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/admin-back.jpg)' }}
+      />
+      
+      {/* Subtle overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-black/20" />
       
       <div className="relative z-10 p-6">
         <div className="max-w-6xl mx-auto space-y-6">
