@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Send, Check, Users, MessageSquare } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Send, Check, Users, MessageSquare, Image, Smartphone } from 'lucide-react';
 import { 
   getWhatsAppContacts, 
   getInvitationTemplates, 
@@ -21,6 +23,7 @@ const SendInvitations = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
+  const [sendingMethod, setSendingMethod] = useState<'whatsapp' | 'sms'>('whatsapp');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,10 +94,39 @@ const SendInvitations = () => {
       .replace(/{link}/g, confirmationLink);
   };
 
-  const generateWhatsAppLink = (phoneNumber: string, message: string) => {
+  const generateWhatsAppLink = (phoneNumber: string, message: string, template: InvitationTemplate) => {
     const cleanPhone = phoneNumber.replace(/\D/g, '');
-    const encodedMessage = encodeURIComponent(message);
-    return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+    let whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    
+    // For multimedia content, we'll include the media URL in the message
+    if (template.media_url) {
+      const mediaText = `\n\n📎 ${getMediaTypeText(template.media_type)}: ${template.media_url}`;
+      whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message + mediaText)}`;
+    }
+    
+    return whatsappUrl;
+  };
+
+  const generateSMSLink = (phoneNumber: string, message: string, template: InvitationTemplate) => {
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+    let smsMessage = message;
+    
+    // Include media URL in SMS if available
+    if (template.media_url) {
+      smsMessage += `\n\n📎 ${getMediaTypeText(template.media_type)}: ${template.media_url}`;
+    }
+    
+    return `sms:${cleanPhone}?body=${encodeURIComponent(smsMessage)}`;
+  };
+
+  const getMediaTypeText = (mediaType?: string) => {
+    switch (mediaType) {
+      case 'image': return 'صورة';
+      case 'video': return 'فيديو';
+      case 'document': return 'مستند';
+      case 'link': return 'رابط';
+      default: return 'ملف';
+    }
   };
 
   const handleBulkSend = async () => {
@@ -124,14 +156,16 @@ const SendInvitations = () => {
     setLoading(true);
     
     try {
-      // Open WhatsApp links for all selected contacts
+      // Open WhatsApp or SMS links for all selected contacts
       for (const contact of selectedContacts) {
         const message = generateWhatsAppMessage(template, contact.name);
-        const whatsappUrl = generateWhatsAppLink(contact.phone_number, message);
+        const url = sendingMethod === 'whatsapp' 
+          ? generateWhatsAppLink(contact.phone_number, message, template)
+          : generateSMSLink(contact.phone_number, message, template);
         
         // Open in new tab with small delay to avoid blocking
         setTimeout(() => {
-          window.open(whatsappUrl, '_blank');
+          window.open(url, '_blank');
         }, selectedContacts.indexOf(contact) * 500);
       }
 
@@ -142,9 +176,10 @@ const SendInvitations = () => {
       await loadData();
       setSelectAll(false);
       
+      const methodText = sendingMethod === 'whatsapp' ? 'WhatsApp' : 'الرسائل النصية';
       toast({
         title: "تم بنجاح",
-        description: `تم فتح WhatsApp لإرسال ${selectedContacts.length} دعوة`
+        description: `تم فتح ${methodText} لإرسال ${selectedContacts.length} دعوة${template.media_url ? ' مع وسائط متعددة' : ''}`
       });
     } catch (error) {
       toast({
@@ -167,10 +202,32 @@ const SendInvitations = () => {
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
           <CardTitle className="text-white text-center" dir="rtl">
-            إرسال الدعوات
+            إرسال الدعوات المتعددة الوسائط
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Method Selection Tabs */}
+          <Tabs value={sendingMethod} onValueChange={(value) => setSendingMethod(value as 'whatsapp' | 'sms')}>
+            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-md">
+              <TabsTrigger 
+                value="whatsapp" 
+                className="data-[state=active]:bg-green-500/30 text-white"
+                dir="rtl"
+              >
+                <MessageSquare className="w-4 h-4 ml-2" />
+                WhatsApp
+              </TabsTrigger>
+              <TabsTrigger 
+                value="sms" 
+                className="data-[state=active]:bg-blue-500/30 text-white"
+                dir="rtl"
+              >
+                <Smartphone className="w-4 h-4 ml-2" />
+                رسائل نصية
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-white text-sm mb-2 block" dir="rtl">اختر قالب الدعوة</label>
@@ -182,7 +239,7 @@ const SendInvitations = () => {
                 <option value="">اختر قالب...</option>
                 {templates.map(template => (
                   <option key={template.id} value={template.id}>
-                    {template.name}
+                    {template.name} {template.media_url && `(${getMediaTypeText(template.media_type)})`}
                   </option>
                 ))}
               </select>
@@ -192,7 +249,11 @@ const SendInvitations = () => {
               <Button
                 onClick={handleBulkSend}
                 disabled={loading || !selectedTemplate || selectedCount === 0}
-                className="w-full bg-green-500/20 hover:bg-green-500/30 text-white border border-green-400/30"
+                className={`w-full border ${
+                  sendingMethod === 'whatsapp' 
+                    ? 'bg-green-500/20 hover:bg-green-500/30 border-green-400/30' 
+                    : 'bg-blue-500/20 hover:bg-blue-500/30 border-blue-400/30'
+                } text-white`}
               >
                 <Send className="w-4 h-4 ml-2" />
                 {loading ? 'جاري الإرسال...' : `إرسال ${selectedCount} دعوة`}
@@ -202,8 +263,22 @@ const SendInvitations = () => {
 
           {selectedTemplate && (
             <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-400/30">
-              <p className="text-blue-400 text-sm" dir="rtl">
-                <strong>قالب محدد:</strong> {templates.find(t => t.id === selectedTemplate)?.name}
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-blue-400 text-sm" dir="rtl">
+                  <strong>قالب محدد:</strong> {templates.find(t => t.id === selectedTemplate)?.name}
+                </p>
+                {templates.find(t => t.id === selectedTemplate)?.media_url && (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-400/30">
+                    <Image className="w-3 h-3 ml-1" />
+                    وسائط متعددة
+                  </Badge>
+                )}
+              </div>
+              <p className="text-blue-300 text-xs" dir="rtl">
+                الطريقة: {sendingMethod === 'whatsapp' ? 'WhatsApp' : 'الرسائل النصية'}
+                {templates.find(t => t.id === selectedTemplate)?.media_url && 
+                  ` • سيتم إرفاق ${getMediaTypeText(templates.find(t => t.id === selectedTemplate)?.media_type)}`
+                }
               </p>
             </div>
           )}
@@ -234,7 +309,7 @@ const SendInvitations = () => {
               </div>
               <div>
                 <p className="text-white/60 text-sm" dir="rtl">في انتظار الإرسال</p>
-                <p className="text-xl font-bold text-white">{pendingContacts.length}</p>
+                <p className="text-xl font-bold text-white">{contacts.filter(c => !c.is_sent).length}</p>
               </div>
             </div>
           </CardContent>
@@ -248,7 +323,7 @@ const SendInvitations = () => {
               </div>
               <div>
                 <p className="text-white/60 text-sm" dir="rtl">تم الإرسال</p>
-                <p className="text-xl font-bold text-white">{sentContacts.length}</p>
+                <p className="text-xl font-bold text-white">{contacts.filter(c => c.is_sent).length}</p>
               </div>
             </div>
           </CardContent>

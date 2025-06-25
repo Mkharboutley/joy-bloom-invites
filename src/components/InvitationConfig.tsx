@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +5,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Image, Video, FileText, Save, Link } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, Video, FileText, Save, Link, Eye } from 'lucide-react';
 import { getInvitationTemplates, addInvitationTemplate, updateInvitationTemplate, deleteInvitationTemplate, type InvitationTemplate } from '@/services/supabaseService';
 import { useToast } from '@/hooks/use-toast';
+import MultimediaPreview from './MultimediaPreview';
 
 const InvitationConfig = () => {
   const [templates, setTemplates] = useState<InvitationTemplate[]>([]);
@@ -175,6 +175,18 @@ const InvitationConfig = () => {
             />
           )}
 
+          {/* Media Preview */}
+          {newTemplate.media_url && newTemplate.media_type && (
+            <div>
+              <p className="text-white/80 text-sm mb-2" dir="rtl">معاينة الوسائط:</p>
+              <MultimediaPreview template={{
+                ...newTemplate,
+                id: 'preview',
+                is_active: true
+              }} />
+            </div>
+          )}
+
           <Textarea
             placeholder="نص الدعوة...
 
@@ -212,9 +224,12 @@ const InvitationConfig = () => {
             )}
           </div>
 
+          {/* Instructions */}
           <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-400/30">
             <p className="text-blue-400 text-sm" dir="rtl">
               <strong>متغيرات متاحة:</strong> {"{name}"} للاسم، {"{link}"} لرابط التأكيد
+              <br />
+              <strong>للوسائط المتعددة:</strong> سيتم إرفاق الصورة/الفيديو/المستند مع الرسالة
             </p>
           </div>
         </CardContent>
@@ -228,69 +243,65 @@ const InvitationConfig = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-white/20 overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-white/20 hover:bg-white/5">
-                  <TableHead className="text-white text-right" dir="rtl">اسم القالب</TableHead>
-                  <TableHead className="text-white text-right" dir="rtl">نوع الوسائط</TableHead>
-                  <TableHead className="text-white text-right" dir="rtl">تاريخ الإنشاء</TableHead>
-                  <TableHead className="text-white text-right" dir="rtl">العمليات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {templates.map((template) => (
-                  <TableRow key={template.id} className="border-white/20 hover:bg-white/5">
-                    <TableCell className="text-white text-right">{template.name}</TableCell>
-                    <TableCell className="text-right">
-                      {template.media_type ? (
-                        <Badge className="bg-blue-500/20 text-blue-400 border-blue-400/30">
-                          {getMediaIcon(template.media_type)}
-                          <span className="mr-1">
-                            {template.media_type === 'image' && 'صورة'}
-                            {template.media_type === 'video' && 'فيديو'}
-                            {template.media_type === 'document' && 'مستند'}
-                            {template.media_type === 'link' && 'رابط'}
-                          </span>
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-gray-500/20 text-gray-400 border-gray-400/30">
-                          نص فقط
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-white text-right">
-                      {template.created_at ? new Date(template.created_at).toLocaleDateString('ar-SA') : '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          onClick={() => handleEditTemplate(template)}
-                          size="sm"
-                          className="bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteTemplate(template.id!)}
-                          size="sm"
-                          className="bg-red-500/20 hover:bg-red-500/30 text-white border border-red-400/30"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+          <div className="space-y-4">
+            {templates.map((template) => (
+              <Card key={template.id} className="bg-white/5 border-white/10">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-white font-semibold">{template.name}</h3>
+                        {template.media_type && (
+                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-400/30">
+                            {getMediaIcon(template.media_type)}
+                            <span className="mr-1">
+                              {template.media_type === 'image' && 'صورة'}
+                              {template.media_type === 'video' && 'فيديو'}
+                              {template.media_type === 'document' && 'مستند'}
+                              {template.media_type === 'link' && 'رابط'}
+                            </span>
+                          </Badge>
+                        )}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {templates.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-white/60 py-8" dir="rtl">
-                      لا توجد قوالب بعد. قم بإنشاء قالب جديد أعلاه.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                      <p className="text-white/60 text-sm mb-2 line-clamp-2">
+                        {template.message.substring(0, 100)}...
+                      </p>
+                      <p className="text-white/40 text-xs">
+                        تاريخ الإنشاء: {template.created_at ? new Date(template.created_at).toLocaleDateString('ar-SA') : '-'}
+                      </p>
+                    </div>
+                    
+                    {template.media_url && (
+                      <div className="flex-shrink-0 w-32">
+                        <MultimediaPreview template={template} />
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        onClick={() => handleEditTemplate(template)}
+                        size="sm"
+                        className="bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
+                      >
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteTemplate(template.id!)}
+                        size="sm"
+                        className="bg-red-500/20 hover:bg-red-500/30 text-white border border-red-400/30"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {templates.length === 0 && (
+              <div className="text-center text-white/60 py-8" dir="rtl">
+                لا توجد قوالب بعد. قم بإنشاء قالب جديد أعلاه.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
