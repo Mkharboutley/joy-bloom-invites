@@ -41,7 +41,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         preload="auto"
         style={{ zIndex: 1 }}
       >
-        <source src="/background.mp4" type="video/mp4" />
+        <source src="/2.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       
