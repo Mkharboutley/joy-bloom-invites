@@ -66,7 +66,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
             onClick={handleStart}
             className="text-white text-lg px-6 py-3 bg-pink-600 hover:bg-pink-700 rounded-full shadow-lg transition-all"
           >
-            🎉 Enter Invitation
+            أهلاً و سهلاً ,إضغط هنا للإستمرار
           </button>
         </div>
       )}
