@@ -29,14 +29,50 @@
       transition: opacity 2s ease-out;
     }
     
-    /* Video layer */
+    /* Video layer - Fixed for mobile viewport */
     video {
       position: relative;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
+      object-position: center center; /* Ensure video is centered */
       transition: opacity 2s ease-out;
       z-index: 2;
+    }
+    
+    /* Mobile-specific video adjustments */
+    @media (max-width: 768px) {
+      video {
+        /* Use contain instead of cover on mobile to prevent cropping */
+        object-fit: contain;
+        /* Add black bars if needed to maintain aspect ratio */
+        background-color: black;
+        /* Ensure video fits within mobile viewport */
+        max-width: 100vw;
+        max-height: 100vh;
+      }
+    }
+    
+    /* For very small screens or unusual aspect ratios */
+    @media (max-width: 480px) {
+      video {
+        /* More aggressive containment for small screens */
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        /* Center the video content */
+        object-position: center;
+      }
+    }
+    
+    /* Landscape mobile orientation */
+    @media (max-width: 768px) and (orientation: landscape) {
+      video {
+        object-fit: cover;
+        object-position: center;
+        /* Slight scale adjustment for landscape mobile */
+        transform: scale(1.05);
+      }
     }
     
     .video-fade-out {
