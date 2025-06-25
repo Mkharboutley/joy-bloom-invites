@@ -29,39 +29,55 @@
       transition: opacity 2s ease-out;
     }
     
-    /* Video layer - Fixed for mobile viewport */
+    /* Video layer - Optimized for mobile */
     video {
       position: relative;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
-      object-position: center center; /* Ensure video is centered */
+      object-position: center center;
       transition: opacity 2s ease-out;
       z-index: 2;
     }
     
-    /* Mobile-specific video adjustments */
+    /* Mobile-specific video adjustments - Smart scaling */
     @media (max-width: 768px) {
       video {
-        /* Use contain instead of cover on mobile to prevent cropping */
-        object-fit: contain;
-        /* Add black bars if needed to maintain aspect ratio */
-        background-color: black;
-        /* Ensure video fits within mobile viewport */
-        max-width: 100vw;
-        max-height: 100vh;
+        /* Use cover but with smart positioning to prevent side cropping */
+        object-fit: cover;
+        object-position: center center;
+        /* Slight scale to ensure full coverage without black bars */
+        transform: scale(1.02);
+        /* Ensure video covers the entire viewport */
+        width: 100vw;
+        height: 100vh;
+        /* Remove any potential gaps */
+        min-width: 100%;
+        min-height: 100%;
       }
     }
     
-    /* For very small screens or unusual aspect ratios */
+    /* For very small screens - more aggressive scaling */
     @media (max-width: 480px) {
       video {
-        /* More aggressive containment for small screens */
-        object-fit: contain;
-        width: 100%;
-        height: 100%;
-        /* Center the video content */
-        object-position: center;
+        object-fit: cover;
+        object-position: center center;
+        /* Slightly more scale for small screens */
+        transform: scale(1.05);
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+    
+    /* Portrait orientation specific adjustments */
+    @media (max-width: 768px) and (orientation: portrait) {
+      video {
+        object-fit: cover;
+        object-position: center center;
+        /* Optimized scale for portrait mode */
+        transform: scale(1.03);
+        width: 100vw;
+        height: 100vh;
       }
     }
     
@@ -69,9 +85,29 @@
     @media (max-width: 768px) and (orientation: landscape) {
       video {
         object-fit: cover;
-        object-position: center;
-        /* Slight scale adjustment for landscape mobile */
-        transform: scale(1.05);
+        object-position: center center;
+        /* Less scale needed for landscape */
+        transform: scale(1.01);
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+    
+    /* Ultra-wide screens adjustment */
+    @media (max-width: 768px) and (max-aspect-ratio: 9/16) {
+      video {
+        /* For very tall screens */
+        transform: scale(1.1);
+        object-position: center center;
+      }
+    }
+    
+    /* Wide screens adjustment */
+    @media (max-width: 768px) and (min-aspect-ratio: 16/9) {
+      video {
+        /* For very wide screens */
+        transform: scale(1.0);
+        object-position: center center;
       }
     }
     
