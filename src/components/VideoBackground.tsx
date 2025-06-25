@@ -60,13 +60,13 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       {/* Force user interaction to enable sound */}
       {!started && (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 text-white text-center px-6">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4"> يشرفنا دعوتكم إلى أفراح آل علي و الخاجه </h1>
-          <p className="text-lg md:text-xl mb-8">Tap below to enter the wedding celebration</p>
+          <h1 className="text-3xl md:text-5xl font-bold mb-4"> يشرفنا دعوتكم إلى حفل الزفاف </h1>
+          <p className="text-lg md:text-xl mb-8"></p>
           <button
             onClick={handleStart}
             className="text-white text-lg px-6 py-3 bg-pink-600 hover:bg-pink-700 rounded-full shadow-lg transition-all"
           >
-            أهلاً و سهلاً ,إضغط هنا للإستمرار
+            الرجاء إضغط هنا للإستمرار
           </button>
         </div>
       )}
