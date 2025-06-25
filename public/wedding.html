@@ -13,18 +13,18 @@
       font-family: 'Tajawal', sans-serif;
     }
     
-    /* Background image layer */
+    /* Background image layer - Using your uploaded back.png */
     .background-image {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-image: url('22.png');
+      background-image: url('back.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      opacity: 0.3; /* Faded effect */
+      opacity: 0.4; /* Slightly higher opacity to show your beautiful background */
       z-index: 1;
       transition: opacity 2s ease-out;
     }
@@ -65,13 +65,13 @@
         min-height: 100%;
       }
       
-      /* If the video has black bars, we'll use a subtle background pattern */
+      /* Enhanced background visibility on mobile */
       .video-container {
         background: 
-          radial-gradient(circle at 20% 20%, rgba(30, 30, 30, 0.8) 0%, transparent 50%),
-          radial-gradient(circle at 80% 80%, rgba(25, 25, 25, 0.8) 0%, transparent 50%),
-          radial-gradient(circle at 40% 60%, rgba(35, 35, 35, 0.6) 0%, transparent 50%),
-          linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+          radial-gradient(circle at 20% 20%, rgba(30, 30, 30, 0.6) 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(25, 25, 25, 0.6) 0%, transparent 50%),
+          radial-gradient(circle at 40% 60%, rgba(35, 35, 35, 0.4) 0%, transparent 50%),
+          linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(15, 15, 15, 0.8) 100%);
       }
     }
     
@@ -111,7 +111,7 @@
     
     /* When video fades out, make background more visible */
     .background-fade-in {
-      opacity: 0.6 !important;
+      opacity: 0.7 !important; /* Increased to show more of your beautiful background */
     }
     
     .loading-overlay {
@@ -156,7 +156,7 @@
       right: 0;
       bottom: 0;
       left: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)); /* Reduced opacity to show background */
+      background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4)); /* Reduced opacity to show your background */
       display: none;
       align-items: center;
       justify-content: center;
@@ -165,16 +165,16 @@
       font-family: 'Tajawal', sans-serif;
       flex-direction: column;
       text-align: center;
-      backdrop-filter: blur(8px); /* Reduced blur to show more background */
+      backdrop-filter: blur(6px); /* Reduced blur to show more of your background */
     }
     
     .end-content {
       max-width: 65%; /* Reduced from 90% by 28% */
       padding: 21.6px; /* Reduced from 30px by 28% */
-      background: rgba(255,255,255,0.08); /* More transparent to show background */
+      background: rgba(255,255,255,0.06); /* More transparent to show your background */
       border-radius: 14.4px; /* Reduced from 20px by 28% */
       border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(15px); /* Reduced blur */
+      backdrop-filter: blur(12px); /* Reduced blur */
       opacity: 0;
       transform: translateY(30px) scale(0.9);
       animation: fadeInCard 2s ease-out forwards;
@@ -503,7 +503,7 @@
 </head>
 <body>
 
-<!-- Background image layer -->
+<!-- Background image layer - Now using your uploaded back.png -->
 <div class="background-image" id="backgroundImage"></div>
 
 <!-- Video container for better control -->
