@@ -105,6 +105,38 @@
       }
     }
     
+    .logo-section {
+      margin-bottom: 18px; /* Reduced from 25px by 28% */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .wedding-logo {
+      width: 72px; /* Reduced from 100px by 28% */
+      height: 72px; /* Reduced from 100px by 28% */
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(255,255,255,0.3));
+      opacity: 0;
+      transform: scale(0.8);
+      animation: logoFadeIn 2.5s ease-out 0.5s forwards;
+    }
+    
+    @keyframes logoFadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.8) rotate(-10deg);
+      }
+      50% {
+        opacity: 0.7;
+        transform: scale(1.05) rotate(0deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+    
     .end-title {
       font-size: 23px; /* Reduced from 32px by 28% */
       font-weight: bold;
@@ -150,6 +182,15 @@
         padding: 18px; /* Reduced from 25px by 28% */
       }
       
+      .wedding-logo {
+        width: 58px; /* Reduced from 80px by 28% */
+        height: 58px; /* Reduced from 80px by 28% */
+      }
+      
+      .logo-section {
+        margin-bottom: 14.4px; /* Reduced from 20px by 28% */
+      }
+      
       .end-title {
         font-size: 20px; /* Reduced from 28px by 28% */
       }
@@ -186,6 +227,9 @@
 
 <div class="end-overlay" id="endOverlay">
   <div class="end-content">
+    <div class="logo-section">
+      <img src="logo2.png" alt="شعار الزفاف" class="wedding-logo" />
+    </div>
     <h1 class="end-title">بحضوركم تكتمل سعادتنا</h1>
     <p class="end-subtitle">يشرفنا حضوركم في هذه المناسبة السعيدة<br>٤ يوليو ٢٠٢٥ - فندق نادي الضباط</p>
     <a href="/" class="attend-button">اضغط هنا لتأكيد الحضور</a>
