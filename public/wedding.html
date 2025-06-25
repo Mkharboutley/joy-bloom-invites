@@ -124,7 +124,7 @@
         drop-shadow(0 2px 8px rgba(255,255,255,0.3));
       opacity: 0;
       transform: scale(0.8);
-      animation: logoFadeInGlow 2.5s ease-out 0.5s forwards, logoFlicker 6s ease-in-out infinite 3s;
+      animation: logoFadeInGlow 2.5s ease-out 0.5s forwards, logoFlicker 12s ease-in-out infinite 3s;
       position: relative;
       z-index: 2;
     }
@@ -140,7 +140,7 @@
       background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 40%, transparent 70%);
       border-radius: 50%;
       opacity: 0;
-      animation: glowPulse 3s ease-in-out infinite, glowFlicker 6s ease-in-out infinite 3s;
+      animation: glowPulse 3s ease-in-out infinite, glowFlicker 12s ease-in-out infinite 3s;
       z-index: -1;
     }
     
@@ -172,7 +172,7 @@
       }
     }
     
-    /* Slow motion flickering animation for logo glow */
+    /* Ultra-slow motion flickering animation for logo glow - 12 seconds */
     @keyframes logoFlicker {
       0%, 100% {
         filter: 
@@ -250,7 +250,7 @@
       }
     }
     
-    /* Flickering animation for the background glow */
+    /* Ultra-slow flickering animation for the background glow - 12 seconds */
     @keyframes glowFlicker {
       0%, 100% {
         opacity: 0.3;
@@ -320,15 +320,15 @@
       padding: 13px 36px; /* Reduced from 18px 50px by 28% */
       font-size: 15.8px; /* Reduced from 22px by 28% */
       font-weight: bold;
-      background: linear-gradient(135deg, #6b7280, #4b5563); /* Gray gradient */
+      background: linear-gradient(135deg, #374151, #1f2937); /* Dark gray gradient */
       border: 0.4px solid rgba(255,255,255,0.6); /* 0.4px glowing border */
-      border-radius: 14.4px; /* Reduced from 20px by 28% */
+      border-radius: 18px; /* Changed to 18px radius */
       cursor: pointer;
       transition: all 0.3s ease;
       color: white;
       font-family: 'Tajawal', sans-serif;
       box-shadow: 
-        0 7.2px 21.6px rgba(107, 114, 128, 0.3), /* Gray shadow */
+        0 7.2px 21.6px rgba(55, 65, 81, 0.3), /* Dark gray shadow */
         0 0 0 0.4px rgba(255,255,255,0.4), /* Inner glow border */
         0 0 8px rgba(255,255,255,0.3); /* Outer glow */
       text-decoration: none;
@@ -346,16 +346,16 @@
       right: -2px;
       bottom: -2px;
       background: linear-gradient(45deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
-      border-radius: 15px;
+      border-radius: 19px; /* Adjusted for 18px button radius */
       z-index: -1;
       filter: blur(1px);
     }
     
     .attend-button:hover {
-      background: linear-gradient(135deg, #4b5563, #374151); /* Darker gray on hover */
+      background: linear-gradient(135deg, #1f2937, #111827); /* Even darker gray on hover */
       transform: translateY(-2.2px); /* Reduced from -3px by 28% */
       box-shadow: 
-        0 10.8px 28.8px rgba(107, 114, 128, 0.4), /* Enhanced gray shadow */
+        0 10.8px 28.8px rgba(55, 65, 81, 0.4), /* Enhanced dark gray shadow */
         0 0 0 0.4px rgba(255,255,255,0.6), /* Brighter inner glow */
         0 0 12px rgba(255,255,255,0.4), /* Enhanced outer glow */
         0 0 20px rgba(255,255,255,0.2); /* Additional outer glow */
