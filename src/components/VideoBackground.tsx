@@ -9,6 +9,21 @@ interface VideoBackgroundProps {
 
 const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      // Try to play the video
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log('Video autoplay failed:', error);
+          // If autoplay fails, the video will still be visible but paused
+        });
+      }
+    }
+  }, []);
 
   const handleError = (e: any) => {
     console.log('Video background failed to load:', e);
@@ -25,6 +40,13 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
     console.log('Video can play - background should be visible');
   };
 
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
   return (
     <>
       {/* Video Background */}
@@ -32,7 +54,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         ref={videoRef}
         autoPlay
         loop
-        muted
+        muted={isMuted}
         playsInline
         className="absolute inset-0 w-full h-full object-cover z-1"
         onError={handleError}
@@ -44,6 +66,15 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         <source src="/G22.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+      
+      {/* Volume Control Button */}
+      <button
+        onClick={toggleMute}
+        className="absolute top-4 right-4 z-50 bg-black/20 hover:bg-black/40 backdrop-blur-sm text-white p-2 rounded-full transition-all"
+        aria-label={isMuted ? "Unmute video" : "Mute video"}
+      >
+        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+      </button>
       
       {/* Fallback background only if video fails */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 z-0" />
