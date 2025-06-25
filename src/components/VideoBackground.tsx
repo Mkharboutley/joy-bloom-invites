@@ -59,7 +59,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
 
       {/* Force user interaction to enable sound */}
       {!started && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 text-white text-center px-6">
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 text-white text-center px-6">
           <h1 className="text-xl md:text-2xl font-medium mb-4">
             يشرفنا دعوتكم إلى حفل الزفاف
           </h1>
