@@ -29,53 +29,67 @@
       transition: opacity 2s ease-out;
     }
     
-    /* Video layer - Optimized for mobile */
-    video {
+    /* Video container for better control */
+    .video-container {
       position: relative;
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
-      object-position: center center;
-      transition: opacity 2s ease-out;
+      overflow: hidden;
       z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: black;
     }
     
-    /* Mobile-specific video adjustments - Smart scaling */
+    /* Video layer - Optimized for mobile without cropping */
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Use contain to show full video */
+      object-position: center center;
+      transition: opacity 2s ease-out;
+      background: black; /* Black background to fill any gaps */
+    }
+    
+    /* Mobile-specific adjustments - prioritize showing full content */
     @media (max-width: 768px) {
       video {
-        /* Use cover but with smart positioning to prevent side cropping */
-        object-fit: cover;
+        /* Keep full video visible */
+        object-fit: contain;
         object-position: center center;
-        /* Slight scale to ensure full coverage without black bars */
-        transform: scale(1.02);
-        /* Ensure video covers the entire viewport */
         width: 100vw;
         height: 100vh;
-        /* Remove any potential gaps */
+        /* Ensure video fills available space without cropping content */
         min-width: 100%;
         min-height: 100%;
       }
+      
+      /* If the video has black bars, we'll use a subtle background pattern */
+      .video-container {
+        background: 
+          radial-gradient(circle at 20% 20%, rgba(30, 30, 30, 0.8) 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(25, 25, 25, 0.8) 0%, transparent 50%),
+          radial-gradient(circle at 40% 60%, rgba(35, 35, 35, 0.6) 0%, transparent 50%),
+          linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+      }
     }
     
-    /* For very small screens - more aggressive scaling */
+    /* For very small screens - maintain aspect ratio */
     @media (max-width: 480px) {
       video {
-        object-fit: cover;
+        object-fit: contain;
         object-position: center center;
-        /* Slightly more scale for small screens */
-        transform: scale(1.05);
         width: 100vw;
         height: 100vh;
       }
     }
     
-    /* Portrait orientation specific adjustments */
+    /* Portrait orientation - ensure full content visibility */
     @media (max-width: 768px) and (orientation: portrait) {
       video {
-        object-fit: cover;
+        object-fit: contain;
         object-position: center center;
-        /* Optimized scale for portrait mode */
-        transform: scale(1.03);
         width: 100vw;
         height: 100vh;
       }
@@ -84,30 +98,10 @@
     /* Landscape mobile orientation */
     @media (max-width: 768px) and (orientation: landscape) {
       video {
-        object-fit: cover;
+        object-fit: contain;
         object-position: center center;
-        /* Less scale needed for landscape */
-        transform: scale(1.01);
         width: 100vw;
         height: 100vh;
-      }
-    }
-    
-    /* Ultra-wide screens adjustment */
-    @media (max-width: 768px) and (max-aspect-ratio: 9/16) {
-      video {
-        /* For very tall screens */
-        transform: scale(1.1);
-        object-position: center center;
-      }
-    }
-    
-    /* Wide screens adjustment */
-    @media (max-width: 768px) and (min-aspect-ratio: 16/9) {
-      video {
-        /* For very wide screens */
-        transform: scale(1.0);
-        object-position: center center;
       }
     }
     
@@ -512,10 +506,13 @@
 <!-- Background image layer -->
 <div class="background-image" id="backgroundImage"></div>
 
-<video id="weddingVideo" autoplay muted playsinline preload="auto">
-  <source src="wedding-invitation.mp4" type="video/mp4" />
-  متصفحك لا يدعم تشغيل الفيديو.
-</video>
+<!-- Video container for better control -->
+<div class="video-container">
+  <video id="weddingVideo" autoplay muted playsinline preload="auto">
+    <source src="wedding-invitation.mp4" type="video/mp4" />
+    متصفحك لا يدعم تشغيل الفيديو.
+  </video>
+</div>
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-text">جاري تحميل الدعوة...</div>
