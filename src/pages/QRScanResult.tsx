@@ -1,8 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
 import VideoBackground from '@/components/VideoBackground';
-import EntryTone from '@/components/EntryTone';
 import ApologyDialog from '@/components/ApologyDialog';
 import { getGuestByInvitationId, Guest } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
@@ -50,7 +50,6 @@ const QRScanResult = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
-        <EntryTone autoPlay={true} />
         <div className="relative z-10 text-white text-xl">جاري التحميل...</div>
       </div>
     );
@@ -60,7 +59,6 @@ const QRScanResult = () => {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
-        <EntryTone autoPlay={true} />
         <div className="relative z-10 text-white text-xl">دعوة غير صالحة</div>
       </div>
     );
@@ -71,7 +69,6 @@ const QRScanResult = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
-      <EntryTone autoPlay={true} />
       
       {/* Large Floating Orbs */}
       <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse z-2" />
