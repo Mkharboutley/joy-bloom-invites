@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import GlassCard from '@/components/GlassCard';
-import VideoBackground from '@/components/VideoBackground';
 import { confirmAttendance } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -39,18 +38,8 @@ const Index = () => {
     }
   };
 
-  const handleVideoError = () => {
-    console.log('Video failed to load from /background.mp4 on Index page');
-  };
-
-  const handleVideoLoad = () => {
-    console.log('Video loaded successfully from /background.mp4 on Index page');
-  };
-
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
-      
       {/* Large Floating Orbs */}
       <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-purple-400/40 to-pink-400/40 rounded-full blur-2xl animate-pulse z-2" />
       <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-r from-blue-400/30 to-cyan-400/30 rounded-full blur-3xl z-2" />
