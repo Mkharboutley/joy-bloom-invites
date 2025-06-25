@@ -13,15 +13,39 @@
       font-family: 'Tajawal', sans-serif;
     }
     
+    /* Background image layer */
+    .background-image {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('22.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.3; /* Faded effect */
+      z-index: 1;
+      transition: opacity 2s ease-out;
+    }
+    
+    /* Video layer */
     video {
+      position: relative;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
       transition: opacity 2s ease-out;
+      z-index: 2;
     }
     
     .video-fade-out {
       opacity: 0 !important;
+    }
+    
+    /* When video fades out, make background more visible */
+    .background-fade-in {
+      opacity: 0.6 !important;
     }
     
     .loading-overlay {
@@ -66,7 +90,7 @@
       right: 0;
       bottom: 0;
       left: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.6));
+      background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)); /* Reduced opacity to show background */
       display: none;
       align-items: center;
       justify-content: center;
@@ -75,16 +99,16 @@
       font-family: 'Tajawal', sans-serif;
       flex-direction: column;
       text-align: center;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px); /* Reduced blur to show more background */
     }
     
     .end-content {
       max-width: 65%; /* Reduced from 90% by 28% */
       padding: 21.6px; /* Reduced from 30px by 28% */
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08); /* More transparent to show background */
       border-radius: 14.4px; /* Reduced from 20px by 28% */
       border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(15px); /* Reduced blur */
       opacity: 0;
       transform: translateY(30px) scale(0.9);
       animation: fadeInCard 2s ease-out forwards;
@@ -413,6 +437,9 @@
 </head>
 <body>
 
+<!-- Background image layer -->
+<div class="background-image" id="backgroundImage"></div>
+
 <video id="weddingVideo" autoplay muted playsinline preload="auto">
   <source src="wedding-invitation.mp4" type="video/mp4" />
   متصفحك لا يدعم تشغيل الفيديو.
@@ -438,10 +465,14 @@
   const video = document.getElementById('weddingVideo');
   const loadingOverlay = document.getElementById('loadingOverlay');
   const endOverlay = document.getElementById('endOverlay');
+  const backgroundImage = document.getElementById('backgroundImage');
 
   function showEndOverlayWithTransition() {
     // Start video fade-out
     video.classList.add('video-fade-out');
+    
+    // Make background more visible when video fades out
+    backgroundImage.classList.add('background-fade-in');
     
     // Show end overlay immediately (it will fade in via CSS animation)
     endOverlay.style.display = 'flex';
