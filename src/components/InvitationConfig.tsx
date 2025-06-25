@@ -177,7 +177,7 @@ const InvitationConfig = () => {
           )}
 
           {/* Media Preview */}
-          {newTemplate.media_url && newTemplate.media_type && newTemplate.media_type !== '' && (
+          {newTemplate.media_url && newTemplate.media_type && newTemplate.media_type.length > 0 && (
             <div>
               <p className="text-white/80 text-sm mb-2" dir="rtl">معاينة الوسائط:</p>
               <MultimediaPreview template={{
