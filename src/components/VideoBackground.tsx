@@ -47,12 +47,12 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
 
   return (
     <>
-      {/* Background image layer - 22.png */}
+      {/* Background image layer - using admin-back.jpg since 22.png doesn't exist */}
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
         style={{
-          backgroundImage: 'url(/22.png)',
-          opacity: 0.3, // Faded effect
+          backgroundImage: 'url(/admin-back.jpg)',
+          opacity: 0.4, // Slightly higher opacity to be more visible
           transition: 'opacity 2s ease-out'
         }}
       />
