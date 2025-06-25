@@ -33,7 +33,7 @@ const AdminDashboard = () => {
 
           {/* Admin Dashboard Tabs */}
           <Tabs defaultValue="attendance" className="w-full">
-            <TabsList className="grid w-full grid-cols-6 bg-white/10 backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-md">
               <TabsTrigger 
                 value="attendance" 
                 className="data-[state=active]:bg-white/20 text-white text-xs"
@@ -69,13 +69,6 @@ const AdminDashboard = () => {
               >
                 إرسال الدعوات
               </TabsTrigger>
-              <TabsTrigger 
-                value="whatsapp" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                إدارة WhatsApp
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="attendance" className="space-y-6 mt-6">
@@ -96,14 +89,6 @@ const AdminDashboard = () => {
             
             <TabsContent value="send" className="space-y-6 mt-6">
               <SendInvitations />
-            </TabsContent>
-            
-            <TabsContent value="whatsapp" className="space-y-6 mt-6">
-              <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-400/30">
-                <p className="text-yellow-400 text-center" dir="rtl">
-                  هذا التبويب للإدارة القديمة لـ WhatsApp. استخدم التبويبات الجديدة لإدارة شاملة.
-                </p>
-              </div>
             </TabsContent>
           </Tabs>
         </div>

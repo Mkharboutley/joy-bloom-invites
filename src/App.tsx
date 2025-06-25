@@ -23,8 +23,6 @@ const App = () => (
           <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
           <Route path="/scan/:invitationId" element={<QRScanResult />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/full" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
