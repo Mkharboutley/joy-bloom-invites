@@ -80,6 +80,24 @@
       border-radius: 14.4px; /* Reduced from 20px by 28% */
       border: 1px solid rgba(255,255,255,0.2);
       backdrop-filter: blur(20px);
+      opacity: 0;
+      transform: translateY(30px) scale(0.9);
+      animation: fadeInCard 2s ease-out forwards;
+    }
+    
+    @keyframes fadeInCard {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+      }
+      50% {
+        opacity: 0.5;
+        transform: translateY(15px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
     
     .end-title {
