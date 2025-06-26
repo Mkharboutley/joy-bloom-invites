@@ -80,10 +80,11 @@ const Index = () => {
                 placeholder="الرجاء إدخال الإسم الكامل"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md h-12 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
                 style={{ 
                   borderRadius: '12px',
                   fontSize: '16px', // Increased from 14px (text-sm) to 16px (14px * 1.15 ≈ 16px)
+                  height: '52.8px' // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
                 }}
                 dir="rtl"
               />
@@ -93,7 +94,10 @@ const Index = () => {
             <Button
               onClick={handleConfirmation}
               disabled={isLoading}
-              className="w-full font-medium py-3 rounded-xl h-12 text-lg transform hover:scale-105 transition-all duration-200"
+              className="w-full font-medium py-3 rounded-xl text-lg transform hover:scale-105 transition-all duration-200"
+              style={{
+                height: '52.8px' // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
+              }}
               size="lg"
             >
               {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
