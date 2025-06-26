@@ -96,7 +96,9 @@ const Index = () => {
               disabled={isLoading}
               className="w-full font-medium py-3 rounded-xl text-lg transform hover:scale-105 transition-all duration-200"
               style={{
-                height: '52.8px' // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
+                height: '52.8px', // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
+                boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.3)', // Added 0.2px glow
+                filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))' // Additional subtle glow
               }}
               size="lg"
             >
