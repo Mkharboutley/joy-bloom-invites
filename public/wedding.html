@@ -85,6 +85,9 @@
       box-sizing: border-box;
       margin: 0 auto;
       position: relative;
+      /* Ensure stable positioning */
+      transform: translateZ(0);
+      will-change: auto;
     }
 
     @keyframes fadeInCard {
@@ -98,6 +101,10 @@
       display: flex;
       justify-content: center;
       position: relative;
+      /* Create a stable container for the logo */
+      width: 317.63px;
+      height: 317.63px;
+      flex-shrink: 0;
     }
 
     .wedding-logo {
@@ -112,38 +119,44 @@
         logoFadeInGlow 2.5s ease-out 0.5s forwards,
         premiumFloat 8s ease-in-out infinite 3s,
         premiumGlow 6s ease-in-out infinite 3s;
-      position: relative;
+      position: absolute;
+      top: 0;
+      left: 0;
       z-index: 1;
+      /* Ensure GPU acceleration and stable rendering */
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
     }
 
-    /* Premium floating animation with random movement */
+    /* Premium floating animation with contained movement */
     @keyframes premiumFloat {
       0% { 
-        transform: translate(0, 0) rotate(0deg) scale(1);
+        transform: translateZ(0) translate(0, 0) rotate(0deg) scale(1);
       }
       12.5% { 
-        transform: translate(3px, -4px) rotate(0.5deg) scale(1.02);
+        transform: translateZ(0) translate(2px, -2px) rotate(0.3deg) scale(1.01);
       }
       25% { 
-        transform: translate(-2px, -8px) rotate(-0.3deg) scale(1.01);
+        transform: translateZ(0) translate(-1px, -4px) rotate(-0.2deg) scale(1.005);
       }
       37.5% { 
-        transform: translate(4px, -6px) rotate(0.7deg) scale(1.03);
+        transform: translateZ(0) translate(2px, -3px) rotate(0.4deg) scale(1.015);
       }
       50% { 
-        transform: translate(-1px, -10px) rotate(-0.2deg) scale(1.02);
+        transform: translateZ(0) translate(-1px, -5px) rotate(-0.1deg) scale(1.01);
       }
       62.5% { 
-        transform: translate(3px, -7px) rotate(0.4deg) scale(1.01);
+        transform: translateZ(0) translate(2px, -3px) rotate(0.2deg) scale(1.005);
       }
       75% { 
-        transform: translate(-3px, -5px) rotate(-0.6deg) scale(1.03);
+        transform: translateZ(0) translate(-2px, -2px) rotate(-0.3deg) scale(1.015);
       }
       87.5% { 
-        transform: translate(2px, -3px) rotate(0.3deg) scale(1.01);
+        transform: translateZ(0) translate(1px, -1px) rotate(0.2deg) scale(1.005);
       }
       100% { 
-        transform: translate(0, 0) rotate(0deg) scale(1);
+        transform: translateZ(0) translate(0, 0) rotate(0deg) scale(1);
       }
     }
 
@@ -196,26 +209,27 @@
       border-radius: 50%;
       animation: ambientGlow 7s ease-in-out infinite;
       z-index: -1;
+      transform: translateZ(0);
     }
 
     @keyframes ambientGlow {
       0%, 100% {
         opacity: 0.3;
-        transform: scale(1) rotate(0deg);
+        transform: translateZ(0) scale(1) rotate(0deg);
       }
       33% {
         opacity: 0.6;
-        transform: scale(1.1) rotate(120deg);
+        transform: translateZ(0) scale(1.1) rotate(120deg);
       }
       66% {
         opacity: 0.4;
-        transform: scale(1.05) rotate(240deg);
+        transform: translateZ(0) scale(1.05) rotate(240deg);
       }
     }
 
     @keyframes logoFadeInGlow {
-      0% { opacity: 0; transform: scale(0.8); }
-      100% { opacity: 1; transform: scale(1); }
+      0% { opacity: 0; transform: translateZ(0) scale(0.8); }
+      100% { opacity: 1; transform: translateZ(0) scale(1); }
     }
 
     .end-title {
@@ -273,11 +287,27 @@
         max-width: none;
         padding: 18.48px 18.48px 22.18px 18.48px; /* Added 20% more bottom padding for mobile: 18.48px * 1.2 = 22.18px */
         min-height: 363.83px;
+        /* Extra stability for mobile */
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+      }
+
+      .logo-section {
+        width: 255.25px;
+        height: 255.25px;
+        margin-bottom: 8.09px;
+        /* Ensure stable container on mobile */
+        flex-shrink: 0;
       }
 
       .wedding-logo {
         width: 255.25px;
         height: 255.25px;
+        /* More stable animation for mobile */
+        animation: 
+          logoFadeInGlow 2.5s ease-out 0.5s forwards,
+          mobileFloat 10s ease-in-out infinite 3s,
+          mobileGlow 8s ease-in-out infinite 3s;
       }
 
       .wedding-logo::before {
@@ -287,39 +317,36 @@
         bottom: -30px;
       }
 
-      /* Reduced movement for mobile */
-      @keyframes premiumFloat {
-        0% { 
-          transform: translate(0, 0) rotate(0deg) scale(1);
-        }
-        12.5% { 
-          transform: translate(2px, -3px) rotate(0.3deg) scale(1.01);
+      /* Much gentler animation for mobile to prevent flickering */
+      @keyframes mobileFloat {
+        0%, 100% { 
+          transform: translateZ(0) translate(0, 0) scale(1);
         }
         25% { 
-          transform: translate(-1px, -5px) rotate(-0.2deg) scale(1.005);
-        }
-        37.5% { 
-          transform: translate(2px, -4px) rotate(0.4deg) scale(1.02);
+          transform: translateZ(0) translate(1px, -2px) scale(1.005);
         }
         50% { 
-          transform: translate(-1px, -6px) rotate(-0.1deg) scale(1.01);
-        }
-        62.5% { 
-          transform: translate(2px, -4px) rotate(0.2deg) scale(1.005);
+          transform: translateZ(0) translate(-1px, -3px) scale(1.01);
         }
         75% { 
-          transform: translate(-2px, -3px) rotate(-0.3deg) scale(1.02);
-        }
-        87.5% { 
-          transform: translate(1px, -2px) rotate(0.2deg) scale(1.005);
-        }
-        100% { 
-          transform: translate(0, 0) rotate(0deg) scale(1);
+          transform: translateZ(0) translate(1px, -2px) scale(1.005);
         }
       }
 
-      .logo-section {
-        margin-bottom: 8.09px;
+      /* Gentler glow for mobile */
+      @keyframes mobileGlow {
+        0%, 100% {
+          filter: 
+            drop-shadow(0 0 15px rgba(255,255,255,0.7))
+            drop-shadow(0 0 30px rgba(255,255,255,0.5))
+            drop-shadow(0 0 45px rgba(255,255,255,0.3));
+        }
+        50% {
+          filter: 
+            drop-shadow(0 0 25px rgba(255,255,255,0.9))
+            drop-shadow(0 0 50px rgba(255,255,255,0.7))
+            drop-shadow(0 0 75px rgba(255,255,255,0.5));
+        }
       }
 
       .end-title {
@@ -336,6 +363,17 @@
         font-size: 13.86px;
         padding: 14.41px 23.1px; /* Increased from 12.87px to 14.41px (12.87 * 1.12 = 14.41) */
         margin-top: 4.62px;
+      }
+    }
+
+    /* Disable animations on very small screens or low-performance devices */
+    @media (max-width: 480px), (prefers-reduced-motion: reduce) {
+      .wedding-logo {
+        animation: logoFadeInGlow 2.5s ease-out 0.5s forwards !important;
+      }
+      
+      .wedding-logo::before {
+        animation: none !important;
       }
     }
   </style>
