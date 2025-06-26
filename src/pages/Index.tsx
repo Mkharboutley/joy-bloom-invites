@@ -80,8 +80,11 @@ const Index = () => {
                 placeholder="الرجاء إدخال الإسم الكامل"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 placeholder:text-xs backdrop-blur-md h-12 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
-                style={{ borderRadius: '12px' }}
+                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md h-12 shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                style={{ 
+                  borderRadius: '12px',
+                  fontSize: '16px', // Increased from 14px (text-sm) to 16px (14px * 1.15 ≈ 16px)
+                }}
                 dir="rtl"
               />
             </div>
