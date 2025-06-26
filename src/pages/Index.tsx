@@ -67,7 +67,7 @@ const Index = () => {
             </div>
 
             {/* Wedding Date and Venue */}
-            <div className="bg-white/25 backdrop-blur-md rounded-2xl p-4 border border-white/30 shadow-xl flex items-center justify-center">
+            <div className="bg-white/25 backdrop-blur-md rounded-xl p-4 border border-white/30 shadow-xl flex items-center justify-center">
               <div className="text-white font-normal text-center text-sm space-y-1" dir="rtl">
                 <p>٤ يوليو ٢٠٢٥ - فندق إرث</p>
               </div>
