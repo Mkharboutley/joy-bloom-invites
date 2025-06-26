@@ -35,34 +35,32 @@
       z-index: 2;
       color: white;
       font-family: 'Tajawal', sans-serif;
-      flex-direction: column;
       text-align: center;
       backdrop-filter: blur(6px);
       padding: 40px 20px;
+      box-sizing: border-box;
     }
 
     .end-content {
-      max-width: 55.25%;
+      width: 55.25%;
+      max-width: 600px;
       padding: 27px;
       background: rgba(255,255,255,0.06);
       border-radius: 14.4px;
       border: 1px solid rgba(255,255,255,0.2);
       backdrop-filter: blur(12px);
       animation: fadeInCard 2s ease-out forwards;
-      margin: 0 auto 60px auto;
       min-height: 500px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      position: relative;
-      left: 50%;
-      transform: translateX(-50%);
+      box-sizing: border-box;
     }
 
     @keyframes fadeInCard {
-      0% { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.9); }
-      50% { opacity: 0.5; transform: translateX(-50%) translateY(15px) scale(0.95); }
-      100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+      0% { opacity: 0; transform: translateY(30px) scale(0.9); }
+      50% { opacity: 0.5; transform: translateY(15px) scale(0.95); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .logo-section {
@@ -117,6 +115,7 @@
         0 0 10px rgba(255,255,255,0.3);
       transition: all 0.3s ease;
       margin-top: 10px;
+      display: inline-block;
     }
 
     .attend-button:hover {
@@ -131,9 +130,9 @@
       }
 
       .end-content {
-        max-width: 72.25%;
+        width: 72.25%;
+        max-width: none;
         padding: 22px;
-        margin: 0 auto 40px auto;
         min-height: 420px;
       }
 
