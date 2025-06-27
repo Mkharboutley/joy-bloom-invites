@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Smartphone, Send, Settings, CheckCircle, AlertTriangle, Globe, RefreshCw } from 'lucide-react';
+import { Bell, Smartphone, Send, Settings, CheckCircle, AlertTriangle, Globe, RefreshCw, Zap } from 'lucide-react';
 import { 
   setupBrowserPushNotifications, 
   registerPushSubscription, 
@@ -13,6 +13,7 @@ import {
   getPushSubscriptions,
   testPushConnection,
   getMessageBirdConfig,
+  initializeMessageBirdSDK,
   type PushNotificationPayload 
 } from '@/services/messageBirdPushService';
 import { useToast } from '@/hooks/use-toast';
@@ -20,9 +21,10 @@ import { useToast } from '@/hooks/use-toast';
 const PushNotificationManager = () => {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [sdkStatus, setSdkStatus] = useState<{ loaded: boolean; error?: string }>({ loaded: false });
   const [testNotification, setTestNotification] = useState({
-    title: 'تأكيد حضور جديد',
-    body: 'تم تأكيد حضور أحمد محمد للزفاف',
+    title: 'تأكيد حضور جديد ✅',
+    body: 'تم تأكيد حضور أحمد محمد للزفاف - الوقت: الآن',
     icon: '/logo2.png'
   });
   const [loading, setLoading] = useState(false);
@@ -32,9 +34,25 @@ const PushNotificationManager = () => {
 
   useEffect(() => {
     checkPushSupport();
+    initializeSDK();
     loadSubscriptions();
     testConnection();
   }, []);
+
+  const initializeSDK = async () => {
+    try {
+      console.log('🔄 Initializing MessageBird SDK...');
+      await initializeMessageBirdSDK();
+      setSdkStatus({ loaded: true });
+      console.log('✅ MessageBird SDK initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize MessageBird SDK:', error);
+      setSdkStatus({ 
+        loaded: false, 
+        error: error instanceof Error ? error.message : 'SDK initialization failed' 
+      });
+    }
+  };
 
   const checkPushSupport = () => {
     const supported = 'serviceWorker' in navigator && 'PushManager' in window;
@@ -71,7 +89,7 @@ const PushNotificationManager = () => {
 
     try {
       const data = await getPushSubscriptions(apiKey);
-      setSubscriptions(data.items || []);
+      setSubscriptions(data.items || data.subscriptions || []);
     } catch (error) {
       console.error('Failed to load push subscriptions:', error);
       // Don't show error toast here as it might be expected during initial setup
@@ -108,8 +126,8 @@ const PushNotificationManager = () => {
         setIsSubscribed(true);
         await loadSubscriptions();
         toast({
-          title: "تم بنجاح",
-          description: "تم تفعيل الإشعارات الفورية بنجاح"
+          title: "تم بنجاح ✅",
+          description: "تم تفعيل الإشعارات الفورية بنجاح! ستصلك إشعارات فورية عند تأكيد الحضور أو الإعتذار."
         });
       } else {
         toast({
@@ -157,8 +175,8 @@ const PushNotificationManager = () => {
       
       if (result.success) {
         toast({
-          title: "تم الإرسال",
-          description: "تم إرسال الإشعار التجريبي بنجاح"
+          title: "تم الإرسال ✅",
+          description: "تم إرسال الإشعار التجريبي بنجاح! تحقق من شاشة جهازك."
         });
       } else {
         toast({
@@ -182,24 +200,43 @@ const PushNotificationManager = () => {
 
   return (
     <div className="space-y-6">
-      {/* MessageBird Configuration Status */}
+      {/* MessageBird SDK Status */}
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
           <CardTitle className="text-white text-center flex items-center justify-center gap-2" dir="rtl">
-            <Settings className="w-5 h-5" />
-            حالة إعداد MessageBird Push
+            <Zap className="w-5 h-5" />
+            حالة MessageBird SDK
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* SDK Status */}
+          <div className="p-3 rounded-lg border" style={{
+            backgroundColor: sdkStatus.loaded ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            borderColor: sdkStatus.loaded ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+          }}>
+            <div className="flex items-center gap-2">
+              {sdkStatus.loaded ? (
+                <CheckCircle className="w-4 h-4 text-green-400" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+              )}
+              <p className={`font-semibold ${
+                sdkStatus.loaded ? 'text-green-400' : 'text-red-400'
+              }`} dir="rtl">
+                {sdkStatus.loaded ? 'MessageBird SDK محمل بنجاح ✅' : `خطأ في تحميل SDK: ${sdkStatus.error || 'غير معروف'}`}
+              </p>
+            </div>
+          </div>
+
           {/* Configuration Display */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-              <h4 className="text-white font-semibold text-sm mb-2" dir="rtl">معرف التطبيق</h4>
-              <p className="text-white/80 text-xs font-mono break-all">{config.applicationId}</p>
+              <h4 className="text-white font-semibold text-sm mb-2" dir="rtl">Workspace ID</h4>
+              <p className="text-white/80 text-xs font-mono break-all">{config.workspaceId}</p>
             </div>
             <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-              <h4 className="text-white font-semibold text-sm mb-2" dir="rtl">مُصدر الهوية</h4>
-              <p className="text-white/80 text-xs font-mono break-all">{config.issuer.substring(0, 50)}...</p>
+              <h4 className="text-white font-semibold text-sm mb-2" dir="rtl">Application ID</h4>
+              <p className="text-white/80 text-xs font-mono break-all">{config.applicationId}</p>
             </div>
           </div>
 
@@ -248,7 +285,7 @@ const PushNotificationManager = () => {
             <h4 className="text-blue-400 font-semibold mb-2" dir="rtl">ما هي الإشعارات الفورية؟</h4>
             <p className="text-blue-300 text-sm" dir="rtl">
               الإشعارات الفورية تظهر على شاشة جهازك فوراً عند حدوث أي تحديث (تأكيد حضور، إعتذار، إلخ) 
-              حتى لو كان التطبيق مغلق. تعمل على الهواتف والحاسوب.
+              حتى لو كان التطبيق مغلق. تعمل على الهواتف والحاسوب عبر MessageBird SDK.
             </p>
           </div>
 
@@ -294,7 +331,7 @@ const PushNotificationManager = () => {
           {!isSubscribed && (
             <Button
               onClick={handleSubscribeToPush}
-              disabled={loading || !('serviceWorker' in navigator) || !connectionStatus?.success}
+              disabled={loading || !('serviceWorker' in navigator) || !sdkStatus.loaded || !connectionStatus?.success}
               className="w-full bg-green-500/20 hover:bg-green-500/30 text-white border border-green-400/30"
             >
               <Smartphone className="w-4 h-4 ml-2" />
@@ -304,7 +341,7 @@ const PushNotificationManager = () => {
 
           {/* MessageBird Integration Info */}
           <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-400/30">
-            <h4 className="text-purple-400 font-semibold mb-2" dir="rtl">مميزات MessageBird Push:</h4>
+            <h4 className="text-purple-400 font-semibold mb-2" dir="rtl">مميزات MessageBird Push SDK:</h4>
             <ul className="text-purple-300 text-sm space-y-1" dir="rtl">
               <li>• إشعارات فورية على جميع الأجهزة</li>
               <li>• تعمل حتى لو كان التطبيق مغلق</li>
@@ -312,6 +349,7 @@ const PushNotificationManager = () => {
               <li>• تقارير توصيل مفصلة</li>
               <li>• دعم للإشعارات المجمعة</li>
               <li>• أمان عالي مع تشفير end-to-end</li>
+              <li>• تكامل مباشر مع MessageBird SDK</li>
             </ul>
           </div>
         </CardContent>
@@ -353,7 +391,7 @@ const PushNotificationManager = () => {
 
           <Button
             onClick={handleSendTestNotification}
-            disabled={loading || !isSubscribed || subscriptions.length === 0 || !connectionStatus?.success}
+            disabled={loading || !isSubscribed || subscriptions.length === 0 || !connectionStatus?.success || !sdkStatus.loaded}
             className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
           >
             <Send className="w-4 h-4 ml-2" />
@@ -390,11 +428,11 @@ const PushNotificationManager = () => {
                         </div>
                       </TableCell>
                       <TableCell className="text-white text-right">
-                        {subscription.created_at ? new Date(subscription.created_at).toLocaleDateString('ar-SA') : 'غير محدد'}
+                        {subscription.created_at ? new Date(subscription.created_at).toLocaleDateString('ar-SA') : 'الآن'}
                       </TableCell>
                       <TableCell className="text-right">
                         <Badge className="bg-green-500/20 text-green-400 border-green-400/30">
-                          نشط
+                          نشط ✅
                         </Badge>
                       </TableCell>
                     </TableRow>
