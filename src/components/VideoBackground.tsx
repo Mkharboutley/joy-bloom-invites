@@ -7,97 +7,47 @@ interface VideoBackgroundProps {
 
 const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isPlayingRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Prevent multiple instances from playing
-    if (isPlayingRef.current) return;
-
-    // Stop all other video elements on the page to prevent audio overlap
-    const allVideos = document.querySelectorAll('video');
-    allVideos.forEach(v => {
-      if (v !== video) {
-        v.pause();
-        v.muted = true;
-        v.currentTime = 0;
-      }
-    });
-
-    // Cleanup function to stop any existing playback
+    // Simple cleanup function
     const cleanup = () => {
-      if (video) {
-        video.pause();
-        video.currentTime = 0;
-        video.muted = true;
-        isPlayingRef.current = false;
-      }
+      video.pause();
+      video.currentTime = 0;
     };
 
-    // Stop any existing playback first
-    cleanup();
-
     // Set up video properties
-    video.muted = true; // Always start muted to avoid autoplay issues
+    video.muted = true;
     video.loop = true;
     video.playsInline = true;
     video.preload = 'auto';
-    video.volume = 0.3; // Set lower volume when unmuted
     
-    // Attempt to play the video
+    // Simple play function
     const playVideo = async () => {
-      if (isPlayingRef.current) return;
-      
       try {
         await video.play();
-        isPlayingRef.current = true;
         if (onLoad) onLoad();
-        
-        // Try to unmute after successful play (with user interaction)
-        setTimeout(() => {
-          if (video && !video.paused && !isPlayingRef.current) {
-            video.muted = false;
-          }
-        }, 1000);
       } catch (error) {
         console.log('Video autoplay failed:', error);
-        isPlayingRef.current = false;
         if (onError) onError();
       }
     };
 
-    // Start playing when video is ready
+    // Start playing when ready
     if (video.readyState >= 3) {
       playVideo();
     } else {
       video.addEventListener('canplay', playVideo, { once: true });
     }
 
-    // Add event listeners for better control
-    const handlePause = () => {
-      isPlayingRef.current = false;
-    };
-
-    const handlePlay = () => {
-      isPlayingRef.current = true;
-    };
-
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('play', handlePlay);
-
     // Cleanup on unmount
-    return () => {
-      cleanup();
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('play', handlePlay);
-    };
+    return cleanup;
   }, [onError, onLoad]);
 
   const handleError = (e: any) => {
     console.log('Video background failed to load:', e);
-    isPlayingRef.current = false;
     if (onError) onError();
   };
 
@@ -113,12 +63,11 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
         style={{
           backgroundImage: 'url(/admin-back.jpg)',
-          opacity: 0.4,
-          transition: 'opacity 2s ease-out'
+          opacity: 0.4
         }}
       />
 
-      {/* Background video - single instance with audio control */}
+      {/* Background video */}
       <video
         ref={videoRef}
         muted
@@ -129,7 +78,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         onError={handleError}
         onLoadedData={handleLoadedData}
         style={{
-          pointerEvents: 'none' // Prevent interaction issues
+          pointerEvents: 'none'
         }}
       >
         <source src="/G22.mp4" type="video/mp4" />

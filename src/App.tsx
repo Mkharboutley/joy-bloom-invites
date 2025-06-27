@@ -8,26 +8,15 @@ import Index from "./pages/Index";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import QRScanResult from "./pages/QRScanResult";
 import AdminDashboard from "./pages/AdminDashboard";
+import WeddingInvitation from "./pages/WeddingInvitation";
 import NotFound from "./pages/NotFound";
-import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
-
-  // Global video cleanup on route changes
-  useEffect(() => {
-    const allVideos = document.querySelectorAll('video');
-    allVideos.forEach((video, index) => {
-      if (index > 0) { // Keep only the first video
-        video.pause();
-        video.muted = true;
-        video.currentTime = 0;
-      }
-    });
-  }, [location.pathname]);
+  const isWeddingPage = location.pathname === '/wedding';
 
   const handleVideoError = () => {
     console.log('Video failed to load from /G22.mp4');
@@ -39,15 +28,12 @@ const AppContent = () => {
 
   return (
     <>
-      {!isAdminPage && (
-        <VideoBackground 
-          key="main-video-bg" // Add key to prevent re-mounting
-          onError={handleVideoError} 
-          onLoad={handleVideoLoad} 
-        />
+      {!isAdminPage && !isWeddingPage && (
+        <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
       )}
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/wedding" element={<WeddingInvitation />} />
         <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
         <Route path="/scan/:invitationId" element={<QRScanResult />} />
         <Route path="/admin" element={<AdminDashboard />} />
