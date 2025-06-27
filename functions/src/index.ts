@@ -82,7 +82,7 @@ export const sendBulkSMS = functions.https.onCall(async (data, context) => {
         console.error(`Error sending SMS to ${smsData.to}:`, error);
         results.push({
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
           to: smsData.to
         });
       }
