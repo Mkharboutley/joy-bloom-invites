@@ -1,6 +1,5 @@
 import { db } from '@/lib/firebase';
 import { collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc, query, where } from 'firebase/firestore';
-import { triggerGuestConfirmationNotification, triggerGuestApologyNotification } from './simpleNotificationService';
 
 export interface Guest {
   id?: string;
@@ -22,10 +21,6 @@ export const confirmAttendance = async (fullName: string): Promise<string> => {
     };
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
-    
-    // Trigger simple notification system
-    await triggerGuestConfirmationNotification(fullName, docRef.id);
-    
     return docRef.id;
   } catch (error) {
     console.error('Error confirming attendance:', error);
@@ -39,14 +34,10 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
     const guestDoc = querySnapshot.docs.find(doc => doc.data().invitationId === invitationId);
     
     if (guestDoc) {
-      const guestData = guestDoc.data();
       await updateDoc(doc(db, 'guests', guestDoc.id), {
         status: 'apologized',
         apologyTimestamp: serverTimestamp()
       });
-      
-      // Trigger simple notification system
-      await triggerGuestApologyNotification(guestData.fullName, guestDoc.id);
     } else {
       throw new Error('Guest not found');
     }
