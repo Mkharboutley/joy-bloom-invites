@@ -5,9 +5,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageSquare, Settings, Eye, EyeOff, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { Send, MessageSquare, Settings, Eye, EyeOff, AlertTriangle, CheckCircle, RefreshCw, Globe } from 'lucide-react';
 import { getAdminContacts, type AdminContact } from '@/services/supabaseService';
-import { sendSMS, sendBulkSMS, testMessageBirdConnection } from '@/services/messageBirdService';
+import { sendSMS, sendBulkSMS, testMessageBirdConnection, checkUAESupport } from '@/services/messageBirdService';
 import { useToast } from '@/hooks/use-toast';
 
 const SMSNotificationManager = () => {
@@ -17,6 +17,12 @@ const SMSNotificationManager = () => {
   const [testMessage, setTestMessage] = useState('تم تأكيد حضور جديد: أحمد محمد');
   const [loading, setLoading] = useState(false);
   const [testingApiKey, setTestingApiKey] = useState(false);
+  const [checkingUAE, setCheckingUAE] = useState(false);
+  const [uaeSupport, setUaeSupport] = useState<{
+    supported: boolean;
+    details: string;
+    recommendations: string[];
+  } | null>(null);
   const [testResults, setTestResults] = useState<Array<{phoneNumber: string; success: boolean; error?: string}>>([]);
   const { toast } = useToast();
 
@@ -113,6 +119,45 @@ const SMSNotificationManager = () => {
     }
   };
 
+  const checkUAEDelivery = async () => {
+    if (!apiKey.trim()) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إدخال مفتاح API أولاً",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCheckingUAE(true);
+    try {
+      console.log('🇦🇪 Checking UAE SMS support...');
+      const uaeResult = await checkUAESupport(apiKey.trim());
+      setUaeSupport(uaeResult);
+      
+      if (uaeResult.supported) {
+        toast({
+          title: "الإمارات مدعومة ✅",
+          description: "MessageBird يدعم إرسال الرسائل النصية إلى الإمارات العربية المتحدة",
+        });
+      } else {
+        toast({
+          title: "مشكلة في دعم الإمارات",
+          description: uaeResult.details,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "خطأ في فحص الإمارات",
+        description: "فشل في فحص دعم الإمارات",
+        variant: "destructive"
+      });
+    } finally {
+      setCheckingUAE(false);
+    }
+  };
+
   const validatePhoneNumbers = () => {
     const invalidContacts = adminContacts.filter(contact => {
       const phone = contact.phone_number?.replace(/\D/g, '') || '';
@@ -189,13 +234,26 @@ const SMSNotificationManager = () => {
 
       const successCount = results.filter(r => r.success).length;
       const failCount = results.length - successCount;
+      
+      // Count UAE-specific results
+      const uaeResults = results.filter(r => {
+        const clean = r.phoneNumber.replace(/\D/g, '');
+        return clean.startsWith('971') || (clean.length === 9 && clean.startsWith('5'));
+      });
+      const uaeSuccessCount = uaeResults.filter(r => r.success).length;
 
       console.log(`📊 Test results: ${successCount} success, ${failCount} failed`);
+      console.log(`🇦🇪 UAE results: ${uaeSuccessCount}/${uaeResults.length} successful`);
 
       if (successCount > 0) {
+        let description = `تم إرسال ${successCount} رسالة بنجاح${failCount > 0 ? ` و فشل ${failCount}` : ''}`;
+        if (uaeResults.length > 0) {
+          description += `\n🇦🇪 الإمارات: ${uaeSuccessCount}/${uaeResults.length} نجح`;
+        }
+        
         toast({
           title: "تم الإرسال",
-          description: `تم إرسال ${successCount} رسالة بنجاح${failCount > 0 ? ` و فشل ${failCount}` : ''}`
+          description: description
         });
       } else {
         // Check if all failures are due to API key issues
@@ -295,6 +353,48 @@ const SMSNotificationManager = () => {
             )}
           </div>
 
+          {/* UAE Support Check */}
+          <div className="space-y-2">
+            <Button
+              onClick={checkUAEDelivery}
+              disabled={checkingUAE || !apiKey.trim()}
+              className="w-full bg-orange-500/20 hover:bg-orange-500/30 text-white border border-orange-400/30"
+            >
+              <Globe className={`w-4 h-4 ml-2 ${checkingUAE ? 'animate-spin' : ''}`} />
+              {checkingUAE ? 'فحص دعم الإمارات...' : '🇦🇪 فحص دعم الإمارات العربية المتحدة'}
+            </Button>
+            
+            {uaeSupport && (
+              <div className={`p-3 rounded-lg border ${uaeSupport.supported ? 'bg-green-500/10 border-green-400/30' : 'bg-red-500/10 border-red-400/30'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {uaeSupport.supported ? (
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-400" />
+                  )}
+                  <p className={`text-sm font-semibold ${uaeSupport.supported ? 'text-green-400' : 'text-red-400'}`} dir="rtl">
+                    {uaeSupport.supported ? 'الإمارات مدعومة ✅' : 'مشكلة في دعم الإمارات ❌'}
+                  </p>
+                </div>
+                <p className={`text-xs mb-2 ${uaeSupport.supported ? 'text-green-300' : 'text-red-300'}`} dir="rtl">
+                  {uaeSupport.details}
+                </p>
+                {uaeSupport.recommendations.length > 0 && (
+                  <div>
+                    <p className={`text-xs font-semibold mb-1 ${uaeSupport.supported ? 'text-green-400' : 'text-red-400'}`} dir="rtl">
+                      توصيات:
+                    </p>
+                    <ul className={`text-xs space-y-1 ${uaeSupport.supported ? 'text-green-300' : 'text-red-300'}`} dir="rtl">
+                      {uaeSupport.recommendations.map((rec, index) => (
+                        <li key={index}>• {rec}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-400/30">
             <p className="text-blue-400 text-sm" dir="rtl">
               <strong>كيفية الحصول على مفتاح API:</strong>
@@ -316,6 +416,25 @@ const SMSNotificationManager = () => {
               4. انسخ المفتاح والصقه هنا
               <br />
               5. استخدم زر "اختبار" للتحقق من صحة المفتاح
+              <br />
+              6. استخدم زر "فحص دعم الإمارات" للتأكد من إمكانية الإرسال للإمارات
+            </p>
+          </div>
+
+          {/* UAE-specific information */}
+          <div className="p-3 bg-green-500/10 rounded-lg border border-green-400/30">
+            <p className="text-green-400 text-sm" dir="rtl">
+              <strong>🇦🇪 معلومات خاصة بالإمارات العربية المتحدة:</strong>
+              <br />
+              • MessageBird يدعم الإرسال إلى الإمارات (اتصالات، دو، فيرجن موبايل)
+              <br />
+              • استخدم التنسيق: 971xxxxxxxxx أو xxxxxxxxx للأرقام المحلية
+              <br />
+              • قد تحتاج إلى Sender ID مسجل لمعدلات تسليم أفضل
+              <br />
+              • النص العربي مدعوم مع ترميز Unicode
+              <br />
+              • اختبر مع مجموعة صغيرة أولاً للتأكد من التسليم
             </p>
           </div>
 
@@ -331,15 +450,8 @@ const SMSNotificationManager = () => {
               • تأكد من تفعيل صلاحية "Messages" في إعدادات المفتاح
               <br />
               • جرب إنشاء مفتاح API جديد إذا استمر الخطأ
-            </p>
-          </div>
-
-          {/* Quick Setup Helper */}
-          <div className="p-3 bg-green-500/10 rounded-lg border border-green-400/30">
-            <p className="text-green-400 text-sm" dir="rtl">
-              <strong>إعداد سريع:</strong>
               <br />
-              إذا كان لديك مفتاح API صحيح، الصقه في الحقل أعلاه واضغط "حفظ" ثم "اختبار" للتأكد من عمله.
+              • تأكد من أن حسابك يدعم الإرسال الدولي للإمارات
             </p>
           </div>
         </CardContent>
@@ -381,25 +493,41 @@ const SMSNotificationManager = () => {
             <div className="space-y-2">
               <h4 className="text-white font-semibold" dir="rtl">نتائج الاختبار:</h4>
               <div className="space-y-1 max-h-40 overflow-y-auto">
-                {testResults.map((result, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-white/5 rounded text-sm">
-                    <span className="text-white">{result.phoneNumber}</span>
-                    <div className="flex items-center gap-2">
-                      <Badge className={result.success ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-red-500/20 text-red-400 border-red-400/30"}>
-                        {result.success ? 'نجح ✅' : 'فشل ❌'}
-                      </Badge>
-                      {!result.success && result.error && (
-                        <span className="text-red-400 text-xs max-w-40 truncate" title={result.error}>
-                          {result.error}
-                        </span>
-                      )}
+                {testResults.map((result, index) => {
+                  const isUAE = result.phoneNumber.replace(/\D/g, '').startsWith('971') || 
+                               (result.phoneNumber.replace(/\D/g, '').length === 9 && result.phoneNumber.replace(/\D/g, '').startsWith('5'));
+                  
+                  return (
+                    <div key={index} className="flex justify-between items-center p-2 bg-white/5 rounded text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white">{result.phoneNumber}</span>
+                        {isUAE && <span className="text-xs">🇦🇪</span>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={result.success ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-red-500/20 text-red-400 border-red-400/30"}>
+                          {result.success ? 'نجح ✅' : 'فشل ❌'}
+                        </Badge>
+                        {!result.success && result.error && (
+                          <span className="text-red-400 text-xs max-w-40 truncate" title={result.error}>
+                            {result.error}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="text-center text-white/80 text-sm">
                 نجح: {testResults.filter(r => r.success).length} | 
                 فشل: {testResults.filter(r => !r.success).length}
+                {testResults.some(r => r.phoneNumber.replace(/\D/g, '').startsWith('971')) && (
+                  <span className="ml-2">
+                    | 🇦🇪 الإمارات: {testResults.filter(r => {
+                      const isUAE = r.phoneNumber.replace(/\D/g, '').startsWith('971');
+                      return r.success && isUAE;
+                    }).length}/{testResults.filter(r => r.phoneNumber.replace(/\D/g, '').startsWith('971')).length}
+                  </span>
+                )}
               </div>
             </div>
           )}
@@ -473,6 +601,7 @@ const SMSNotificationManager = () => {
               <p>🇦🇪 <strong>الإمارات:</strong> 971509011275 أو 509011275</p>
               <p>🇸🇦 <strong>السعودية:</strong> 966501234567 أو 501234567</p>
               <p>⚠️ تأكد من إدخال الرقم بدون مسافات أو رموز (+، 00)</p>
+              <p>📱 MessageBird يدعم الإمارات رسمياً مع جميع الشبكات الرئيسية</p>
             </div>
           </div>
         </CardContent>

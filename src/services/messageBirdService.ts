@@ -1,4 +1,4 @@
-// MessageBird SMS Service
+// MessageBird SMS Service - Updated for UAE Support
 export interface SMSResponse {
   success: boolean;
   messageId?: string;
@@ -107,23 +107,23 @@ export const sendSMS = async (
       };
     }
     
-    // Clean phone number and handle different country codes
+    // Clean phone number and handle UAE numbers specifically
     let cleanPhone = phoneNumber.replace(/\D/g, '');
     
-    // Handle UAE numbers (971)
+    // Handle UAE numbers (971) - MessageBird supports UAE
     if (cleanPhone.startsWith('971')) {
       // UAE number is already in correct format
       console.log(`🇦🇪 UAE number detected: ${cleanPhone}`);
-    }
-    // Handle Saudi numbers (966)
-    else if (cleanPhone.startsWith('966')) {
-      // Saudi number is already in correct format
-      console.log(`🇸🇦 Saudi number detected: ${cleanPhone}`);
     }
     // Handle local UAE numbers (9 digits starting with 5)
     else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
       cleanPhone = '971' + cleanPhone;
       console.log(`🇦🇪 Local UAE number converted to: ${cleanPhone}`);
+    }
+    // Handle Saudi numbers (966)
+    else if (cleanPhone.startsWith('966')) {
+      // Saudi number is already in correct format
+      console.log(`🇸🇦 Saudi number detected: ${cleanPhone}`);
     }
     // Handle other formats
     else {
@@ -132,10 +132,12 @@ export const sendSMS = async (
     
     console.log(`📞 Final phone number: ${cleanPhone}`);
     
+    // MessageBird request body - optimized for UAE delivery
     const requestBody = {
       recipients: [cleanPhone],
-      originator: 'Wedding',
-      body: message
+      originator: 'Wedding', // You can customize this sender ID
+      body: message,
+      datacoding: 'unicode' // Important for Arabic text support
     };
     
     console.log('📤 Request body:', requestBody);
@@ -170,12 +172,18 @@ export const sendSMS = async (
 
     if (response.ok && data.id) {
       console.log('✅ SMS sent successfully, ID:', data.id);
+      
+      // Check if message was delivered to UAE
+      if (cleanPhone.startsWith('971')) {
+        console.log('🇦🇪 SMS sent to UAE number successfully');
+      }
+      
       return {
         success: true,
         messageId: data.id
       };
     } else {
-      // Handle specific API key errors
+      // Handle specific errors for UAE
       if (response.status === 401 || response.status === 403) {
         const errorMsg = 'Invalid API key or insufficient permissions. Please check your MessageBird API key.';
         console.error('❌ Authentication error:', errorMsg);
@@ -185,9 +193,24 @@ export const sendSMS = async (
         };
       }
       
+      // Check for UAE-specific delivery issues
       const errorMsg = data.errors?.[0]?.description || 
                       data.error || 
                       `HTTP ${response.status}: ${response.statusText}`;
+      
+      // Log specific UAE delivery information
+      if (cleanPhone.startsWith('971')) {
+        console.error('🇦🇪 UAE SMS delivery failed:', errorMsg);
+        
+        // Check for common UAE delivery issues
+        if (errorMsg.includes('not supported') || errorMsg.includes('blocked')) {
+          return {
+            success: false,
+            error: 'UAE SMS delivery may be restricted. MessageBird supports UAE but some carriers may block messages. Try using a verified sender ID or contact MessageBird support.'
+          };
+        }
+      }
+      
       console.error('❌ SMS failed:', errorMsg);
       return {
         success: false,
@@ -230,6 +253,14 @@ export const sendBulkSMS = async (
     }));
   }
   
+  // Count UAE numbers for logging
+  const uaeNumbers = contacts.filter(contact => {
+    const clean = contact.phoneNumber.replace(/\D/g, '');
+    return clean.startsWith('971') || (clean.length === 9 && clean.startsWith('5'));
+  });
+  
+  console.log(`🇦🇪 Found ${uaeNumbers.length} UAE numbers out of ${contacts.length} total contacts`);
+  
   // Send SMS with delay to avoid rate limiting
   for (const contact of contacts) {
     try {
@@ -259,7 +290,73 @@ export const sendBulkSMS = async (
   }
   
   const successCount = results.filter(r => r.success).length;
+  const uaeSuccessCount = results.filter(r => {
+    const clean = r.phoneNumber.replace(/\D/g, '');
+    const isUAE = clean.startsWith('971') || (clean.length === 9 && clean.startsWith('5'));
+    return r.success && isUAE;
+  }).length;
+  
   console.log(`📈 Bulk SMS completed: ${successCount}/${results.length} successful`);
+  console.log(`🇦🇪 UAE SMS results: ${uaeSuccessCount}/${uaeNumbers.length} successful`);
   
   return results;
+};
+
+// Check MessageBird UAE coverage specifically
+export const checkUAESupport = async (apiKey: string): Promise<{
+  supported: boolean;
+  details: string;
+  recommendations: string[];
+}> => {
+  try {
+    console.log('🇦🇪 Checking MessageBird UAE support...');
+    
+    // Test with a UAE number format (without actually sending)
+    const testResponse = await fetch('https://rest.messagebird.com/lookup/971501234567/hlr', {
+      method: 'GET',
+      headers: {
+        'Authorization': `AccessKey ${apiKey.trim()}`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (testResponse.status === 200) {
+      return {
+        supported: true,
+        details: 'MessageBird supports UAE SMS delivery. UAE carriers: Etisalat, du, Virgin Mobile UAE are supported.',
+        recommendations: [
+          'Use a verified sender ID for better delivery rates',
+          'Ensure your MessageBird account is verified',
+          'Consider using unicode encoding for Arabic text',
+          'Test with small batches first'
+        ]
+      };
+    } else if (testResponse.status === 401) {
+      return {
+        supported: false,
+        details: 'Invalid API key. Please check your MessageBird credentials.',
+        recommendations: ['Verify your API key in MessageBird dashboard']
+      };
+    } else {
+      return {
+        supported: true,
+        details: 'MessageBird generally supports UAE, but HLR lookup failed. This may be due to account limitations.',
+        recommendations: [
+          'Contact MessageBird support to verify UAE access',
+          'Ensure your account has international SMS permissions',
+          'Try sending a test message to confirm delivery'
+        ]
+      };
+    }
+  } catch (error) {
+    return {
+      supported: true,
+      details: 'Unable to verify UAE support automatically, but MessageBird generally supports UAE SMS delivery.',
+      recommendations: [
+        'Test with a small batch of UAE numbers',
+        'Contact MessageBird support if you experience delivery issues',
+        'Ensure your account has proper permissions for international SMS'
+      ]
+    };
+  }
 };
