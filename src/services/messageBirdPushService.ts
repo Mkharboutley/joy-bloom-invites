@@ -366,9 +366,9 @@ export const setupBrowserPushNotifications = async (): Promise<PushSubscription 
       return null;
     }
 
-    // Register service worker
-    const registration = await navigator.serviceWorker.register('/service-worker.js');
-    console.log('✅ Service worker registered');
+    // Wait for service worker to be ready (MessageBird SDK will handle registration)
+    const registration = await navigator.serviceWorker.ready;
+    console.log('✅ Service worker ready');
 
     // Try to get VAPID key from MessageBird SDK
     let vapidPublicKey = 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NqIUHI80NqIUHI80NqIUHI80NqIUHI80NqI'; // Default fallback
