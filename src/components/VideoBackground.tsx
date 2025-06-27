@@ -105,7 +105,7 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       >
         <source src="/G22.mp4" type="video/mp4" />
         Your browser does not support the video tag.
-      </source>
+      </video>
 
       {/* Overlay for text readability */}
       <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
