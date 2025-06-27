@@ -8,7 +8,7 @@ export interface SMSResponse {
 }
 
 // Helper function to get the correct API base URL
-const getApiBaseUrl = (): string => {
+export const getApiBaseUrl = (): string => {
   // In development, use the Vite proxy to avoid CORS issues
   if (import.meta.env.DEV) {
     return '/messagebird-api';

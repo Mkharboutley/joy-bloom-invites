@@ -8,6 +8,7 @@ export interface NotificationRule {
   enabled: boolean;
   recipients: string[];
   message_template: string;
+  notification_types: ('sms' | 'push' | 'email')[];
   conditions?: {
     phone_prefix?: string; // e.g., "971" for UAE
     time_delay?: number; // minutes
@@ -28,6 +29,7 @@ export const getNotificationRules = async (): Promise<NotificationRule[]> => {
       enabled: true,
       recipients: [], // Will be populated from admin_contacts
       message_template: 'تأكيد حضور جديد: {guest_name} - الوقت: {timestamp}',
+      notification_types: ['sms', 'push'],
       created_at: new Date().toISOString()
     },
     {
@@ -37,6 +39,7 @@ export const getNotificationRules = async (): Promise<NotificationRule[]> => {
       enabled: true,
       recipients: [],
       message_template: 'إعتذار عن الحضور: {guest_name} - الوقت: {timestamp}',
+      notification_types: ['sms', 'push'],
       created_at: new Date().toISOString()
     },
     {
@@ -46,6 +49,7 @@ export const getNotificationRules = async (): Promise<NotificationRule[]> => {
       enabled: true,
       recipients: [],
       message_template: 'فشل في توصيل رسالة إلى {phone_number} - السبب: {reason}',
+      notification_types: ['push'], // Push is better for technical alerts
       conditions: {
         phone_prefix: '971',
         min_failures: 1
@@ -59,6 +63,7 @@ export const getNotificationRules = async (): Promise<NotificationRule[]> => {
       enabled: false,
       recipients: [],
       message_template: 'تقرير يومي: {confirmed_count} تأكيد، {apology_count} إعتذار، {failed_sms_count} رسالة فاشلة',
+      notification_types: ['push'],
       created_at: new Date().toISOString()
     }
   ];
@@ -108,26 +113,72 @@ const executeNotificationRule = async (rule: NotificationRule, data: Record<stri
     // Get recipients (admin contacts)
     const { getAdminContacts } = await import('./supabaseService');
     const adminContacts = await getAdminContacts();
-    const smsContacts = adminContacts.filter(contact => 
-      contact.notification_type === 'sms' && contact.phone_number
-    );
     
-    // Send notifications
     const apiKey = localStorage.getItem('messagebird_api_key');
-    if (apiKey && smsContacts.length > 0) {
-      const { sendBulkSMS } = await import('./messageBirdService');
+    if (!apiKey) {
+      console.warn('⚠️ No MessageBird API key found');
+      return;
+    }
+    
+    // Send SMS notifications
+    if (rule.notification_types.includes('sms')) {
+      const smsContacts = adminContacts.filter(contact => 
+        contact.notification_type === 'sms' && contact.phone_number
+      );
       
-      const contacts = smsContacts.map(contact => ({
-        phoneNumber: contact.phone_number!,
-        message: message
-      }));
+      if (smsContacts.length > 0) {
+        const { sendBulkSMS } = await import('./messageBirdService');
+        
+        const contacts = smsContacts.map(contact => ({
+          phoneNumber: contact.phone_number!,
+          message: message
+        }));
+        
+        console.log(`📤 Sending SMS via rule "${rule.name}" to ${contacts.length} recipients`);
+        await sendBulkSMS(contacts, apiKey);
+      }
+    }
+    
+    // Send Push notifications
+    if (rule.notification_types.includes('push')) {
+      const { sendPushNotification, getPushSubscriptions } = await import('./messageBirdPushService');
       
-      console.log(`📤 Sending notification via rule "${rule.name}" to ${contacts.length} recipients`);
-      await sendBulkSMS(contacts, apiKey);
+      try {
+        const subscriptionsData = await getPushSubscriptions(apiKey);
+        const subscriptionIds = (subscriptionsData.items || []).map((sub: any) => sub.id);
+        
+        if (subscriptionIds.length > 0) {
+          console.log(`📱 Sending push notification via rule "${rule.name}" to ${subscriptionIds.length} devices`);
+          
+          await sendPushNotification(apiKey, subscriptionIds, {
+            title: getNotificationTitle(rule.trigger),
+            body: message,
+            icon: '/logo2.png',
+            data: {
+              trigger: rule.trigger,
+              guest_name: data.guest_name,
+              timestamp: data.timestamp
+            }
+          });
+        }
+      } catch (pushError) {
+        console.error('❌ Failed to send push notification:', pushError);
+      }
     }
     
   } catch (error) {
     console.error(`❌ Failed to execute notification rule ${rule.name}:`, error);
+  }
+};
+
+// Get notification title based on trigger
+const getNotificationTitle = (trigger: string): string => {
+  switch (trigger) {
+    case 'guest_confirmation': return '✅ تأكيد حضور جديد';
+    case 'guest_apology': return '❌ إعتذار عن الحضور';
+    case 'failed_delivery': return '⚠️ فشل في التوصيل';
+    case 'daily_summary': return '📊 التقرير اليومي';
+    default: return '🔔 إشعار جديد';
   }
 };
 
