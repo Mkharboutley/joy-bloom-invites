@@ -1,12 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, Check, Users, MessageSquare, Image, Smartphone } from 'lucide-react';
+import { Send, Check, Users, MessageSquare, Image } from 'lucide-react';
 import { 
   getWhatsAppContacts, 
   getInvitationTemplates, 
@@ -23,7 +21,6 @@ const SendInvitations = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
-  const [sendingMethod, setSendingMethod] = useState<'whatsapp' | 'sms'>('whatsapp');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -107,18 +104,6 @@ const SendInvitations = () => {
     return whatsappUrl;
   };
 
-  const generateSMSLink = (phoneNumber: string, message: string, template: InvitationTemplate) => {
-    const cleanPhone = phoneNumber.replace(/\D/g, '');
-    let smsMessage = message;
-    
-    // Include media URL in SMS if available
-    if (template.media_url) {
-      smsMessage += `\n\n📎 ${getMediaTypeText(template.media_type)}: ${template.media_url}`;
-    }
-    
-    return `sms:${cleanPhone}?body=${encodeURIComponent(smsMessage)}`;
-  };
-
   const getMediaTypeText = (mediaType?: string) => {
     switch (mediaType) {
       case 'image': return 'صورة';
@@ -156,12 +141,10 @@ const SendInvitations = () => {
     setLoading(true);
     
     try {
-      // Open WhatsApp or SMS links for all selected contacts
+      // Open WhatsApp links for all selected contacts
       for (const contact of selectedContacts) {
         const message = generateWhatsAppMessage(template, contact.name);
-        const url = sendingMethod === 'whatsapp' 
-          ? generateWhatsAppLink(contact.phone_number, message, template)
-          : generateSMSLink(contact.phone_number, message, template);
+        const url = generateWhatsAppLink(contact.phone_number, message, template);
         
         // Open in new tab with small delay to avoid blocking
         setTimeout(() => {
@@ -176,10 +159,9 @@ const SendInvitations = () => {
       await loadData();
       setSelectAll(false);
       
-      const methodText = sendingMethod === 'whatsapp' ? 'WhatsApp' : 'الرسائل النصية';
       toast({
         title: "تم بنجاح",
-        description: `تم فتح ${methodText} لإرسال ${selectedContacts.length} دعوة${template.media_url ? ' مع وسائط متعددة' : ''}`
+        description: `تم فتح WhatsApp لإرسال ${selectedContacts.length} دعوة${template.media_url ? ' مع وسائط متعددة' : ''}`
       });
     } catch (error) {
       toast({
@@ -202,32 +184,10 @@ const SendInvitations = () => {
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
           <CardTitle className="text-white text-center" dir="rtl">
-            إرسال الدعوات المتعددة الوسائط
+            إرسال الدعوات عبر WhatsApp
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Method Selection Tabs */}
-          <Tabs value={sendingMethod} onValueChange={(value) => setSendingMethod(value as 'whatsapp' | 'sms')}>
-            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-md">
-              <TabsTrigger 
-                value="whatsapp" 
-                className="data-[state=active]:bg-green-500/30 text-white"
-                dir="rtl"
-              >
-                <MessageSquare className="w-4 h-4 ml-2" />
-                WhatsApp
-              </TabsTrigger>
-              <TabsTrigger 
-                value="sms" 
-                className="data-[state=active]:bg-blue-500/30 text-white"
-                dir="rtl"
-              >
-                <Smartphone className="w-4 h-4 ml-2" />
-                رسائل نصية
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-white text-sm mb-2 block" dir="rtl">اختر قالب الدعوة</label>
@@ -249,11 +209,7 @@ const SendInvitations = () => {
               <Button
                 onClick={handleBulkSend}
                 disabled={loading || !selectedTemplate || selectedCount === 0}
-                className={`w-full border ${
-                  sendingMethod === 'whatsapp' 
-                    ? 'bg-green-500/20 hover:bg-green-500/30 border-green-400/30' 
-                    : 'bg-blue-500/20 hover:bg-blue-500/30 border-blue-400/30'
-                } text-white`}
+                className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-400/30 text-white"
               >
                 <Send className="w-4 h-4 ml-2" />
                 {loading ? 'جاري الإرسال...' : `إرسال ${selectedCount} دعوة`}
@@ -275,7 +231,7 @@ const SendInvitations = () => {
                 )}
               </div>
               <p className="text-blue-300 text-xs" dir="rtl">
-                الطريقة: {sendingMethod === 'whatsapp' ? 'WhatsApp' : 'الرسائل النصية'}
+                الطريقة: WhatsApp
                 {templates.find(t => t.id === selectedTemplate)?.media_url && 
                   ` • سيتم إرفاق ${getMediaTypeText(templates.find(t => t.id === selectedTemplate)?.media_type)}`
                 }
