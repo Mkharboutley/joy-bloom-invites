@@ -14,13 +14,35 @@ export const sendSMS = async (
     console.log(`🔄 Sending SMS to ${phoneNumber}: ${message}`);
     console.log(`📱 Using API Key: ${apiKey.substring(0, 8)}...`);
     
-    // Clean phone number - ensure it starts with country code
+    // Clean phone number and handle different country codes
     let cleanPhone = phoneNumber.replace(/\D/g, '');
-    if (!cleanPhone.startsWith('966') && cleanPhone.length === 9) {
+    
+    // Handle UAE numbers (971)
+    if (cleanPhone.startsWith('971')) {
+      // UAE number is already in correct format
+      console.log(`🇦🇪 UAE number detected: ${cleanPhone}`);
+    }
+    // Handle Saudi numbers (966)
+    else if (cleanPhone.startsWith('966')) {
+      // Saudi number is already in correct format
+      console.log(`🇸🇦 Saudi number detected: ${cleanPhone}`);
+    }
+    // Handle local UAE numbers (9 digits starting with 5)
+    else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
+      cleanPhone = '971' + cleanPhone;
+      console.log(`🇦🇪 Local UAE number converted to: ${cleanPhone}`);
+    }
+    // Handle local Saudi numbers (9 digits starting with 5)
+    else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
       cleanPhone = '966' + cleanPhone;
+      console.log(`🇸🇦 Local Saudi number converted to: ${cleanPhone}`);
+    }
+    // Handle other formats
+    else {
+      console.log(`🌍 International number: ${cleanPhone}`);
     }
     
-    console.log(`📞 Cleaned phone number: ${cleanPhone}`);
+    console.log(`📞 Final phone number: ${cleanPhone}`);
     
     const requestBody = {
       recipients: [cleanPhone],

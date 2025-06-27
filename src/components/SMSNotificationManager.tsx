@@ -77,14 +77,19 @@ const SMSNotificationManager = () => {
   const validatePhoneNumbers = () => {
     const invalidContacts = adminContacts.filter(contact => {
       const phone = contact.phone_number?.replace(/\D/g, '') || '';
-      return phone.length < 9 || (!phone.startsWith('966') && phone.length !== 9);
+      // Accept UAE (971) and Saudi (966) numbers, or 9-digit local numbers
+      const isValidUAE = phone.startsWith('971') && phone.length === 12;
+      const isValidSaudi = phone.startsWith('966') && phone.length === 12;
+      const isValidLocal = phone.length === 9 && phone.startsWith('5');
+      
+      return !(isValidUAE || isValidSaudi || isValidLocal);
     });
     
     if (invalidContacts.length > 0) {
       console.warn('⚠️ Invalid phone numbers found:', invalidContacts);
       toast({
         title: "تحذير",
-        description: `${invalidContacts.length} أرقام هواتف غير صحيحة. تأكد من استخدام التنسيق الدولي (966xxxxxxxxx)`,
+        description: `${invalidContacts.length} أرقام هواتف غير صحيحة. استخدم التنسيق: 971xxxxxxxxx (الإمارات) أو 966xxxxxxxxx (السعودية)`,
         variant: "destructive"
       });
       return false;
@@ -217,7 +222,7 @@ const SMSNotificationManager = () => {
                 {apiKey.length >= 10 ? (
                   <>
                     <CheckCircle className="w-4 h-4 text-green-400" />
-                    <span className="text-green-400">مفتاح API صحيح</span>
+                    <span className="text-green-400">مفتاح API صحيح ✅</span>
                   </>
                 ) : (
                   <>
@@ -294,7 +299,7 @@ const SMSNotificationManager = () => {
                     <span className="text-white">{result.phoneNumber}</span>
                     <div className="flex items-center gap-2">
                       <Badge className={result.success ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-red-500/20 text-red-400 border-red-400/30"}>
-                        {result.success ? 'نجح' : 'فشل'}
+                        {result.success ? 'نجح ✅' : 'فشل ❌'}
                       </Badge>
                       {!result.success && result.error && (
                         <span className="text-red-400 text-xs max-w-40 truncate" title={result.error}>
@@ -329,21 +334,35 @@ const SMSNotificationManager = () => {
                   <TableRow className="border-white/20 hover:bg-white/5">
                     <TableHead className="text-white text-right" dir="rtl">الاسم</TableHead>
                     <TableHead className="text-white text-right" dir="rtl">رقم الهاتف</TableHead>
+                    <TableHead className="text-white text-right" dir="rtl">البلد</TableHead>
                     <TableHead className="text-white text-right" dir="rtl">الحالة</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {adminContacts.map((contact) => {
                     const phone = contact.phone_number?.replace(/\D/g, '') || '';
-                    const isValidPhone = phone.length >= 9 && (phone.startsWith('966') || phone.length === 9);
+                    const isValidUAE = phone.startsWith('971') && phone.length === 12;
+                    const isValidSaudi = phone.startsWith('966') && phone.length === 12;
+                    const isValidLocal = phone.length === 9 && phone.startsWith('5');
+                    const isValid = isValidUAE || isValidSaudi || isValidLocal;
+                    
+                    let country = '';
+                    if (phone.startsWith('971') || (phone.length === 9 && phone.startsWith('5'))) {
+                      country = '🇦🇪 الإمارات';
+                    } else if (phone.startsWith('966')) {
+                      country = '🇸🇦 السعودية';
+                    } else {
+                      country = '🌍 دولي';
+                    }
                     
                     return (
                       <TableRow key={contact.id} className="border-white/20 hover:bg-white/5">
                         <TableCell className="text-white text-right">{contact.name}</TableCell>
                         <TableCell className="text-white text-right">{contact.phone_number}</TableCell>
+                        <TableCell className="text-white text-right">{country}</TableCell>
                         <TableCell className="text-right">
-                          <Badge className={isValidPhone ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-yellow-500/20 text-yellow-400 border-yellow-400/30"}>
-                            {isValidPhone ? 'صحيح' : 'تحقق من الرقم'}
+                          <Badge className={isValid ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-yellow-500/20 text-yellow-400 border-yellow-400/30"}>
+                            {isValid ? 'صحيح ✅' : 'تحقق من الرقم ⚠️'}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -359,6 +378,16 @@ const SMSNotificationManager = () => {
               <p className="text-sm mt-2">اذهب إلى تبويب "إشعارات الإدارة" لإضافة جهات اتصال</p>
             </div>
           )}
+
+          {/* Phone Number Format Guide */}
+          <div className="mt-4 p-3 bg-amber-500/10 rounded-lg border border-amber-400/30">
+            <h4 className="text-amber-400 font-semibold mb-2" dir="rtl">تنسيق أرقام الهواتف المدعومة:</h4>
+            <div className="text-amber-300 text-sm space-y-1" dir="rtl">
+              <p>🇦🇪 <strong>الإمارات:</strong> 971509011275 أو 509011275</p>
+              <p>🇸🇦 <strong>السعودية:</strong> 966501234567 أو 501234567</p>
+              <p>⚠️ تأكد من إدخال الرقم بدون مسافات أو رموز (+، 00)</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
