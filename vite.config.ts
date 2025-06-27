@@ -19,4 +19,14 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Ensure static files are served correctly
+  publicDir: 'public',
+  build: {
+    // Ensure proper asset handling
+    assetsDir: 'assets',
+    rollupOptions: {
+      // Don't bundle the wedding.html file
+      external: ['/wedding.html']
+    }
+  }
 }));
