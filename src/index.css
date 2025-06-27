@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -110,5 +109,58 @@
   html[dir="rtl"] {
     direction: rtl;
     text-align: right;
+  }
+}
+
+/* Force dark background for all select dropdowns */
+@layer components {
+  /* Target all select dropdown content */
+  [data-radix-select-content] {
+    background-color: rgb(31 41 55) !important; /* bg-gray-800 */
+    color: white !important;
+    border-color: rgb(75 85 99) !important; /* border-gray-600 */
+  }
+  
+  /* Target select items */
+  [data-radix-select-item] {
+    color: white !important;
+  }
+  
+  [data-radix-select-item]:hover,
+  [data-radix-select-item][data-highlighted] {
+    background-color: rgb(55 65 81) !important; /* bg-gray-700 */
+    color: white !important;
+  }
+  
+  /* Target select labels */
+  [data-radix-select-label] {
+    color: white !important;
+  }
+  
+  /* Target select separators */
+  [data-radix-select-separator] {
+    background-color: rgb(75 85 99) !important; /* bg-gray-600 */
+  }
+  
+  /* Alternative targeting for select content */
+  .bg-popover {
+    background-color: rgb(31 41 55) !important; /* bg-gray-800 */
+    color: white !important;
+  }
+  
+  .text-popover-foreground {
+    color: white !important;
+  }
+  
+  /* Target native select elements as well */
+  select {
+    background-color: rgb(31 41 55) !important; /* bg-gray-800 */
+    color: white !important;
+    border-color: rgb(75 85 99) !important;
+  }
+  
+  select option {
+    background-color: rgb(31 41 55) !important; /* bg-gray-800 */
+    color: white !important;
   }
 }
