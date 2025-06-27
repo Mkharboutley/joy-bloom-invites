@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // SMS collection - only functions can write
+    match /sms/{messageId} {
+      allow read, write: if false; // Only Cloud Functions can access
+    }
+    
+    // SMS logs - admin read access
+    match /sms_logs/{logId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only Cloud Functions can write
+    }
+    
+    // Notification logs - admin read access
+    match /notification_logs/{logId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only Cloud Functions can write
+    }
+    
+    // Existing rules for guests collection
+    match /guests/{guestId} {
+      allow read, write: if true; // Adjust based on your security needs
+    }
+  }
+}
