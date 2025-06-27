@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 
 interface VideoBackgroundProps {
   onError?: () => void;
@@ -7,19 +7,16 @@ interface VideoBackgroundProps {
 
 const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [audioEnabled, setAudioEnabled] = useState(false);
-  const [showAudioPrompt, setShowAudioPrompt] = useState(true);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     // Set up video properties
-    video.muted = true; // Start muted to allow autoplay
+    video.muted = true;
     video.loop = true;
     video.playsInline = true;
     video.preload = 'auto';
-    video.volume = 0.5; // Set moderate volume
     
     const playVideo = async () => {
       try {
@@ -45,16 +42,6 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       video.currentTime = 0;
     };
   }, [onError, onLoad]);
-
-  const enableAudio = () => {
-    const video = videoRef.current;
-    if (video) {
-      video.muted = false;
-      setAudioEnabled(true);
-      setShowAudioPrompt(false);
-      console.log('Audio enabled');
-    }
-  };
 
   const handleError = (e: any) => {
     console.log('Video background failed to load:', e);
@@ -106,28 +93,6 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
           minWidth: '100vw'
         }}
       />
-
-      {/* Audio enable button */}
-      {showAudioPrompt && (
-        <button
-          onClick={enableAudio}
-          className="fixed bottom-6 right-6 z-50 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-4 py-2 rounded-full border border-white/30 transition-all duration-300 flex items-center gap-2 shadow-lg"
-          style={{
-            pointerEvents: 'auto'
-          }}
-        >
-          <span className="text-lg">🔊</span>
-          <span className="text-sm font-medium">تشغيل الصوت</span>
-        </button>
-      )}
-
-      {/* Audio status indicator */}
-      {audioEnabled && (
-        <div className="fixed bottom-6 right-6 z-50 bg-green-500/20 backdrop-blur-md text-white px-3 py-2 rounded-full border border-green-400/30 flex items-center gap-2">
-          <span className="text-sm">🎵</span>
-          <span className="text-xs">الصوت مُفعل</span>
-        </div>
-      )}
     </>
   );
 };
