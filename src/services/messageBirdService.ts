@@ -14,6 +14,15 @@ export const sendSMS = async (
     console.log(`🔄 Sending SMS to ${phoneNumber}: ${message}`);
     console.log(`📱 Using API Key: ${apiKey.substring(0, 8)}...`);
     
+    // Validate API key format
+    if (!apiKey || apiKey.trim().length < 10) {
+      console.error('❌ Invalid API key format');
+      return {
+        success: false,
+        error: 'Invalid API key format - must be at least 10 characters'
+      };
+    }
+    
     // Clean phone number and handle different country codes
     let cleanPhone = phoneNumber.replace(/\D/g, '');
     
@@ -31,11 +40,6 @@ export const sendSMS = async (
     else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
       cleanPhone = '971' + cleanPhone;
       console.log(`🇦🇪 Local UAE number converted to: ${cleanPhone}`);
-    }
-    // Handle local Saudi numbers (9 digits starting with 5)
-    else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
-      cleanPhone = '966' + cleanPhone;
-      console.log(`🇸🇦 Local Saudi number converted to: ${cleanPhone}`);
     }
     // Handle other formats
     else {
@@ -55,7 +59,7 @@ export const sendSMS = async (
     const response = await fetch('https://rest.messagebird.com/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `AccessKey ${apiKey}`,
+        'Authorization': `AccessKey ${apiKey.trim()}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
@@ -87,6 +91,16 @@ export const sendSMS = async (
         messageId: data.id
       };
     } else {
+      // Handle specific API key errors
+      if (response.status === 401 || response.status === 403) {
+        const errorMsg = 'Invalid API key or insufficient permissions. Please check your MessageBird API key.';
+        console.error('❌ Authentication error:', errorMsg);
+        return {
+          success: false,
+          error: errorMsg
+        };
+      }
+      
       const errorMsg = data.errors?.[0]?.description || 
                       data.error || 
                       `HTTP ${response.status}: ${response.statusText}`;
@@ -98,6 +112,15 @@ export const sendSMS = async (
     }
   } catch (error) {
     console.error('💥 MessageBird SMS Error:', error);
+    
+    // Handle network errors specifically
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        success: false,
+        error: 'Network error - please check your internet connection'
+      };
+    }
+    
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Network error occurred'
@@ -118,7 +141,7 @@ export const sendBulkSMS = async (
     console.error('❌ Invalid API key provided');
     return contacts.map(contact => ({
       success: false,
-      error: 'Invalid API key',
+      error: 'Invalid API key - must be at least 10 characters',
       phoneNumber: contact.phoneNumber
     }));
   }

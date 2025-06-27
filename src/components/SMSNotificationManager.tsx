@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageSquare, Settings, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Send, MessageSquare, Settings, Eye, EyeOff, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { getAdminContacts, type AdminContact } from '@/services/supabaseService';
 import { sendSMS, sendBulkSMS } from '@/services/messageBirdService';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ const SMSNotificationManager = () => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [testMessage, setTestMessage] = useState('تم تأكيد حضور جديد: أحمد محمد');
   const [loading, setLoading] = useState(false);
+  const [testingApiKey, setTestingApiKey] = useState(false);
   const [testResults, setTestResults] = useState<Array<{phoneNumber: string; success: boolean; error?: string}>>([]);
   const { toast } = useToast();
 
@@ -72,6 +73,53 @@ const SMSNotificationManager = () => {
       title: "تم الحفظ",
       description: "تم حفظ مفتاح API بنجاح"
     });
+  };
+
+  const testApiKey = async () => {
+    if (!apiKey.trim()) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إدخال مفتاح API أولاً",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setTestingApiKey(true);
+    try {
+      // Test with a dummy number to validate API key
+      const testResult = await sendSMS('971501234567', 'Test message', apiKey.trim());
+      
+      if (testResult.success) {
+        toast({
+          title: "مفتاح API صحيح",
+          description: "تم التحقق من صحة مفتاح API بنجاح",
+        });
+      } else {
+        // Check if it's an API key error specifically
+        if (testResult.error?.includes('Invalid API key') || testResult.error?.includes('incorrect access_key')) {
+          toast({
+            title: "مفتاح API غير صحيح",
+            description: "الرجاء التحقق من مفتاح API في لوحة تحكم MessageBird",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "تحذير",
+            description: `مفتاح API قد يكون صحيح ولكن: ${testResult.error}`,
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "خطأ في الاختبار",
+        description: "فشل في اختبار مفتاح API",
+        variant: "destructive"
+      });
+    } finally {
+      setTestingApiKey(false);
+    }
   };
 
   const validatePhoneNumbers = () => {
@@ -159,11 +207,25 @@ const SMSNotificationManager = () => {
           description: `تم إرسال ${successCount} رسالة بنجاح${failCount > 0 ? ` و فشل ${failCount}` : ''}`
         });
       } else {
-        toast({
-          title: "فشل الإرسال",
-          description: "فشل في إرسال جميع الرسائل. تحقق من مفتاح API وأرقام الهواتف",
-          variant: "destructive"
-        });
+        // Check if all failures are due to API key issues
+        const apiKeyErrors = results.filter(r => 
+          r.error?.includes('Invalid API key') || 
+          r.error?.includes('incorrect access_key')
+        );
+        
+        if (apiKeyErrors.length > 0) {
+          toast({
+            title: "مفتاح API غير صحيح",
+            description: "الرجاء التحقق من مفتاح API في لوحة تحكم MessageBird والتأكد من صحته",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "فشل الإرسال",
+            description: "فشل في إرسال جميع الرسائل. تحقق من مفتاح API وأرقام الهواتف",
+            variant: "destructive"
+          });
+        }
       }
     } catch (error) {
       console.error('💥 Error sending test SMS:', error);
@@ -210,6 +272,14 @@ const SMSNotificationManager = () => {
                 </Button>
               </div>
               <Button
+                onClick={testApiKey}
+                disabled={testingApiKey || !apiKey.trim()}
+                className="bg-green-500/20 hover:bg-green-500/30 text-white border border-green-400/30"
+              >
+                <RefreshCw className={`w-4 h-4 ml-2 ${testingApiKey ? 'animate-spin' : ''}`} />
+                {testingApiKey ? 'اختبار...' : 'اختبار'}
+              </Button>
+              <Button
                 onClick={handleSaveApiKey}
                 className="bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
               >
@@ -250,9 +320,26 @@ const SMSNotificationManager = () => {
               <br />
               2. انقر على "Add access key"
               <br />
-              3. انسخ المفتاح والصقه هنا
+              3. تأكد من تفعيل صلاحية "Messages" للمفتاح
               <br />
-              4. تأكد من أن المفتاح يبدأ بأحرف وأرقام (مثل: NFo58JnOC5jH...)
+              4. انسخ المفتاح والصقه هنا
+              <br />
+              5. استخدم زر "اختبار" للتحقق من صحة المفتاح
+            </p>
+          </div>
+
+          {/* API Key Error Alert */}
+          <div className="p-3 bg-red-500/10 rounded-lg border border-red-400/30">
+            <p className="text-red-400 text-sm" dir="rtl">
+              <strong>إذا ظهر خطأ "incorrect access_key":</strong>
+              <br />
+              • تأكد من نسخ مفتاح API بالكامل بدون مسافات إضافية
+              <br />
+              • تحقق من أن المفتاح لم ينته صلاحيته
+              <br />
+              • تأكد من تفعيل صلاحية "Messages" في إعدادات المفتاح
+              <br />
+              • جرب إنشاء مفتاح API جديد إذا استمر الخطأ
             </p>
           </div>
         </CardContent>
