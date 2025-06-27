@@ -68,34 +68,44 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
 
   return (
     <>
-      {/* Background image layer - fallback */}
+      {/* Background image layer - fallback - covers entire document */}
       <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
         style={{
           backgroundImage: 'url(/admin-back.jpg)',
-          opacity: 0.4
+          opacity: 0.4,
+          minHeight: '100vh',
+          minWidth: '100vw'
         }}
       />
 
-      {/* Background video */}
+      {/* Background video - covers entire viewport */}
       <video
         ref={videoRef}
         loop
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover z-5"
+        className="fixed inset-0 w-full h-full object-cover z-5"
         onError={handleError}
         onLoadedData={handleLoadedData}
         style={{
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          minHeight: '100vh',
+          minWidth: '100vw'
         }}
       >
         <source src="/G22.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {/* Overlay for text readability */}
-      <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+      {/* Overlay for text readability - covers entire viewport */}
+      <div 
+        className="fixed inset-0 bg-black/20 z-10 pointer-events-none"
+        style={{
+          minHeight: '100vh',
+          minWidth: '100vw'
+        }}
+      />
 
       {/* Audio enable button */}
       {showAudioPrompt && (
