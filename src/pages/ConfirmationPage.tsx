@@ -72,7 +72,7 @@ const ConfirmationPage = () => {
         <GlassCard className="w-full max-w-md p-5 space-y-3">
           {/* Confirmation Message - reduced margin and spacing */}
           <div className="text-center space-y-1 -mt-3 mb-3" dir="rtl">
-            <h2 className="text-white text-xl font-bold">تم تأكيد الحضور</h2>
+            <h2 className="text-white text-xl font-bold">تم تأكيد حضوركم</h2>
             <p className="text-white/90 text-base">بحضوركم تكتمل سعادتنا</p>
           </div>
 
