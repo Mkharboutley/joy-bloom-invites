@@ -1,4 +1,6 @@
 // MessageBird Webhook Service for Real-time Notifications
+import { getApiBaseUrl } from './messageBirdService';
+
 export interface WebhookEvent {
   id: string;
   type: 'message.delivered' | 'message.failed' | 'message.sent';
@@ -79,7 +81,7 @@ const handleSuccessfulDelivery = async (data: WebhookEvent['data']) => {
 // Setup webhook URL for MessageBird
 export const setupMessageBirdWebhook = async (apiKey: string, webhookUrl: string) => {
   try {
-    const response = await fetch('https://rest.messagebird.com/webhooks', {
+    const response = await fetch(`${getApiBaseUrl()}/webhooks`, {
       method: 'POST',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
@@ -107,7 +109,7 @@ export const setupMessageBirdWebhook = async (apiKey: string, webhookUrl: string
 // Get webhook status
 export const getWebhookStatus = async (apiKey: string) => {
   try {
-    const response = await fetch('https://rest.messagebird.com/webhooks', {
+    const response = await fetch(`${getApiBaseUrl()}/webhooks`, {
       method: 'GET',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
