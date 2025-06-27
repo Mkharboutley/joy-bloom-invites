@@ -7,6 +7,16 @@ export interface SMSResponse {
   error?: string;
 }
 
+// Helper function to get the correct API base URL
+const getApiBaseUrl = (): string => {
+  // In development, use the Vite proxy to avoid CORS issues
+  if (import.meta.env.DEV) {
+    return '/messagebird-api';
+  }
+  // In production, use the direct MessageBird API URL
+  return 'https://rest.messagebird.com';
+};
+
 // Test MessageBird connection without sending actual SMS
 export const testMessageBirdConnection = async (apiKey: string): Promise<SMSResponse> => {
   try {
@@ -23,7 +33,8 @@ export const testMessageBirdConnection = async (apiKey: string): Promise<SMSResp
     }
     
     // Test API key by making a simple balance request
-    const response = await fetch('https://rest.messagebird.com/balance', {
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/balance`, {
       method: 'GET',
       headers: {
         'Authorization': `AccessKey ${apiKey.trim()}`,
@@ -144,7 +155,8 @@ export const sendSMS = async (
     
     console.log('📤 Request body:', requestBody);
     
-    const response = await fetch('https://rest.messagebird.com/messages', {
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `AccessKey ${apiKey.trim()}`,
@@ -322,7 +334,8 @@ export const checkUAESupport = async (apiKey: string): Promise<{
     console.log('🇦🇪 Checking MessageBird UAE support...');
     
     // Test with a UAE number format (without actually sending)
-    const testResponse = await fetch('https://rest.messagebird.com/lookup/971501234567/hlr', {
+    const apiBaseUrl = getApiBaseUrl();
+    const testResponse = await fetch(`${apiBaseUrl}/lookup/971501234567/hlr`, {
       method: 'GET',
       headers: {
         'Authorization': `AccessKey ${apiKey.trim()}`,

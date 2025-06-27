@@ -8,6 +8,18 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Proxy MessageBird API requests to avoid CORS issues in development
+      '/messagebird-api': {
+        target: 'https://rest.messagebird.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/messagebird-api/, ''),
+        secure: true,
+        headers: {
+          'User-Agent': 'Wedding-App/1.0'
+        }
+      }
+    }
   },
   plugins: [
     react(),
