@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +6,7 @@ import AttendanceStatusView from '@/components/AttendanceStatusView';
 import ContactImport from '@/components/ContactImport';
 import InvitationConfig from '@/components/InvitationConfig';
 import SendInvitations from '@/components/SendInvitations';
+import SMSNotificationManager from '@/components/SMSNotificationManager';
 
 const AdminDashboard = () => {
   return (
@@ -33,7 +33,7 @@ const AdminDashboard = () => {
 
           {/* Admin Dashboard Tabs */}
           <Tabs defaultValue="attendance" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-6 bg-white/10 backdrop-blur-md">
               <TabsTrigger 
                 value="attendance" 
                 className="data-[state=active]:bg-white/20 text-white text-xs"
@@ -47,6 +47,13 @@ const AdminDashboard = () => {
                 dir="rtl"
               >
                 إشعارات الإدارة
+              </TabsTrigger>
+              <TabsTrigger 
+                value="sms" 
+                className="data-[state=active]:bg-white/20 text-white text-xs"
+                dir="rtl"
+              >
+                إعداد SMS
               </TabsTrigger>
               <TabsTrigger 
                 value="import" 
@@ -77,6 +84,10 @@ const AdminDashboard = () => {
             
             <TabsContent value="notifications" className="space-y-6 mt-6">
               <AdminContactsManager />
+            </TabsContent>
+            
+            <TabsContent value="sms" className="space-y-6 mt-6">
+              <SMSNotificationManager />
             </TabsContent>
             
             <TabsContent value="import" className="space-y-6 mt-6">

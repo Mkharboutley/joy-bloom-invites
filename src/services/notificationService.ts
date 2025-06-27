@@ -1,5 +1,5 @@
-
 import { getAdminContacts, logNotification } from './supabaseService';
+import { sendSMS } from './messageBirdService';
 
 export const sendAdminNotifications = async (
   guestName: string,
@@ -8,6 +8,7 @@ export const sendAdminNotifications = async (
 ) => {
   try {
     const adminContacts = await getAdminContacts();
+    const apiKey = localStorage.getItem('messagebird_api_key');
     
     for (const contact of adminContacts) {
       try {
@@ -15,17 +16,36 @@ export const sendAdminNotifications = async (
           ? `تأكيد حضور جديد: ${guestName}` 
           : `إعتذار عن الحضور: ${guestName}`;
         
-        // For now, we'll just log the notifications
-        // You can integrate with actual SMS/Push services later
-        console.log(`Sending ${contact.notification_type} to ${contact.name}: ${message}`);
+        let notificationSent = false;
+        let sentTo = contact.name;
+        
+        // Send SMS if it's an SMS contact and we have API key
+        if (contact.notification_type === 'sms' && contact.phone_number && apiKey) {
+          try {
+            const smsResult = await sendSMS(contact.phone_number, message, apiKey);
+            if (smsResult.success) {
+              notificationSent = true;
+              sentTo = contact.phone_number;
+              console.log(`SMS sent successfully to ${contact.name}: ${message}`);
+            } else {
+              console.error(`SMS failed to ${contact.name}:`, smsResult.error);
+            }
+          } catch (smsError) {
+            console.error(`SMS error for ${contact.name}:`, smsError);
+          }
+        } else {
+          // For other notification types, just log (you can integrate other services later)
+          console.log(`Notification logged for ${contact.name}: ${message}`);
+          notificationSent = true;
+        }
         
         await logNotification({
           guest_name: guestName,
           guest_id: guestId,
           notification_type: notificationType,
-          sent_to: contact.phone_number || contact.email || contact.name,
+          sent_to: sentTo,
           sent_via: contact.notification_type,
-          status: 'sent'
+          status: notificationSent ? 'sent' : 'failed'
         });
         
       } catch (error) {
