@@ -5,6 +5,11 @@ export interface SMSResponse {
   error?: string;
 }
 
+// Helper function to normalize phone numbers for comparison
+const normalizePhoneNumber = (phoneNumber: string): string => {
+  return phoneNumber.replace(/\D/g, '');
+};
+
 // Twilio SMS Service (Works in UAE)
 export const sendTwilioSMS = async (
   phoneNumber: string,
@@ -16,14 +21,35 @@ export const sendTwilioSMS = async (
   try {
     console.log(`🔄 Sending SMS via Twilio to ${phoneNumber}`);
     
-    // Clean phone number
-    let cleanPhone = phoneNumber.replace(/\D/g, '');
-    if (cleanPhone.startsWith('971') && cleanPhone.length === 12) {
-      cleanPhone = '+' + cleanPhone;
-    } else if (cleanPhone.length === 9 && cleanPhone.startsWith('5')) {
-      cleanPhone = '+971' + cleanPhone;
+    // Clean and format phone numbers
+    let cleanToPhone = phoneNumber.replace(/\D/g, '');
+    if (cleanToPhone.startsWith('971') && cleanToPhone.length === 12) {
+      cleanToPhone = '+' + cleanToPhone;
+    } else if (cleanToPhone.length === 9 && cleanToPhone.startsWith('5')) {
+      cleanToPhone = '+971' + cleanToPhone;
     } else {
-      cleanPhone = '+' + cleanPhone;
+      cleanToPhone = '+' + cleanToPhone;
+    }
+    
+    // Normalize fromNumber for comparison
+    let cleanFromPhone = fromNumber;
+    if (!cleanFromPhone.startsWith('+')) {
+      cleanFromPhone = '+' + cleanFromPhone.replace(/\D/g, '');
+    }
+    
+    // CRITICAL: Check if 'To' and 'From' numbers are the same BEFORE making API call
+    const normalizedTo = normalizePhoneNumber(cleanToPhone);
+    const normalizedFrom = normalizePhoneNumber(cleanFromPhone);
+    
+    console.log(`📞 To number (normalized): ${normalizedTo}`);
+    console.log(`📞 From number (normalized): ${normalizedFrom}`);
+    
+    if (normalizedTo === normalizedFrom) {
+      console.error('❌ Twilio SMS failed: To and From numbers are the same');
+      return {
+        success: false,
+        error: "'To' and 'From' number cannot be the same in Twilio"
+      };
     }
     
     const credentials = btoa(`${accountSid}:${authToken}`);
@@ -35,8 +61,8 @@ export const sendTwilioSMS = async (
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        To: cleanPhone,
-        From: fromNumber,
+        To: cleanToPhone,
+        From: cleanFromPhone,
         Body: message
       })
     });

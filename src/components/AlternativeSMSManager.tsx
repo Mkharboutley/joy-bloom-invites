@@ -126,11 +126,6 @@ const AlternativeSMSManager = () => {
     }
   };
 
-  // Helper function to normalize phone numbers for comparison
-  const normalizePhoneNumber = (phoneNumber: string): string => {
-    return phoneNumber.replace(/\D/g, '');
-  };
-
   const handleTestSMS = async () => {
     if (adminContacts.length === 0) {
       toast({
@@ -161,19 +156,6 @@ const AlternativeSMSManager = () => {
           let result;
           
           if (provider === 'twilio') {
-            // Check if 'To' and 'From' numbers are the same for Twilio
-            const normalizedToNumber = normalizePhoneNumber(contact.phone_number!);
-            const normalizedFromNumber = normalizePhoneNumber(credentials.twilio.fromNumber);
-            
-            if (normalizedToNumber === normalizedFromNumber) {
-              results.push({
-                phoneNumber: contact.phone_number!,
-                success: false,
-                error: "لا يمكن إرسال رسالة إلى نفس رقم المرسل في Twilio"
-              });
-              continue;
-            }
-            
             result = await sendTwilioSMS(
               contact.phone_number!,
               testMessage,
@@ -331,6 +313,16 @@ const AlternativeSMSManager = () => {
                   dir="ltr"
                 />
               </div>
+              
+              {/* Warning about same numbers */}
+              <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-400/30">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <p className="text-amber-400 text-sm" dir="rtl">
+                    <strong>تنبيه:</strong> تأكد من أن رقم "From Number" مختلف عن أرقام جهات الاتصال المستلمة. Twilio لا يسمح بإرسال رسائل إلى نفس الرقم المرسل.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -389,6 +381,8 @@ const AlternativeSMSManager = () => {
                   3. اشتري رقم هاتف من Twilio لإرسال الرسائل
                   <br />
                   4. أدخل الرقم في حقل "From Number"
+                  <br />
+                  5. تأكد من أن رقم "From Number" مختلف عن أرقام المستلمين
                 </>
               ) : (
                 <>
