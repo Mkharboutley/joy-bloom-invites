@@ -12,26 +12,31 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Simple cleanup function
-    const cleanup = () => {
-      video.pause();
-      video.currentTime = 0;
-    };
-
-    // Set up video properties
-    video.muted = true;
+    // Set up video properties for audio playback
+    video.muted = false; // Enable audio
     video.loop = true;
     video.playsInline = true;
     video.preload = 'auto';
+    video.volume = 0.3; // Set moderate volume
     
-    // Simple play function
     const playVideo = async () => {
       try {
+        // Try to play with audio first
         await video.play();
+        console.log('Video with audio started successfully');
         if (onLoad) onLoad();
       } catch (error) {
-        console.log('Video autoplay failed:', error);
-        if (onError) onError();
+        console.log('Autoplay with audio failed, trying muted:', error);
+        // If autoplay with audio fails, try muted
+        video.muted = true;
+        try {
+          await video.play();
+          console.log('Video started muted');
+          if (onLoad) onLoad();
+        } catch (mutedError) {
+          console.log('Video failed completely:', mutedError);
+          if (onError) onError();
+        }
       }
     };
 
@@ -42,8 +47,26 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       video.addEventListener('canplay', playVideo, { once: true });
     }
 
-    // Cleanup on unmount
-    return cleanup;
+    // Add click handler to unmute if needed
+    const handleUserInteraction = () => {
+      if (video.muted) {
+        video.muted = false;
+        video.volume = 0.3;
+        console.log('Video unmuted after user interaction');
+      }
+    };
+
+    // Listen for any user interaction to enable audio
+    document.addEventListener('click', handleUserInteraction, { once: true });
+    document.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+    // Cleanup
+    return () => {
+      video.pause();
+      video.currentTime = 0;
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
   }, [onError, onLoad]);
 
   const handleError = (e: any) => {
@@ -67,10 +90,9 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
         }}
       />
 
-      {/* Background video */}
+      {/* Background video with audio */}
       <video
         ref={videoRef}
-        muted
         loop
         playsInline
         preload="auto"
@@ -83,10 +105,15 @@ const VideoBackground = ({ onError, onLoad }: VideoBackgroundProps) => {
       >
         <source src="/G22.mp4" type="video/mp4" />
         Your browser does not support the video tag.
-      </video>
+      </source>
 
       {/* Overlay for text readability */}
       <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+
+      {/* Audio control hint (optional) */}
+      <div className="absolute bottom-4 right-4 z-20 text-white/60 text-xs pointer-events-none">
+        🔊 Click anywhere to enable audio
+      </div>
     </>
   );
 };
