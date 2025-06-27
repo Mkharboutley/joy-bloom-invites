@@ -126,6 +126,11 @@ const AlternativeSMSManager = () => {
     }
   };
 
+  // Helper function to normalize phone numbers for comparison
+  const normalizePhoneNumber = (phoneNumber: string): string => {
+    return phoneNumber.replace(/\D/g, '');
+  };
+
   const handleTestSMS = async () => {
     if (adminContacts.length === 0) {
       toast({
@@ -156,6 +161,19 @@ const AlternativeSMSManager = () => {
           let result;
           
           if (provider === 'twilio') {
+            // Check if 'To' and 'From' numbers are the same for Twilio
+            const normalizedToNumber = normalizePhoneNumber(contact.phone_number!);
+            const normalizedFromNumber = normalizePhoneNumber(credentials.twilio.fromNumber);
+            
+            if (normalizedToNumber === normalizedFromNumber) {
+              results.push({
+                phoneNumber: contact.phone_number!,
+                success: false,
+                error: "لا يمكن إرسال رسالة إلى نفس رقم المرسل في Twilio"
+              });
+              continue;
+            }
+            
             result = await sendTwilioSMS(
               contact.phone_number!,
               testMessage,
