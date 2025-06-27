@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
@@ -100,7 +99,7 @@ const QRScanResult = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium text-xs">المكان:</span>
-                  <span className="text-xs">فندق نادي الضباط، قاعة إرث</span>
+                  <span className="text-xs">فندق إرث</span>
                 </div>
               </div>
             </GlassCard>

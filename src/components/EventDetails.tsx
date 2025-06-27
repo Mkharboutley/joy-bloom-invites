@@ -1,4 +1,3 @@
-
 const EventDetails = () => {
   return (
     <div className="text-center space-y-1 py-4" dir="rtl" style={{ paddingTop: '-9px' }}>
@@ -17,7 +16,7 @@ const EventDetails = () => {
         
         <div className="space-y-0.5">
           <div className="text-white/70 text-xs font-light">المكان</div>
-          <div className="text-sm font-light">فندق نادي الضباط - قاعة إرث</div>
+          <div className="text-sm font-light">فندق إرث</div>
         </div>
       </div>
     </div>
