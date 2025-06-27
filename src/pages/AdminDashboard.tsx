@@ -1,12 +1,8 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminContactsManager from '@/components/AdminContactsManager';
 import AttendanceStatusView from '@/components/AttendanceStatusView';
-import ContactImport from '@/components/ContactImport';
-import InvitationConfig from '@/components/InvitationConfig';
-import SendInvitations from '@/components/SendInvitations';
 
 const AdminDashboard = () => {
   return (
@@ -33,41 +29,20 @@ const AdminDashboard = () => {
 
           {/* Admin Dashboard Tabs */}
           <Tabs defaultValue="attendance" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-md">
               <TabsTrigger 
                 value="attendance" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
+                className="data-[state=active]:bg-white/20 text-white text-sm"
                 dir="rtl"
               >
                 حالة الحضور
               </TabsTrigger>
               <TabsTrigger 
                 value="notifications" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
+                className="data-[state=active]:bg-white/20 text-white text-sm"
                 dir="rtl"
               >
                 إشعارات الإدارة
-              </TabsTrigger>
-              <TabsTrigger 
-                value="import" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                استيراد جهات الاتصال
-              </TabsTrigger>
-              <TabsTrigger 
-                value="templates" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                إعداد الدعوات
-              </TabsTrigger>
-              <TabsTrigger 
-                value="send" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                إرسال الدعوات
               </TabsTrigger>
             </TabsList>
             
@@ -77,18 +52,6 @@ const AdminDashboard = () => {
             
             <TabsContent value="notifications" className="space-y-6 mt-6">
               <AdminContactsManager />
-            </TabsContent>
-            
-            <TabsContent value="import" className="space-y-6 mt-6">
-              <ContactImport />
-            </TabsContent>
-            
-            <TabsContent value="templates" className="space-y-6 mt-6">
-              <InvitationConfig />
-            </TabsContent>
-            
-            <TabsContent value="send" className="space-y-6 mt-6">
-              <SendInvitations />
             </TabsContent>
           </Tabs>
         </div>
