@@ -5,18 +5,18 @@ const EventDetails = () => {
       
       <div className="space-y-3 text-white max-w-sm mx-auto">
         <div className="flex justify-between items-center">
-          <div className="text-sm font-light">الجمعة، ٤ يوليو ٢٠٢٥</div>
           <div className="text-white/70 text-sm font-light">التاريخ</div>
+          <div className="text-sm font-light">الجمعة، ٤ يوليو ٢٠٢٥</div>
         </div>
         
         <div className="flex justify-between items-center">
-          <div className="text-sm font-light">الساعة ٨:٣٠ مساءً</div>
           <div className="text-white/70 text-sm font-light">الوقت</div>
+          <div className="text-sm font-light">الساعة ٨:٣٠ مساءً</div>
         </div>
         
         <div className="flex justify-between items-center">
-          <div className="text-sm font-light">فندق إرث</div>
           <div className="text-white/70 text-sm font-light">المكان</div>
+          <div className="text-sm font-light">فندق إرث</div>
         </div>
       </div>
     </div>
