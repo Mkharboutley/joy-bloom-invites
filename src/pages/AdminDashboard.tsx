@@ -8,7 +8,7 @@ import InvitationConfig from '@/components/InvitationConfig';
 import SendInvitations from '@/components/SendInvitations';
 import SMSNotificationManager from '@/components/SMSNotificationManager';
 import NotificationRulesManager from '@/components/NotificationRulesManager';
-import PushNotificationManager from '@/components/PushNotificationManager';
+import SimplePushNotificationManager from '@/components/SimplePushNotificationManager';
 
 const AdminDashboard = () => {
   return (
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
             </TabsContent>
             
             <TabsContent value="push" className="space-y-6 mt-6">
-              <PushNotificationManager />
+              <SimplePushNotificationManager />
             </TabsContent>
             
             <TabsContent value="auto-notifications" className="space-y-6 mt-6">
