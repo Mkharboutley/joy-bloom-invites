@@ -367,7 +367,7 @@ export const setupBrowserPushNotifications = async (): Promise<PushSubscription 
     }
 
     // Register service worker
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
     console.log('✅ Service worker registered');
 
     // Try to get VAPID key from MessageBird SDK
