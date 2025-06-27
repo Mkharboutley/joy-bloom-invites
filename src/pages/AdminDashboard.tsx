@@ -6,7 +6,7 @@ import AttendanceStatusView from '@/components/AttendanceStatusView';
 import ContactImport from '@/components/ContactImport';
 import InvitationConfig from '@/components/InvitationConfig';
 import SendInvitations from '@/components/SendInvitations';
-import AlternativeSMSManager from '@/components/AlternativeSMSManager';
+import SMSNotificationManager from '@/components/SMSNotificationManager';
 
 const AdminDashboard = () => {
   return (
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
             </TabsContent>
             
             <TabsContent value="sms" className="space-y-6 mt-6">
-              <AlternativeSMSManager />
+              <SMSNotificationManager />
             </TabsContent>
             
             <TabsContent value="import" className="space-y-6 mt-6">
