@@ -32,6 +32,13 @@ export interface PushResponse {
   };
 }
 
+// MessageBird Application Configuration
+const MESSAGEBIRD_CONFIG = {
+  issuer: 'mrn:v1:application:identity-claims-issuer:0c1202e3-4318-4330-9e78-e09ea6829512/d7a5cb15-ade7-4588-8de4-ad3f11b4d81c:1',
+  identitySigningKey: 'b61a2ac23fdb7e25dff3539056260d20664a641583059ede4b56fbfbcff92866',
+  applicationId: '0c1202e3-4318-4330-9e78-e09ea6829512'
+};
+
 // Get the correct MessageBird Push API base URL
 const getPushApiBaseUrl = (): string => {
   // In development, use the proxy
@@ -55,13 +62,15 @@ export const registerPushSubscription = async (
       method: 'POST',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-MessageBird-Application-Id': MESSAGEBIRD_CONFIG.applicationId
       },
       body: JSON.stringify({
         platform: subscription.platform,
         endpoint: subscription.endpoint,
         keys: subscription.keys,
-        user_id: subscription.user_id || 'admin-user'
+        user_id: subscription.user_id || 'admin-user',
+        application_id: MESSAGEBIRD_CONFIG.applicationId
       })
     });
 
@@ -77,7 +86,7 @@ export const registerPushSubscription = async (
       console.error('❌ Failed to register push subscription:', data);
       return {
         success: false,
-        error: data.errors?.[0]?.description || 'Registration failed'
+        error: data.errors?.[0]?.description || data.message || 'Registration failed'
       };
     }
   } catch (error) {
@@ -104,7 +113,8 @@ export const sendPushNotification = async (
       method: 'POST',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-MessageBird-Application-Id': MESSAGEBIRD_CONFIG.applicationId
       },
       body: JSON.stringify({
         subscriptions: subscriptionIds,
@@ -117,7 +127,8 @@ export const sendPushNotification = async (
           image: payload.image,
           click_action: payload.click_action || '/'
         },
-        data: payload.data || {}
+        data: payload.data || {},
+        application_id: MESSAGEBIRD_CONFIG.applicationId
       })
     });
 
@@ -134,7 +145,7 @@ export const sendPushNotification = async (
       console.error('❌ Push notification failed:', data);
       return {
         success: false,
-        error: data.errors?.[0]?.description || 'Send failed'
+        error: data.errors?.[0]?.description || data.message || 'Send failed'
       };
     }
   } catch (error) {
@@ -189,21 +200,26 @@ export const sendBulkPushNotifications = async (
 // Get push subscription status
 export const getPushSubscriptions = async (apiKey: string) => {
   try {
+    console.log('📱 Loading push subscriptions from MessageBird...');
+    
     const apiBaseUrl = getPushApiBaseUrl();
     const response = await fetch(`${apiBaseUrl}/subscriptions`, {
       method: 'GET',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-MessageBird-Application-Id': MESSAGEBIRD_CONFIG.applicationId
       }
     });
     
     if (response.ok) {
       const data = await response.json();
-      console.log('📱 Push subscriptions:', data);
+      console.log('📱 Push subscriptions loaded:', data);
       return data;
     } else {
-      throw new Error(`Failed to get push subscriptions: ${response.statusText}`);
+      const errorData = await response.json();
+      console.error('❌ Failed to get push subscriptions:', errorData);
+      throw new Error(errorData.errors?.[0]?.description || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
     console.error('❌ Failed to get push subscriptions:', error);
@@ -211,7 +227,40 @@ export const getPushSubscriptions = async (apiKey: string) => {
   }
 };
 
-// Browser push notification setup
+// Test MessageBird Push API connection
+export const testPushConnection = async (apiKey: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    console.log('🧪 Testing MessageBird Push API connection...');
+    
+    const apiBaseUrl = getPushApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/subscriptions`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `AccessKey ${apiKey}`,
+        'Accept': 'application/json',
+        'X-MessageBird-Application-Id': MESSAGEBIRD_CONFIG.applicationId
+      }
+    });
+    
+    if (response.ok) {
+      console.log('✅ MessageBird Push API connection successful');
+      return { success: true };
+    } else {
+      const errorData = await response.json();
+      const errorMsg = errorData.errors?.[0]?.description || errorData.message || `HTTP ${response.status}`;
+      console.error('❌ MessageBird Push API connection failed:', errorMsg);
+      return { success: false, error: errorMsg };
+    }
+  } catch (error) {
+    console.error('💥 MessageBird Push API test error:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Network error' 
+    };
+  }
+};
+
+// Browser push notification setup with MessageBird VAPID keys
 export const setupBrowserPushNotifications = async (): Promise<PushSubscription | null> => {
   try {
     // Check if browser supports push notifications
@@ -231,12 +280,14 @@ export const setupBrowserPushNotifications = async (): Promise<PushSubscription 
     const registration = await navigator.serviceWorker.register('/sw.js');
     console.log('✅ Service worker registered');
 
+    // For now, we'll use a placeholder VAPID key
+    // In production, you should get the actual VAPID public key from MessageBird
+    const vapidPublicKey = 'BEl62iUYgUivxIkv69yViEuiBIa40HI80NqIUHI80NqIUHI80NqIUHI80NqIUHI80NqI';
+
     // Subscribe to push notifications
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        'BEl62iUYgUivxIkv69yViEuiBIa40HI80NqIUHI80NqIUHI80NqIUHI80NqIUHI80NqI' // Replace with your VAPID public key
-      )
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
     });
 
     console.log('✅ Push subscription created:', subscription);
@@ -281,3 +332,6 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   }
   return window.btoa(binary);
 }
+
+// Get MessageBird configuration
+export const getMessageBirdConfig = () => MESSAGEBIRD_CONFIG;

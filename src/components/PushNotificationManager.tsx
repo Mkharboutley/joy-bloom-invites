@@ -5,12 +5,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Smartphone, Send, Settings, CheckCircle, AlertTriangle, Globe } from 'lucide-react';
+import { Bell, Smartphone, Send, Settings, CheckCircle, AlertTriangle, Globe, RefreshCw } from 'lucide-react';
 import { 
   setupBrowserPushNotifications, 
   registerPushSubscription, 
   sendPushNotification,
   getPushSubscriptions,
+  testPushConnection,
+  getMessageBirdConfig,
   type PushNotificationPayload 
 } from '@/services/messageBirdPushService';
 import { useToast } from '@/hooks/use-toast';
@@ -24,11 +26,14 @@ const PushNotificationManager = () => {
     icon: '/logo2.png'
   });
   const [loading, setLoading] = useState(false);
+  const [testingConnection, setTestingConnection] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<{ success?: boolean; error?: string } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     checkPushSupport();
     loadSubscriptions();
+    testConnection();
   }, []);
 
   const checkPushSupport = () => {
@@ -45,6 +50,21 @@ const PushNotificationManager = () => {
     }
   };
 
+  const testConnection = async () => {
+    const apiKey = localStorage.getItem('messagebird_api_key');
+    if (!apiKey) return;
+
+    setTestingConnection(true);
+    try {
+      const result = await testPushConnection(apiKey);
+      setConnectionStatus(result);
+    } catch (error) {
+      setConnectionStatus({ success: false, error: 'Connection test failed' });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
   const loadSubscriptions = async () => {
     const apiKey = localStorage.getItem('messagebird_api_key');
     if (!apiKey) return;
@@ -54,6 +74,7 @@ const PushNotificationManager = () => {
       setSubscriptions(data.items || []);
     } catch (error) {
       console.error('Failed to load push subscriptions:', error);
+      // Don't show error toast here as it might be expected during initial setup
     }
   };
 
@@ -75,7 +96,7 @@ const PushNotificationManager = () => {
       if (!subscription) {
         toast({
           title: "خطأ",
-          description: "فشل في إعداد الإشعارات في المتصفح",
+          description: "فشل في إعداد الإشعارات في المتصفح. تأكد من منح الإذن للإشعارات.",
           variant: "destructive"
         });
         return;
@@ -88,16 +109,17 @@ const PushNotificationManager = () => {
         await loadSubscriptions();
         toast({
           title: "تم بنجاح",
-          description: "تم تفعيل الإشعارات الفورية"
+          description: "تم تفعيل الإشعارات الفورية بنجاح"
         });
       } else {
         toast({
-          title: "خطأ",
-          description: result.error || "فشل في تسجيل الإشعارات",
+          title: "خطأ في MessageBird",
+          description: result.error || "فشل في تسجيل الإشعارات مع MessageBird",
           variant: "destructive"
         });
       }
     } catch (error) {
+      console.error('Push subscription error:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ في تفعيل الإشعارات",
@@ -140,7 +162,7 @@ const PushNotificationManager = () => {
         });
       } else {
         toast({
-          title: "خطأ",
+          title: "خطأ في الإرسال",
           description: result.error || "فشل في إرسال الإشعار",
           variant: "destructive"
         });
@@ -156,8 +178,63 @@ const PushNotificationManager = () => {
     }
   };
 
+  const config = getMessageBirdConfig();
+
   return (
     <div className="space-y-6">
+      {/* MessageBird Configuration Status */}
+      <Card className="bg-white/10 backdrop-blur-md border-white/20">
+        <CardHeader>
+          <CardTitle className="text-white text-center flex items-center justify-center gap-2" dir="rtl">
+            <Settings className="w-5 h-5" />
+            حالة إعداد MessageBird Push
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Configuration Display */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+              <h4 className="text-white font-semibold text-sm mb-2" dir="rtl">معرف التطبيق</h4>
+              <p className="text-white/80 text-xs font-mono break-all">{config.applicationId}</p>
+            </div>
+            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+              <h4 className="text-white font-semibold text-sm mb-2" dir="rtl">مُصدر الهوية</h4>
+              <p className="text-white/80 text-xs font-mono break-all">{config.issuer.substring(0, 50)}...</p>
+            </div>
+          </div>
+
+          {/* Connection Status */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {testingConnection ? (
+                <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
+              ) : connectionStatus?.success ? (
+                <CheckCircle className="w-4 h-4 text-green-400" />
+              ) : (
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+              )}
+              <span className={`font-semibold ${
+                testingConnection ? 'text-blue-400' : 
+                connectionStatus?.success ? 'text-green-400' : 'text-red-400'
+              }`} dir="rtl">
+                {testingConnection ? 'جاري اختبار الاتصال...' :
+                 connectionStatus?.success ? 'متصل بـ MessageBird Push API ✅' : 
+                 `خطأ في الاتصال: ${connectionStatus?.error || 'غير معروف'}`}
+              </span>
+            </div>
+            <Button
+              onClick={testConnection}
+              disabled={testingConnection}
+              size="sm"
+              className="bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
+            >
+              <RefreshCw className={`w-4 h-4 ml-2 ${testingConnection ? 'animate-spin' : ''}`} />
+              اختبار الاتصال
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Push Notifications Setup */}
       <Card className="bg-white/10 backdrop-blur-md border-white/20">
         <CardHeader>
@@ -217,7 +294,7 @@ const PushNotificationManager = () => {
           {!isSubscribed && (
             <Button
               onClick={handleSubscribeToPush}
-              disabled={loading || !('serviceWorker' in navigator)}
+              disabled={loading || !('serviceWorker' in navigator) || !connectionStatus?.success}
               className="w-full bg-green-500/20 hover:bg-green-500/30 text-white border border-green-400/30"
             >
               <Smartphone className="w-4 h-4 ml-2" />
@@ -276,7 +353,7 @@ const PushNotificationManager = () => {
 
           <Button
             onClick={handleSendTestNotification}
-            disabled={loading || !isSubscribed || subscriptions.length === 0}
+            disabled={loading || !isSubscribed || subscriptions.length === 0 || !connectionStatus?.success}
             className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
           >
             <Send className="w-4 h-4 ml-2" />
