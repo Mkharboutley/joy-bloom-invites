@@ -1,7 +1,6 @@
-
 import { db } from '@/lib/firebase';
 import { collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc, query, where } from 'firebase/firestore';
-import { sendAdminNotifications } from './notificationService';
+import { triggerGuestConfirmationNotification, triggerGuestApologyNotification } from './notificationRulesService';
 
 export interface Guest {
   id?: string;
@@ -24,8 +23,8 @@ export const confirmAttendance = async (fullName: string): Promise<string> => {
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
     
-    // Send admin notifications
-    await sendAdminNotifications(fullName, docRef.id, 'confirmation');
+    // Trigger notification system
+    await triggerGuestConfirmationNotification(fullName, docRef.id);
     
     return docRef.id;
   } catch (error) {
@@ -46,8 +45,8 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
         apologyTimestamp: serverTimestamp()
       });
       
-      // Send admin notifications
-      await sendAdminNotifications(guestData.fullName, guestDoc.id, 'apology');
+      // Trigger notification system
+      await triggerGuestApologyNotification(guestData.fullName, guestDoc.id);
     } else {
       throw new Error('Guest not found');
     }

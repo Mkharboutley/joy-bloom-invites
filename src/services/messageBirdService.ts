@@ -1,4 +1,6 @@
-// MessageBird SMS Service - Updated for UAE Support
+// MessageBird SMS Service - Updated for UAE Support with Notification Integration
+import { triggerDeliveryFailureNotification } from './notificationRulesService';
+
 export interface SMSResponse {
   success: boolean;
   messageId?: string;
@@ -198,9 +200,12 @@ export const sendSMS = async (
                       data.error || 
                       `HTTP ${response.status}: ${response.statusText}`;
       
-      // Log specific UAE delivery information
+      // Log specific UAE delivery information and trigger notification
       if (cleanPhone.startsWith('971')) {
         console.error('🇦🇪 UAE SMS delivery failed:', errorMsg);
+        
+        // Trigger delivery failure notification
+        await triggerDeliveryFailureNotification(cleanPhone, errorMsg);
         
         // Check for common UAE delivery issues
         if (errorMsg.includes('not supported') || errorMsg.includes('blocked')) {
@@ -219,6 +224,11 @@ export const sendSMS = async (
     }
   } catch (error) {
     console.error('💥 MessageBird SMS Error:', error);
+    
+    // Trigger delivery failure notification for network errors
+    if (phoneNumber) {
+      await triggerDeliveryFailureNotification(phoneNumber, error instanceof Error ? error.message : 'Network error');
+    }
     
     // Handle network errors specifically
     if (error instanceof TypeError && error.message.includes('fetch')) {
