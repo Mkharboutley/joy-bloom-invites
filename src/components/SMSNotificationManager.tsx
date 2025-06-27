@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Send, MessageSquare, Settings, Eye, EyeOff } from 'lucide-react';
+import { Send, MessageSquare, Settings, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
 import { getAdminContacts, type AdminContact } from '@/services/supabaseService';
 import { sendSMS, sendBulkSMS } from '@/services/messageBirdService';
 import { useToast } from '@/hooks/use-toast';
@@ -30,13 +30,15 @@ const SMSNotificationManager = () => {
 
   const loadAdminContacts = async () => {
     try {
+      console.log('🔄 Loading admin contacts...');
       const contacts = await getAdminContacts();
       const smsContacts = contacts.filter(contact => 
         contact.notification_type === 'sms' && contact.phone_number
       );
+      console.log(`📋 Found ${smsContacts.length} SMS contacts out of ${contacts.length} total contacts`);
       setAdminContacts(smsContacts);
     } catch (error) {
-      console.error('Error loading admin contacts:', error);
+      console.error('❌ Error loading admin contacts:', error);
       toast({
         title: "خطأ",
         description: "فشل في تحميل جهات الاتصال",
@@ -55,14 +57,44 @@ const SMSNotificationManager = () => {
       return;
     }
     
-    localStorage.setItem('messagebird_api_key', apiKey);
+    if (apiKey.trim().length < 10) {
+      toast({
+        title: "خطأ",
+        description: "مفتاح API غير صحيح - يجب أن يكون أطول من 10 أحرف",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    localStorage.setItem('messagebird_api_key', apiKey.trim());
+    console.log('💾 API key saved to localStorage');
     toast({
       title: "تم الحفظ",
       description: "تم حفظ مفتاح API بنجاح"
     });
   };
 
+  const validatePhoneNumbers = () => {
+    const invalidContacts = adminContacts.filter(contact => {
+      const phone = contact.phone_number?.replace(/\D/g, '') || '';
+      return phone.length < 9 || (!phone.startsWith('966') && phone.length !== 9);
+    });
+    
+    if (invalidContacts.length > 0) {
+      console.warn('⚠️ Invalid phone numbers found:', invalidContacts);
+      toast({
+        title: "تحذير",
+        description: `${invalidContacts.length} أرقام هواتف غير صحيحة. تأكد من استخدام التنسيق الدولي (966xxxxxxxxx)`,
+        variant: "destructive"
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleTestSMS = async () => {
+    console.log('🧪 Starting SMS test...');
+    
     if (!apiKey.trim()) {
       toast({
         title: "خطأ",
@@ -81,20 +113,40 @@ const SMSNotificationManager = () => {
       return;
     }
 
+    if (!testMessage.trim()) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إدخال نص الرسالة",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!validatePhoneNumbers()) {
+      return;
+    }
+
     setLoading(true);
     setTestResults([]);
 
     try {
+      console.log(`📤 Preparing to send test SMS to ${adminContacts.length} contacts`);
+      console.log('📝 Test message:', testMessage);
+      
       const contacts = adminContacts.map(contact => ({
         phoneNumber: contact.phone_number!,
         message: testMessage
       }));
 
-      const results = await sendBulkSMS(contacts, apiKey);
+      console.log('📞 Contact list:', contacts);
+
+      const results = await sendBulkSMS(contacts, apiKey.trim());
       setTestResults(results);
 
       const successCount = results.filter(r => r.success).length;
       const failCount = results.length - successCount;
+
+      console.log(`📊 Test results: ${successCount} success, ${failCount} failed`);
 
       if (successCount > 0) {
         toast({
@@ -104,15 +156,15 @@ const SMSNotificationManager = () => {
       } else {
         toast({
           title: "فشل الإرسال",
-          description: "فشل في إرسال جميع الرسائل",
+          description: "فشل في إرسال جميع الرسائل. تحقق من مفتاح API وأرقام الهواتف",
           variant: "destructive"
         });
       }
     } catch (error) {
-      console.error('Error sending test SMS:', error);
+      console.error('💥 Error sending test SMS:', error);
       toast({
         title: "خطأ",
-        description: "حدث خطأ أثناء إرسال الرسائل",
+        description: `حدث خطأ أثناء إرسال الرسائل: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`,
         variant: "destructive"
       });
     } finally {
@@ -136,7 +188,7 @@ const SMSNotificationManager = () => {
               <div className="relative flex-1">
                 <Input
                   type={showApiKey ? "text" : "password"}
-                  placeholder="أدخل مفتاح API من MessageBird"
+                  placeholder="أدخل مفتاح API من MessageBird (مثل: NFo58JnOC5jH4khza8pFYXtEzaCiKejmRZUc)"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
@@ -160,6 +212,21 @@ const SMSNotificationManager = () => {
                 حفظ
               </Button>
             </div>
+            {apiKey && (
+              <div className="flex items-center gap-2 text-sm">
+                {apiKey.length >= 10 ? (
+                  <>
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400">مفتاح API صحيح</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                    <span className="text-yellow-400">مفتاح API قصير جداً</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-400/30">
@@ -179,6 +246,8 @@ const SMSNotificationManager = () => {
               2. انقر على "Add access key"
               <br />
               3. انسخ المفتاح والصقه هنا
+              <br />
+              4. تأكد من أن المفتاح يبدأ بأحرف وأرقام (مثل: NFo58JnOC5jH...)
             </p>
           </div>
         </CardContent>
@@ -200,13 +269,17 @@ const SMSNotificationManager = () => {
               onChange={(e) => setTestMessage(e.target.value)}
               className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
               dir="rtl"
+              rows={3}
             />
+            <p className="text-white/60 text-xs" dir="rtl">
+              عدد الأحرف: {testMessage.length} (الحد الأقصى: 160 حرف لرسالة واحدة)
+            </p>
           </div>
 
           <Button
             onClick={handleTestSMS}
-            disabled={loading || !apiKey || adminContacts.length === 0}
-            className="w-full bg-green-500/20 hover:bg-green-500/30 text-white border border-green-400/30"
+            disabled={loading || !apiKey || adminContacts.length === 0 || !testMessage.trim()}
+            className="w-full bg-green-500/20 hover:bg-green-500/30 text-white border border-green-400/30 disabled:opacity-50"
           >
             <Send className="w-4 h-4 ml-2" />
             {loading ? 'جاري الإرسال...' : `إرسال اختبار إلى ${adminContacts.length} جهة اتصال`}
@@ -215,15 +288,26 @@ const SMSNotificationManager = () => {
           {testResults.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-white font-semibold" dir="rtl">نتائج الاختبار:</h4>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-40 overflow-y-auto">
                 {testResults.map((result, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-white/5 rounded">
-                    <span className="text-white text-sm">{result.phoneNumber}</span>
-                    <Badge className={result.success ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
-                      {result.success ? 'نجح' : 'فشل'}
-                    </Badge>
+                  <div key={index} className="flex justify-between items-center p-2 bg-white/5 rounded text-sm">
+                    <span className="text-white">{result.phoneNumber}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge className={result.success ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-red-500/20 text-red-400 border-red-400/30"}>
+                        {result.success ? 'نجح' : 'فشل'}
+                      </Badge>
+                      {!result.success && result.error && (
+                        <span className="text-red-400 text-xs max-w-40 truncate" title={result.error}>
+                          {result.error}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
+              </div>
+              <div className="text-center text-white/80 text-sm">
+                نجح: {testResults.filter(r => r.success).length} | 
+                فشل: {testResults.filter(r => !r.success).length}
               </div>
             </div>
           )}
@@ -249,17 +333,22 @@ const SMSNotificationManager = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {adminContacts.map((contact) => (
-                    <TableRow key={contact.id} className="border-white/20 hover:bg-white/5">
-                      <TableCell className="text-white text-right">{contact.name}</TableCell>
-                      <TableCell className="text-white text-right">{contact.phone_number}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge className="bg-green-500/20 text-green-400 border-green-400/30">
-                          نشط
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {adminContacts.map((contact) => {
+                    const phone = contact.phone_number?.replace(/\D/g, '') || '';
+                    const isValidPhone = phone.length >= 9 && (phone.startsWith('966') || phone.length === 9);
+                    
+                    return (
+                      <TableRow key={contact.id} className="border-white/20 hover:bg-white/5">
+                        <TableCell className="text-white text-right">{contact.name}</TableCell>
+                        <TableCell className="text-white text-right">{contact.phone_number}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge className={isValidPhone ? "bg-green-500/20 text-green-400 border-green-400/30" : "bg-yellow-500/20 text-yellow-400 border-yellow-400/30"}>
+                            {isValidPhone ? 'صحيح' : 'تحقق من الرقم'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
