@@ -5,6 +5,90 @@ export interface SMSResponse {
   error?: string;
 }
 
+// Test MessageBird connection without sending actual SMS
+export const testMessageBirdConnection = async (apiKey: string): Promise<SMSResponse> => {
+  try {
+    console.log('🧪 Testing MessageBird API connection...');
+    console.log(`📱 Using API Key: ${apiKey.substring(0, 8)}...`);
+    
+    // Validate API key format
+    if (!apiKey || apiKey.trim().length < 10) {
+      console.error('❌ Invalid API key format');
+      return {
+        success: false,
+        error: 'Invalid API key format - must be at least 10 characters'
+      };
+    }
+    
+    // Test API key by making a simple balance request
+    const response = await fetch('https://rest.messagebird.com/balance', {
+      method: 'GET',
+      headers: {
+        'Authorization': `AccessKey ${apiKey.trim()}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log(`📡 Balance API Response status: ${response.status} ${response.statusText}`);
+    
+    const responseText = await response.text();
+    console.log('📥 Balance API Raw response:', responseText);
+    
+    if (response.ok) {
+      console.log('✅ MessageBird API key is valid');
+      return {
+        success: true,
+        messageId: 'connection-test'
+      };
+    } else {
+      // Handle specific API key errors
+      if (response.status === 401 || response.status === 403) {
+        const errorMsg = 'Invalid API key or insufficient permissions. Please check your MessageBird API key.';
+        console.error('❌ Authentication error:', errorMsg);
+        return {
+          success: false,
+          error: errorMsg
+        };
+      }
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse error response as JSON:', parseError);
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${response.statusText}`
+        };
+      }
+      
+      const errorMsg = data.errors?.[0]?.description || 
+                      data.error || 
+                      `HTTP ${response.status}: ${response.statusText}`;
+      console.error('❌ API key test failed:', errorMsg);
+      return {
+        success: false,
+        error: errorMsg
+      };
+    }
+  } catch (error) {
+    console.error('💥 MessageBird Connection Test Error:', error);
+    
+    // Handle network errors specifically
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        success: false,
+        error: 'Network error - please check your internet connection'
+      };
+    }
+    
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error occurred'
+    };
+  }
+};
+
 export const sendSMS = async (
   phoneNumber: string, 
   message: string, 

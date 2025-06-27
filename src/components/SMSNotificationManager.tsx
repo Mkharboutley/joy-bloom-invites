@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Send, MessageSquare, Settings, Eye, EyeOff, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { getAdminContacts, type AdminContact } from '@/services/supabaseService';
-import { sendSMS, sendBulkSMS } from '@/services/messageBirdService';
+import { sendSMS, sendBulkSMS, testMessageBirdConnection } from '@/services/messageBirdService';
 import { useToast } from '@/hooks/use-toast';
 
 const SMSNotificationManager = () => {
@@ -87,8 +87,8 @@ const SMSNotificationManager = () => {
 
     setTestingApiKey(true);
     try {
-      // Test with a dummy number to validate API key
-      const testResult = await sendSMS('971501234567', 'Test message', apiKey.trim());
+      console.log('🧪 Testing MessageBird API key...');
+      const testResult = await testMessageBirdConnection(apiKey.trim());
       
       if (testResult.success) {
         toast({
@@ -96,20 +96,11 @@ const SMSNotificationManager = () => {
           description: "تم التحقق من صحة مفتاح API بنجاح",
         });
       } else {
-        // Check if it's an API key error specifically
-        if (testResult.error?.includes('Invalid API key') || testResult.error?.includes('incorrect access_key')) {
-          toast({
-            title: "مفتاح API غير صحيح",
-            description: "الرجاء التحقق من مفتاح API في لوحة تحكم MessageBird",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "تحذير",
-            description: `مفتاح API قد يكون صحيح ولكن: ${testResult.error}`,
-            variant: "destructive"
-          });
-        }
+        toast({
+          title: "مفتاح API غير صحيح",
+          description: testResult.error || "الرجاء التحقق من مفتاح API في لوحة تحكم MessageBird",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       toast({
@@ -255,7 +246,7 @@ const SMSNotificationManager = () => {
               <div className="relative flex-1">
                 <Input
                   type={showApiKey ? "text" : "password"}
-                  placeholder="أدخل مفتاح API من MessageBird (مثل: NFo58JnOC5jH4khza8pFYXtEzaCiKejmRZUc)"
+                  placeholder="أدخل مفتاح API من MessageBird (مثل: cNt1noVlxmOEZ7SmlHI0TbDSUKC3lS1Q8psv)"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   className="bg-white/10 border-white/20 text-white placeholder:text-white/50 pr-10"
@@ -340,6 +331,15 @@ const SMSNotificationManager = () => {
               • تأكد من تفعيل صلاحية "Messages" في إعدادات المفتاح
               <br />
               • جرب إنشاء مفتاح API جديد إذا استمر الخطأ
+            </p>
+          </div>
+
+          {/* Quick Setup Helper */}
+          <div className="p-3 bg-green-500/10 rounded-lg border border-green-400/30">
+            <p className="text-green-400 text-sm" dir="rtl">
+              <strong>إعداد سريع:</strong>
+              <br />
+              إذا كان لديك مفتاح API صحيح، الصقه في الحقل أعلاه واضغط "حفظ" ثم "اختبار" للتأكد من عمله.
             </p>
           </div>
         </CardContent>
