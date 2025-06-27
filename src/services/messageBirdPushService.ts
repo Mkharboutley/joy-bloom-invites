@@ -1,6 +1,4 @@
 // MessageBird Push Notifications Service
-import { getApiBaseUrl } from './messageBirdService';
-
 export interface PushNotificationPayload {
   title: string;
   body: string;
@@ -34,6 +32,16 @@ export interface PushResponse {
   };
 }
 
+// Get the correct MessageBird Push API base URL
+const getPushApiBaseUrl = (): string => {
+  // In development, use the proxy
+  if (import.meta.env.DEV) {
+    return '/messagebird-push-api';
+  }
+  // In production, use the actual Push API endpoint
+  return 'https://push.messagebird.com/v1';
+};
+
 // Register push subscription with MessageBird
 export const registerPushSubscription = async (
   apiKey: string,
@@ -42,8 +50,8 @@ export const registerPushSubscription = async (
   try {
     console.log('📱 Registering push subscription with MessageBird...');
     
-    const apiBaseUrl = getApiBaseUrl();
-    const response = await fetch(`${apiBaseUrl}/push/subscriptions`, {
+    const apiBaseUrl = getPushApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/subscriptions`, {
       method: 'POST',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
@@ -91,8 +99,8 @@ export const sendPushNotification = async (
     console.log(`📤 Sending push notification to ${subscriptionIds.length} devices...`);
     console.log('📋 Payload:', payload);
     
-    const apiBaseUrl = getApiBaseUrl();
-    const response = await fetch(`${apiBaseUrl}/push/messages`, {
+    const apiBaseUrl = getPushApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,
@@ -181,8 +189,8 @@ export const sendBulkPushNotifications = async (
 // Get push subscription status
 export const getPushSubscriptions = async (apiKey: string) => {
   try {
-    const apiBaseUrl = getApiBaseUrl();
-    const response = await fetch(`${apiBaseUrl}/push/subscriptions`, {
+    const apiBaseUrl = getPushApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/subscriptions`, {
       method: 'GET',
       headers: {
         'Authorization': `AccessKey ${apiKey}`,

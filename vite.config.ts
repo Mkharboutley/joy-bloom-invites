@@ -18,6 +18,16 @@ export default defineConfig(({ mode }) => ({
         headers: {
           'User-Agent': 'Wedding-App/1.0'
         }
+      },
+      // Proxy MessageBird Push API requests to avoid CORS issues in development
+      '/messagebird-push-api': {
+        target: 'https://push.messagebird.com/v1',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/messagebird-push-api/, ''),
+        secure: true,
+        headers: {
+          'User-Agent': 'Wedding-App/1.0'
+        }
       }
     }
   },
