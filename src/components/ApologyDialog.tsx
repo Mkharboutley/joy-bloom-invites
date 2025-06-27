@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,7 +48,7 @@ const ApologyDialog = ({ invitationId, onApologySuccess }: ApologyDialogProps) =
       <AlertDialogTrigger asChild>
         <Button 
           variant="destructive" 
-          className="w-full bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm text-white border border-red-400/30 hover:border-red-400/50"
+          className="w-full bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm text-white border border-red-400/30 hover:border-red-400/50 rounded-xl"
         >
           الإعتذار عن الحضور
         </Button>
@@ -64,13 +63,13 @@ const ApologyDialog = ({ invitationId, onApologySuccess }: ApologyDialogProps) =
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex gap-2">
-          <AlertDialogCancel className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+          <AlertDialogCancel className="bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-xl">
             لا
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleApology}
             disabled={loading}
-            className="bg-red-500/20 hover:bg-red-500/30 text-white border border-red-400/30"
+            className="bg-red-500/20 hover:bg-red-500/30 text-white border border-red-400/30 rounded-xl"
           >
             {loading ? 'جاري الإلغاء...' : 'نعم'}
           </AlertDialogAction>

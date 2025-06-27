@@ -92,9 +92,8 @@ const Index = () => {
                 placeholder="الرجاء إدخال الإسم الكامل"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md shadow-xl focus:bg-white/30 focus:border-white/60 transition-all"
+                className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md shadow-xl focus:bg-white/30 focus:border-white/60 transition-all rounded-xl"
                 style={{ 
-                  borderRadius: '12px',
                   fontSize: '16px', // Increased from 14px (text-sm) to 16px (14px * 1.15 ≈ 16px)
                   height: '52.8px' // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
                 }}

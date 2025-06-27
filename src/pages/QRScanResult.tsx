@@ -126,7 +126,7 @@ const QRScanResult = () => {
                   href={venueLocation}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-4 rounded-2xl text-center transition-all duration-300 border border-white/20 hover:border-white/40"
+                  className="flex items-center justify-center gap-3 w-auto max-w-xs mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 border border-white/20 hover:border-white/40"
                   style={{ 
                     boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 4px rgba(255, 255, 255, 0.3), 0 0 8px rgba(255, 255, 255, 0.2)',
                     filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))'
