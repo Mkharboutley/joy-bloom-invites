@@ -36,6 +36,7 @@ const SMSNotificationManager = () => {
       );
       setAdminContacts(smsContacts);
     } catch (error) {
+      console.error('Error loading admin contacts:', error);
       toast({
         title: "خطأ",
         description: "فشل في تحميل جهات الاتصال",
@@ -108,6 +109,7 @@ const SMSNotificationManager = () => {
         });
       }
     } catch (error) {
+      console.error('Error sending test SMS:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء إرسال الرسائل",
@@ -164,7 +166,15 @@ const SMSNotificationManager = () => {
             <p className="text-blue-400 text-sm" dir="rtl">
               <strong>كيفية الحصول على مفتاح API:</strong>
               <br />
-              1. اذهب إلى <a href="https://dashboard.messagebird.com/en/developers/access" target="_blank" className="underline">MessageBird Dashboard</a>
+              1. اذهب إلى{' '}
+              <a 
+                href="https://dashboard.messagebird.com/en/developers/access" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-blue-300"
+              >
+                MessageBird Dashboard
+              </a>
               <br />
               2. انقر على "Add access key"
               <br />
