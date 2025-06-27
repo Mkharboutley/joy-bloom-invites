@@ -8,15 +8,12 @@ import Index from "./pages/Index";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import QRScanResult from "./pages/QRScanResult";
 import AdminDashboard from "./pages/AdminDashboard";
-import WeddingInvitation from "./pages/WeddingInvitation";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
-  const isWeddingPage = location.pathname === '/wedding';
 
   const handleVideoError = () => {
     console.log('Video failed to load from /G22.mp4');
@@ -28,16 +25,15 @@ const AppContent = () => {
 
   return (
     <>
-      {!isAdminPage && !isWeddingPage && (
+      {!isAdminPage && (
         <VideoBackground onError={handleVideoError} onLoad={handleVideoLoad} />
       )}
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/wedding" element={<WeddingInvitation />} />
         <Route path="/confirmation/:guestId" element={<ConfirmationPage />} />
         <Route path="/scan/:invitationId" element={<QRScanResult />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

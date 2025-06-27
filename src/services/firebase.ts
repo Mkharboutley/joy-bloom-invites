@@ -1,5 +1,18 @@
-import { db } from '@/lib/firebase';
-import { collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc, query, where } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC2GHe8k-8ceL0ikWmkoUUILIyuQCBfWSk",
+  authDomain: "wedding-f09cd.firebaseapp.com",
+  projectId: "wedding-f09cd",
+  storageBucket: "wedding-f09cd.firebasestorage.app",
+  messagingSenderId: "1024579602427",
+  appId: "1:1024579602427:web:eefb44a0779632ad88ed5e",
+  measurementId: "G-N7Q3EF4796"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export interface Guest {
   id?: string;
