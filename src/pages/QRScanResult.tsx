@@ -63,7 +63,7 @@ const QRScanResult = () => {
     );
   }
 
-  const venueLocation = "https://maps.app.goo.gl/ini1momzSFJN5g4DA";
+  const venueLocation = "https://maps.app.goo.gl/E9sp6ayDb96DTnNG6";
 
   return (
     <div className="min-h-screen relative overflow-hidden">
