@@ -112,6 +112,31 @@
   }
 }
 
+/* Wedding logo glow animation */
+@keyframes gentleGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3)) 
+            drop-shadow(0 0 16px rgba(255, 255, 255, 0.2)) 
+            drop-shadow(0 0 24px rgba(255, 255, 255, 0.1));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5)) 
+            drop-shadow(0 0 24px rgba(255, 255, 255, 0.3)) 
+            drop-shadow(0 0 36px rgba(255, 255, 255, 0.2));
+  }
+}
+
+.wedding-logo-glow {
+  animation: gentleGlow 4s ease-in-out infinite;
+  transition: filter 0.3s ease;
+}
+
+.wedding-logo-glow:hover {
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.6)) 
+          drop-shadow(0 0 32px rgba(255, 255, 255, 0.4)) 
+          drop-shadow(0 0 48px rgba(255, 255, 255, 0.3)) !important;
+}
+
 /* Force dark background for all select dropdowns */
 @layer components {
   /* Target all select dropdown content */
