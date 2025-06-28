@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AttendanceStatusView from '@/components/AttendanceStatusView';
 import NotificationManagement from '@/components/NotificationManagement';
-import WhatsAppBulkSender from '@/components/WhatsAppBulkSender';
 
 const AdminDashboard = () => {
   return (
@@ -37,20 +36,13 @@ const AdminDashboard = () => {
 
           {/* Admin Dashboard Tabs */}
           <Tabs defaultValue="attendance" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-md">
+            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-md">
               <TabsTrigger 
                 value="attendance" 
                 className="data-[state=active]:bg-white/20 text-white text-xs"
                 dir="rtl"
               >
                 حالة الحضور
-              </TabsTrigger>
-              <TabsTrigger 
-                value="whatsapp" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                دعوات واتساب
               </TabsTrigger>
               <TabsTrigger 
                 value="notifications" 
@@ -63,10 +55,6 @@ const AdminDashboard = () => {
             
             <TabsContent value="attendance" className="space-y-6 mt-6">
               <AttendanceStatusView />
-            </TabsContent>
-            
-            <TabsContent value="whatsapp" className="space-y-6 mt-6">
-              <WhatsAppBulkSender />
             </TabsContent>
             
             <TabsContent value="notifications" className="space-y-6 mt-6">
