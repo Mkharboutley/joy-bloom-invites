@@ -1,5 +1,3 @@
-import twilio from 'twilio';
-
 interface TwilioConfig {
   accountSid: string;
   authToken: string;
@@ -27,21 +25,22 @@ interface MessageStatus {
 
 class TwilioWhatsAppService {
   private static instance: TwilioWhatsAppService;
-  private client: twilio.Twilio;
   private config: TwilioConfig;
+  private apiBaseUrl: string;
 
   private constructor() {
     this.config = {
       accountSid: import.meta.env.VITE_TWILIO_ACCOUNT_SID || '',
       authToken: import.meta.env.VITE_TWILIO_AUTH_TOKEN || '',
-      whatsappNumber: import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886', // Twilio Sandbox number
+      whatsappNumber: import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
     };
+
+    // Use Supabase Edge Functions for backend API calls
+    this.apiBaseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
 
     if (!this.config.accountSid || !this.config.authToken) {
       console.warn('Twilio credentials not found. Please set VITE_TWILIO_ACCOUNT_SID and VITE_TWILIO_AUTH_TOKEN');
     }
-
-    this.client = twilio(this.config.accountSid, this.config.authToken);
   }
 
   public static getInstance(): TwilioWhatsAppService {
@@ -52,17 +51,30 @@ class TwilioWhatsAppService {
   }
 
   /**
-   * Send a simple WhatsApp message
+   * Send a simple WhatsApp message via backend API
    */
   async sendMessage(message: WhatsAppMessage): Promise<{ success: boolean; sid?: string; error?: string }> {
     try {
-      const result = await this.client.messages.create({
-        from: this.config.whatsappNumber,
-        to: `whatsapp:${message.to}`,
-        body: message.body,
-        ...(message.mediaUrl && { mediaUrl: [message.mediaUrl] })
+      const response = await fetch(`${this.apiBaseUrl}/whatsapp-send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          to: message.to,
+          body: message.body,
+          mediaUrl: message.mediaUrl,
+          from: this.config.whatsappNumber
+        })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
+      }
+
+      const result = await response.json();
       console.log('WhatsApp message sent successfully:', result.sid);
       return { success: true, sid: result.sid };
     } catch (error: any) {
@@ -75,17 +87,30 @@ class TwilioWhatsAppService {
   }
 
   /**
-   * Send WhatsApp message using approved template
+   * Send WhatsApp message using approved template via backend API
    */
   async sendTemplateMessage(template: WhatsAppTemplate): Promise<{ success: boolean; sid?: string; error?: string }> {
     try {
-      const result = await this.client.messages.create({
-        from: this.config.whatsappNumber,
-        to: `whatsapp:${template.to}`,
-        contentSid: template.templateSid,
-        ...(template.contentVariables && { contentVariables: JSON.stringify(template.contentVariables) })
+      const response = await fetch(`${this.apiBaseUrl}/whatsapp-template`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          to: template.to,
+          templateSid: template.templateSid,
+          contentVariables: template.contentVariables,
+          from: this.config.whatsappNumber
+        })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send template message');
+      }
+
+      const result = await response.json();
       console.log('WhatsApp template message sent successfully:', result.sid);
       return { success: true, sid: result.sid };
     } catch (error: any) {
@@ -184,62 +209,75 @@ _نتطلع لرؤيتكم في هذا اليوم المميز_`,
   }
 
   /**
-   * Send bulk invitations to multiple contacts
+   * Send bulk invitations to multiple contacts via backend API
    */
   async sendBulkInvitations(
     contacts: Array<{ name: string; phoneNumber: string }>,
     mediaUrl?: string,
     onProgress?: (sent: number, total: number) => void
   ): Promise<{ successful: number; failed: number; results: Array<{ contact: any; success: boolean; error?: string }> }> {
-    const results: Array<{ contact: any; success: boolean; error?: string }> = [];
-    let successful = 0;
-    let failed = 0;
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/whatsapp-bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          contacts,
+          mediaUrl,
+          from: this.config.whatsappNumber
+        })
+      });
 
-    for (let i = 0; i < contacts.length; i++) {
-      const contact = contacts[i];
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send bulk messages');
+      }
+
+      const result = await response.json();
       
-      try {
-        const success = await this.sendWeddingInvitation(contact.phoneNumber, contact.name, mediaUrl);
-        
-        if (success) {
-          successful++;
-          results.push({ contact, success: true });
-        } else {
-          failed++;
-          results.push({ contact, success: false, error: 'Failed to send message' });
-        }
-      } catch (error: any) {
-        failed++;
-        results.push({ contact, success: false, error: error.message });
-      }
-
-      // Update progress
+      // Simulate progress updates if callback provided
       if (onProgress) {
-        onProgress(i + 1, contacts.length);
+        onProgress(contacts.length, contacts.length);
       }
 
-      // Add delay between messages to avoid rate limiting
-      if (i < contacts.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-      }
+      return result;
+    } catch (error: any) {
+      console.error('Error sending bulk invitations:', error);
+      
+      // Return failed result for all contacts
+      const results = contacts.map(contact => ({
+        contact,
+        success: false,
+        error: error.message
+      }));
+
+      return {
+        successful: 0,
+        failed: contacts.length,
+        results
+      };
     }
-
-    return { successful, failed, results };
   }
 
   /**
-   * Get message status
+   * Get message status via backend API
    */
   async getMessageStatus(messageSid: string): Promise<MessageStatus | null> {
     try {
-      const message = await this.client.messages(messageSid).fetch();
-      
-      return {
-        sid: message.sid,
-        status: message.status as MessageStatus['status'],
-        errorCode: message.errorCode || undefined,
-        errorMessage: message.errorMessage || undefined
-      };
+      const response = await fetch(`${this.apiBaseUrl}/whatsapp-status/${messageSid}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch message status');
+      }
+
+      return await response.json();
     } catch (error: any) {
       console.error('Error fetching message status:', error);
       return null;
@@ -247,129 +285,27 @@ _نتطلع لرؤيتكم في هذا اليوم المميز_`,
   }
 
   /**
-   * Handle incoming WhatsApp messages (webhook)
+   * Handle incoming WhatsApp messages (webhook) via backend API
    */
   async handleIncomingMessage(webhookData: any): Promise<void> {
     try {
-      const { From, Body, MessageSid } = webhookData;
-      const phoneNumber = From.replace('whatsapp:', '');
-      const messageBody = Body?.toLowerCase() || '';
+      const response = await fetch(`${this.apiBaseUrl}/whatsapp-webhook`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(webhookData)
+      });
 
-      console.log(`Received WhatsApp message from ${phoneNumber}: ${Body}`);
-
-      // Auto-respond based on message content
-      if (messageBody.includes('موقع') || messageBody.includes('عنوان') || messageBody.includes('location')) {
-        await this.sendLocationResponse(phoneNumber);
-      } else if (messageBody.includes('وقت') || messageBody.includes('تاريخ') || messageBody.includes('time')) {
-        await this.sendEventDetailsResponse(phoneNumber);
-      } else if (messageBody.includes('تأكيد') || messageBody.includes('confirm')) {
-        await this.sendConfirmationInstructions(phoneNumber);
-      } else {
-        await this.sendDefaultResponse(phoneNumber);
+      if (!response.ok) {
+        throw new Error('Failed to handle incoming message');
       }
 
+      console.log('Incoming message handled successfully');
     } catch (error) {
       console.error('Error handling incoming WhatsApp message:', error);
     }
-  }
-
-  /**
-   * Send location response
-   */
-  private async sendLocationResponse(phoneNumber: string): Promise<void> {
-    const message: WhatsAppMessage = {
-      to: phoneNumber,
-      body: `📍 *موقع فندق إرث*
-
-🏨 العنوان: [عنوان الفندق]
-🗺️ رابط الخريطة: https://maps.app.goo.gl/E9sp6ayDb96DTnNG6
-
-🚗 *للوصول بالسيارة:*
-- يمكنكم استخدام تطبيق خرائط جوجل للحصول على أفضل طريق
-
-🚕 *للوصول بالتاكسي:*
-- يمكنكم إظهار هذا الموقع للسائق
-
-نتطلع لرؤيتكم! 🎉`
-    };
-
-    await this.sendMessage(message);
-  }
-
-  /**
-   * Send event details response
-   */
-  private async sendEventDetailsResponse(phoneNumber: string): Promise<void> {
-    const message: WhatsAppMessage = {
-      to: phoneNumber,
-      body: `🎊 *تفاصيل حفل الزفاف*
-
-📅 *التاريخ:* الجمعة، ٤ يوليو ٢٠٢٥
-🕰️ *الوقت:* ٨:٣٠ مساءً
-📍 *المكان:* فندق إرث
-
-⏰ *جدول الفعاليات:*
-- ٨:٣٠ م: استقبال الضيوف
-- ٩:٠٠ م: بداية الحفل
-- ١١:٠٠ م: العشاء
-- ١٢:٠٠ ص: انتهاء الحفل
-
-👔 *الزي المطلوب:* رسمي
-
-بحضوركم تكتمل سعادتنا! ✨`
-    };
-
-    await this.sendMessage(message);
-  }
-
-  /**
-   * Send confirmation instructions
-   */
-  private async sendConfirmationInstructions(phoneNumber: string): Promise<void> {
-    const message: WhatsAppMessage = {
-      to: phoneNumber,
-      body: `✅ *تأكيد الحضور*
-
-لتأكيد حضوركم، يرجى زيارة الرابط التالي:
-${window.location.origin}
-
-📝 *خطوات التأكيد:*
-1. اضغط على الرابط أعلاه
-2. أدخل اسمكم الكامل
-3. اضغط على "تأكيد الحضور"
-4. ستحصلون على رمز QR خاص بكم
-
-🎫 *أهمية رمز QR:*
-- احتفظوا به في هاتفكم
-- أحضروه معكم يوم الحفل
-- سيتم مسحه عند الدخول
-
-شكراً لكم! 💕`
-    };
-
-    await this.sendMessage(message);
-  }
-
-  /**
-   * Send default response
-   */
-  private async sendDefaultResponse(phoneNumber: string): Promise<void> {
-    const message: WhatsAppMessage = {
-      to: phoneNumber,
-      body: `🙏 *شكراً لتواصلكم معنا!*
-
-للمساعدة، يمكنكم كتابة:
-• "موقع" - لمعرفة عنوان الفندق
-• "وقت" - لمعرفة تفاصيل الحفل  
-• "تأكيد" - لمعرفة كيفية تأكيد الحضور
-
-أو تواصلوا معنا مباشرة على:
-📞 [رقم الهاتف]
-
-نحن هنا لمساعدتكم! 💕`
-    };
-
-    await this.sendMessage(message);
   }
 
   /**
