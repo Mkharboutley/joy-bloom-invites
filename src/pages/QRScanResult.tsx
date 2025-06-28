@@ -137,7 +137,7 @@ const QRScanResult = () => {
                     alt="موقع الخريطة" 
                     className="h-10"
                     style={{ 
-                      width: '64.8px', // 35% more than original width (48px * 1.35 = 64.8px)
+                      width: '84.8px', // 35% more than original width (48px * 1.35 = 64.8px)
                       filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.8))'
                     }}
                   />
