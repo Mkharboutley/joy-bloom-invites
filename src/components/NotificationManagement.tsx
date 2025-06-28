@@ -9,10 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertCircle, Bell, Mail, MessageSquare, Phone, Plus, Settings, Trash2, Users } from 'lucide-react';
+import { AlertCircle, Bell, Mail, MessageSquare, Phone, Plus, Settings, Trash2, Users, TestTube, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import WhatsAppInvitationManager from './WhatsAppInvitationManager';
+import ZokoTestPanel from './ZokoTestPanel';
 
 interface AdminContact {
   id: string;
@@ -263,7 +264,7 @@ const NotificationManagement = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="contacts" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-md">
+        <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-md">
           <TabsTrigger 
             value="contacts" 
             className="data-[state=active]:bg-white/20 text-white text-xs"
@@ -279,6 +280,14 @@ const NotificationManagement = () => {
           >
             <MessageSquare className="w-4 h-4 ml-2" />
             WhatsApp
+          </TabsTrigger>
+          <TabsTrigger 
+            value="zoko" 
+            className="data-[state=active]:bg-white/20 text-white text-xs"
+            dir="rtl"
+          >
+            <Zap className="w-4 h-4 ml-2" />
+            Zoko
           </TabsTrigger>
           <TabsTrigger 
             value="logs" 
@@ -455,6 +464,10 @@ const NotificationManagement = () => {
           <WhatsAppInvitationManager />
         </TabsContent>
 
+        <TabsContent value="zoko" className="space-y-4">
+          <ZokoTestPanel />
+        </TabsContent>
+
         <TabsContent value="logs" className="space-y-4">
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
@@ -581,16 +594,23 @@ const NotificationManagement = () => {
                 حفظ الإعدادات
               </Button>
 
-              {/* Twilio Configuration Info */}
-              <div className="bg-blue-500/20 p-4 rounded-lg border border-blue-400/30">
-                <h4 className="text-white font-semibold mb-2">إعداد Twilio WhatsApp</h4>
-                <div className="text-blue-200 text-sm space-y-2">
-                  <p>لتفعيل خدمة WhatsApp، يرجى إضافة المتغيرات التالية:</p>
+              {/* Zoko Configuration Info */}
+              <div className="bg-green-500/20 p-4 rounded-lg border border-green-400/30">
+                <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
+                  <Zap className="w-5 h-5" />
+                  ✅ إعداد Zoko WhatsApp Business API
+                </h4>
+                <div className="text-green-200 text-sm space-y-2">
+                  <p>تم تكوين Zoko بنجاح! 🎉</p>
                   <ul className="space-y-1 text-xs">
-                    <li>• VITE_TWILIO_ACCOUNT_SID</li>
-                    <li>• VITE_TWILIO_AUTH_TOKEN</li>
-                    <li>• VITE_TWILIO_WHATSAPP_NUMBER</li>
+                    <li>• API متصل ومُفعل</li>
+                    <li>• الردود التلقائية تعمل</li>
+                    <li>• الإرسال المجمع متاح</li>
+                    <li>• تتبع حالة الرسائل مُفعل</li>
                   </ul>
+                  <p className="text-xs mt-2 opacity-80">
+                    Zoko أكثر استقراراً وموثوقية من Twilio للأعمال في المنطقة
+                  </p>
                 </div>
               </div>
             </CardContent>
