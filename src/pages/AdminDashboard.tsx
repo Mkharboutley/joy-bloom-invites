@@ -27,7 +27,7 @@ const AdminDashboard = () => {
                   className="w-[195px] h-[101.25px] object-contain opacity-80"
                 />
                 <CardTitle className="text-white text-2xl text-center" dir="rtl">
-                  لوحة تحكم الإدارة
+                  لوحة التحكم
                 </CardTitle>
               </div>
             </CardHeader>
