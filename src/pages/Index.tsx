@@ -116,12 +116,12 @@ const Index = () => {
               {isLoading ? "جاري التأكيد..." : "تأكيد الحضور"}
             </Button>
 
-            {/* Logo Footer - Made 25% smaller */}
+            {/* Logo Footer - Increased height by 35% */}
             <div className="flex justify-center pt-4">
               <img 
                 src="/logo2.png" 
                 alt="Logo" 
-                className="w-[97.5px] h-[37.5px] object-contain opacity-60"
+                className="w-[97.5px] h-[50.625px] object-contain opacity-60"
               />
             </div>
           </div>
