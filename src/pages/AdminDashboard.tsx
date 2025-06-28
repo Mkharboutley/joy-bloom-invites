@@ -24,7 +24,7 @@ const AdminDashboard = () => {
                 <img 
                   src="/logo2.png" 
                   alt="Logo" 
-                  className="w-[97.5px] h-[50.625px] object-contain opacity-80"
+                  className="w-[195px] h-[101.25px] object-contain opacity-80"
                 />
                 <CardTitle className="text-white text-2xl text-center" dir="rtl">
                   لوحة تحكم الإدارة
