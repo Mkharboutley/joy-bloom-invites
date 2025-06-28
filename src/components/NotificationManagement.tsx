@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertCircle, Bell, Mail, MessageSquare, Phone, Plus, Settings, Trash2, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import WhatsAppInvitationManager from './WhatsAppInvitationManager';
 
 interface AdminContact {
   id: string;
@@ -42,7 +43,7 @@ const NotificationManagement = () => {
     name: '',
     phone_number: '',
     email: '',
-    notification_type: 'sms',
+    notification_type: 'whatsapp',
     is_active: true
   });
   const [notificationSettings, setNotificationSettings] = useState({
@@ -102,10 +103,10 @@ const NotificationManagement = () => {
       return;
     }
 
-    if (newContact.notification_type === 'sms' && !newContact.phone_number.trim()) {
+    if ((newContact.notification_type === 'sms' || newContact.notification_type === 'whatsapp') && !newContact.phone_number.trim()) {
       toast({
         title: "خطأ",
-        description: "الرجاء إدخال رقم الهاتف للإشعارات النصية",
+        description: "الرجاء إدخال رقم الهاتف للإشعارات النصية أو WhatsApp",
         variant: "destructive"
       });
       return;
@@ -136,7 +137,7 @@ const NotificationManagement = () => {
         name: '',
         phone_number: '',
         email: '',
-        notification_type: 'sms',
+        notification_type: 'whatsapp',
         is_active: true
       });
       setIsAddContactOpen(false);
@@ -210,7 +211,7 @@ const NotificationManagement = () => {
           guest_name: 'اختبار النظام',
           guest_id: 'test-notification',
           notification_type: 'test',
-          sent_to: contact.notification_type === 'sms' ? contact.phone_number : contact.email,
+          sent_to: contact.notification_type === 'email' ? contact.email : contact.phone_number,
           sent_via: contact.notification_type,
           status: 'sent'
         }]);
@@ -239,6 +240,8 @@ const NotificationManagement = () => {
         return <MessageSquare className="w-4 h-4" />;
       case 'email':
         return <Mail className="w-4 h-4" />;
+      case 'whatsapp':
+        return <MessageSquare className="w-4 h-4" />;
       case 'push':
         return <Bell className="w-4 h-4" />;
       default:
@@ -260,7 +263,7 @@ const NotificationManagement = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="contacts" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-md">
+        <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-md">
           <TabsTrigger 
             value="contacts" 
             className="data-[state=active]:bg-white/20 text-white text-xs"
@@ -268,6 +271,14 @@ const NotificationManagement = () => {
           >
             <Users className="w-4 h-4 ml-2" />
             جهات الاتصال
+          </TabsTrigger>
+          <TabsTrigger 
+            value="whatsapp" 
+            className="data-[state=active]:bg-white/20 text-white text-xs"
+            dir="rtl"
+          >
+            <MessageSquare className="w-4 h-4 ml-2" />
+            WhatsApp
           </TabsTrigger>
           <TabsTrigger 
             value="logs" 
@@ -328,6 +339,7 @@ const NotificationManagement = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="whatsapp">WhatsApp</SelectItem>
                             <SelectItem value="sms">رسائل نصية (SMS)</SelectItem>
                             <SelectItem value="email">بريد إلكتروني</SelectItem>
                             <SelectItem value="push">إشعارات فورية</SelectItem>
@@ -335,7 +347,7 @@ const NotificationManagement = () => {
                         </Select>
                       </div>
 
-                      {newContact.notification_type === 'sms' && (
+                      {(newContact.notification_type === 'sms' || newContact.notification_type === 'whatsapp') && (
                         <div>
                           <Label className="text-white">رقم الهاتف</Label>
                           <Input
@@ -389,12 +401,13 @@ const NotificationManagement = () => {
                             {getNotificationIcon(contact.notification_type)}
                             <span className="text-white text-sm">
                               {contact.notification_type === 'sms' ? 'رسائل نصية' : 
-                               contact.notification_type === 'email' ? 'بريد إلكتروني' : 'إشعارات فورية'}
+                               contact.notification_type === 'email' ? 'بريد إلكتروني' : 
+                               contact.notification_type === 'whatsapp' ? 'WhatsApp' : 'إشعارات فورية'}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell className="text-white text-right">
-                          {contact.notification_type === 'sms' ? contact.phone_number : contact.email}
+                          {contact.notification_type === 'email' ? contact.email : contact.phone_number}
                         </TableCell>
                         <TableCell className="text-right">
                           <Switch
@@ -438,6 +451,10 @@ const NotificationManagement = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="whatsapp" className="space-y-4">
+          <WhatsAppInvitationManager />
+        </TabsContent>
+
         <TabsContent value="logs" className="space-y-4">
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
@@ -472,7 +489,8 @@ const NotificationManagement = () => {
                             {getNotificationIcon(log.sent_via)}
                             <span className="text-white text-sm">
                               {log.sent_via === 'sms' ? 'SMS' : 
-                               log.sent_via === 'email' ? 'Email' : 'Push'}
+                               log.sent_via === 'email' ? 'Email' : 
+                               log.sent_via === 'whatsapp' ? 'WhatsApp' : 'Push'}
                             </span>
                           </div>
                         </TableCell>
@@ -562,6 +580,19 @@ const NotificationManagement = () => {
               <Button className="w-full bg-green-600 hover:bg-green-700">
                 حفظ الإعدادات
               </Button>
+
+              {/* Twilio Configuration Info */}
+              <div className="bg-blue-500/20 p-4 rounded-lg border border-blue-400/30">
+                <h4 className="text-white font-semibold mb-2">إعداد Twilio WhatsApp</h4>
+                <div className="text-blue-200 text-sm space-y-2">
+                  <p>لتفعيل خدمة WhatsApp، يرجى إضافة المتغيرات التالية:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• VITE_TWILIO_ACCOUNT_SID</li>
+                    <li>• VITE_TWILIO_AUTH_TOKEN</li>
+                    <li>• VITE_TWILIO_WHATSAPP_NUMBER</li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

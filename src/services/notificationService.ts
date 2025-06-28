@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { subscribeToGuests } from './firebase';
+import TwilioWhatsAppService from './twilioWhatsAppService';
 
 interface NotificationContact {
   id: string;
@@ -14,8 +15,10 @@ class NotificationService {
   private static instance: NotificationService;
   private contacts: NotificationContact[] = [];
   private isListening = false;
+  private twilioWhatsApp: TwilioWhatsAppService;
 
   private constructor() {
+    this.twilioWhatsApp = TwilioWhatsAppService.getInstance();
     this.loadContacts();
     this.startGuestListener();
   }
@@ -77,7 +80,7 @@ class NotificationService {
     
     for (const contact of activeContacts) {
       try {
-        // Simulate sending notification (in real implementation, integrate with SMS/Email services)
+        // Send notification based on contact type
         const success = await this.sendToContact(contact, message);
         
         // Log the notification attempt
@@ -107,12 +110,11 @@ class NotificationService {
   }
 
   private async sendToContact(contact: NotificationContact, message: string): Promise<boolean> {
-    // This is where you would integrate with actual notification services
-    // For now, we'll simulate the sending process
-    
+    // Send notifications using Twilio WhatsApp for SMS and WhatsApp
     switch (contact.notification_type) {
       case 'sms':
-        return this.sendSMS(contact.phone_number!, message);
+      case 'whatsapp':
+        return this.sendWhatsAppMessage(contact.phone_number!, message);
       case 'email':
         return this.sendEmail(contact.email!, message);
       case 'push':
@@ -122,14 +124,19 @@ class NotificationService {
     }
   }
 
-  private async sendSMS(phoneNumber: string, message: string): Promise<boolean> {
-    // Integrate with SMS service (Twilio, AWS SNS, etc.)
-    console.log(`Sending SMS to ${phoneNumber}: ${message}`);
-    
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(Math.random() > 0.1), 1000); // 90% success rate
-    });
+  private async sendWhatsAppMessage(phoneNumber: string, message: string): Promise<boolean> {
+    try {
+      const formattedNumber = TwilioWhatsAppService.formatPhoneNumber(phoneNumber);
+      const result = await this.twilioWhatsApp.sendMessage({
+        to: formattedNumber,
+        body: message
+      });
+      
+      return result.success;
+    } catch (error) {
+      console.error('Error sending WhatsApp message:', error);
+      return false;
+    }
   }
 
   private async sendEmail(email: string, message: string): Promise<boolean> {
@@ -179,12 +186,14 @@ class NotificationService {
   }
 
   public async sendConfirmationNotification(guestName: string, guestId: string) {
+    // Send WhatsApp notification to admin contacts
     const message = `🎉 تأكيد حضور جديد!\n\nالضيف: ${guestName}\nرقم الدعوة: ${guestId}\nالوقت: ${new Date().toLocaleString('ar-SA')}`;
     
     await this.sendNotification(guestName, guestId, 'confirmation', message);
   }
 
   public async sendApologyNotification(guestName: string, guestId: string) {
+    // Send WhatsApp notification to admin contacts
     const message = `😔 اعتذار عن الحضور\n\nالضيف: ${guestName}\nرقم الدعوة: ${guestId}\nالوقت: ${new Date().toLocaleString('ar-SA')}`;
     
     await this.sendNotification(guestName, guestId, 'apology', message);
@@ -200,6 +209,23 @@ class NotificationService {
 
   public async refreshContacts() {
     await this.loadContacts();
+  }
+
+  // New methods for bulk invitation sending
+  public async sendBulkInvitations(
+    contacts: Array<{ name: string; phoneNumber: string }>,
+    mediaUrl?: string,
+    onProgress?: (sent: number, total: number) => void
+  ) {
+    return await this.twilioWhatsApp.sendBulkInvitations(contacts, mediaUrl, onProgress);
+  }
+
+  public async sendWeddingInvitation(phoneNumber: string, guestName: string, mediaUrl?: string) {
+    return await this.twilioWhatsApp.sendWeddingInvitation(phoneNumber, guestName, mediaUrl);
+  }
+
+  public async handleIncomingWhatsAppMessage(webhookData: any) {
+    return await this.twilioWhatsApp.handleIncomingMessage(webhookData);
   }
 }
 
