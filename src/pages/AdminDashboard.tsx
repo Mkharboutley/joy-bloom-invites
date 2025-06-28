@@ -20,9 +20,16 @@ const AdminDashboard = () => {
           {/* Header */}
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
-              <CardTitle className="text-white text-2xl text-center" dir="rtl">
-                لوحة تحكم الإدارة
-              </CardTitle>
+              <div className="flex items-center justify-center space-x-4">
+                <img 
+                  src="/logo2.png" 
+                  alt="Logo" 
+                  className="w-[97.5px] h-[50.625px] object-contain opacity-80"
+                />
+                <CardTitle className="text-white text-2xl text-center" dir="rtl">
+                  لوحة تحكم الإدارة
+                </CardTitle>
+              </div>
             </CardHeader>
           </Card>
 
