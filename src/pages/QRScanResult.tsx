@@ -133,7 +133,7 @@ const QRScanResult = () => {
                   }}
                 >
                   <img 
-                    src="/lovable-uploads/1adfbfa7-5732-495d-88ba-048a36661d96.png" 
+                    src="/maps.png" 
                     alt="موقع الخريطة" 
                     className="h-10"
                     style={{ 
