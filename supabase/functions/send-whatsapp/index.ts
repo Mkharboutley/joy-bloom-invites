@@ -45,7 +45,7 @@ serve(async (req) => {
     let whatsappPayload;
 
     if (useTemplate) {
-      // Try a different template structure - maybe without templateId field
+      // Use template message structure exactly as Zoko expects
       whatsappPayload = {
         channel: "whatsapp",
         recipient: formattedPhone,
@@ -89,7 +89,7 @@ serve(async (req) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'apikey': zokoApiKey,
+        'apikey': zokoApiKey, // Changed from Authorization to apikey
       },
       body: JSON.stringify(whatsappPayload),
     });
