@@ -93,7 +93,7 @@ class ZokoWhatsAppService {
   private async callZokoAPI(action: string, data?: any): Promise<any> {
     if (this.isDevelopment) {
       try {
-        return await this.callZokoDirectly(action, data);
+        return await this.callZokoViaProxy(action, data);
       } catch (error) {
         console.warn('Proxy failed, falling back to edge function:', error);
         return await this.callEdgeFunction(action, data);
@@ -104,113 +104,39 @@ class ZokoWhatsAppService {
   }
 
   /**
-   * Call Zoko API directly through Vite proxy (development only)
+   * Call Zoko API via local proxy server (development only)
    */
-  private async callZokoDirectly(action: string, data?: any): Promise<any> {
+  private async callZokoViaProxy(action: string, data?: any): Promise<any> {
     try {
-      let url = '';
-      let method = 'GET';
-      let body = null;
-
-      switch (action) {
-        case 'test_connection':
-          url = `/api/zoko/v2/phone_numbers/${this.config.phoneNumberId}`;
-          method = 'GET';
-          break;
-        case 'send_message':
-          url = `/api/zoko/v2/messages`;
-          method = 'POST';
-          body = JSON.stringify(data.message);
-          break;
-        case 'get_analytics':
-          url = `/api/zoko/v2/messages/${data.messageId}`;
-          method = 'GET';
-          break;
-        default:
-          throw new Error(`Unknown action: ${action}`);
-      }
-
-      console.log(`Making Zoko API call via proxy: ${method} ${url}`);
-      console.log('Request headers:', {
-        'Authorization': `Bearer ${this.config.apiKey.substring(0, 8)}...`,
-        'Content-Type': 'application/json'
-      });
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body,
-      });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      // Check if response is HTML (indicates proxy failure)
-      const contentType = response.headers.get('content-type');
-      console.log('Content-Type:', contentType);
+      const proxyUrl = 'http://localhost:3001/zoko-proxy';
       
-      if (contentType && contentType.includes('text/html')) {
-        console.error('Received HTML instead of JSON - proxy configuration error');
-        throw new Error('Proxy configuration error - received HTML instead of JSON. Check Vite proxy setup.');
-      }
+      console.log(`Making Zoko API call via proxy: ${action}`);
+      
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action, data }),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Zoko API Error Response:', errorText);
-        
-        let error;
-        try {
-          const errorJson = JSON.parse(errorText);
-          error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}`;
-        } catch {
-          error = `HTTP ${response.status}: ${response.statusText}`;
-        }
-        
-        return {
-          success: false,
-          error: error
-        };
+        console.error('Proxy Error Response:', errorText);
+        throw new Error(`Proxy error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('Zoko API Success Response:', result);
-
-      // Format response based on action
-      switch (action) {
-        case 'test_connection':
-          return {
-            success: true,
-            phoneNumber: result.display_phone_number || `+${this.config.phoneNumberId}`,
-            data: result
-          };
-        case 'send_message':
-          return {
-            success: true,
-            messageId: result.messages?.[0]?.id,
-            data: result
-          };
-        default:
-          return {
-            success: true,
-            data: result
-          };
-      }
+      console.log('Proxy Success Response:', result);
+      return result;
     } catch (error: any) {
-      console.error('Direct Zoko API call failed:', error);
+      console.error('Proxy call failed:', error);
       
-      // If it's a proxy error, throw it to trigger fallback
-      if (error.message?.includes('proxy') || error.message?.includes('HTML')) {
-        throw error;
+      if (error.message?.includes('fetch')) {
+        throw new Error('Could not connect to proxy server. Make sure proxy.js is running on port 3001');
       }
       
-      return {
-        success: false,
-        error: error.message || 'Failed to connect to Zoko API'
-      };
+      throw error;
     }
   }
 
