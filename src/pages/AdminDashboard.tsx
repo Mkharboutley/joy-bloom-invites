@@ -1,8 +1,6 @@
-import { useState } from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AttendanceStatusView from '@/components/AttendanceStatusView';
-import NotificationManagement from '@/components/NotificationManagement';
 
 const AdminDashboard = () => {
   return (
@@ -34,33 +32,8 @@ const AdminDashboard = () => {
             </CardHeader>
           </Card>
 
-          {/* Admin Dashboard Tabs */}
-          <Tabs defaultValue="attendance" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-md">
-              <TabsTrigger 
-                value="attendance" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                حالة الحضور
-              </TabsTrigger>
-              <TabsTrigger 
-                value="notifications" 
-                className="data-[state=active]:bg-white/20 text-white text-xs"
-                dir="rtl"
-              >
-                إدارة الإشعارات
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="attendance" className="space-y-6 mt-6">
-              <AttendanceStatusView />
-            </TabsContent>
-            
-            <TabsContent value="notifications" className="space-y-6 mt-6">
-              <NotificationManagement />
-            </TabsContent>
-          </Tabs>
+          {/* Admin Dashboard Content */}
+          <AttendanceStatusView />
         </div>
       </div>
     </div>
