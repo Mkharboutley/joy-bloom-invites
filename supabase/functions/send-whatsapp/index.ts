@@ -1,5 +1,4 @@
 
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -45,7 +44,7 @@ serve(async (req) => {
     let whatsappPayload;
 
     if (useTemplate) {
-      // Use template message for new contacts - FIXED: Using Arabic language
+      // Use template message for new contacts - Using Arabic language
       whatsappPayload = {
         channel: "whatsapp",
         recipient: formattedPhone,
@@ -54,7 +53,7 @@ serve(async (req) => {
         template: {
           name: "01_new",
           language: {
-            code: "ar"  // Changed from "en" to "ar" for Arabic
+            code: "ar"  // Using Arabic language as shown in your template
           },
           components: [
             {
@@ -79,7 +78,7 @@ serve(async (req) => {
       };
     }
 
-    console.log('Sending to Zoko API:', whatsappPayload);
+    console.log('Sending to Zoko API:', JSON.stringify(whatsappPayload, null, 2));
     console.log('API URL:', apiUrl);
 
     const response = await fetch(apiUrl, {
@@ -140,4 +139,3 @@ serve(async (req) => {
     );
   }
 });
-
