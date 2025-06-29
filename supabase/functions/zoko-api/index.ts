@@ -59,18 +59,71 @@ Deno.serve(async (req) => {
               'Accept': 'application/json'
             },
           })
-        } catch (fetchError: any) {
-          console.error('Fetch error details:', {
-            name: fetchError.name,
-            message: fetchError.message,
-            cause: fetchError.cause,
-            stack: fetchError.stack
+          
+          console.log('Zoko API Response Status:', response.status)
+          console.log('Zoko API Response Headers:', Object.fromEntries(response.headers.entries()))
+          
+          if (!response.ok) {
+            console.error(`Fetch failed: ${response.status} ${response.statusText}`)
+            const errorText = await response.text()
+            console.error('Zoko API Error Response:', errorText)
+            
+            let error
+            try {
+              const errorJson = JSON.parse(errorText)
+              error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}: ${response.statusText}`
+            } catch {
+              error = `HTTP ${response.status}: ${response.statusText} - ${errorText}`
+            }
+            
+            // Add specific error messages for common issues
+            if (response.status === 401) {
+              error += ' (Invalid API key or unauthorized access)'
+            } else if (response.status === 404) {
+              error += ' (Phone number not found or invalid phone number ID)'
+            } else if (response.status === 403) {
+              error += ' (Access forbidden - check API permissions)'
+            }
+            
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: error
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            )
+          }
+
+          result = await response.json()
+          console.log('Zoko API Success Response:', result)
+          
+          return new Response(
+            JSON.stringify({
+              success: true,
+              phoneNumber: result.display_phone_number || `+${config.phoneNumberId}`,
+              data: result
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          )
+          
+        } catch (error: any) {
+          console.error('Fetch Error:', error.message || error)
+          console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            cause: error.cause,
+            stack: error.stack
           })
           
           return new Response(
             JSON.stringify({
               success: false,
-              error: `Network error: ${fetchError.message}. Please check if Zoko API is accessible and credentials are correct.`
+              error: `Network error: ${error.message || 'Unknown error'}. Please check if Zoko API is accessible and credentials are correct.`
             }),
             {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -78,57 +131,6 @@ Deno.serve(async (req) => {
             }
           )
         }
-        
-        console.log('Zoko API Response Status:', response.status)
-        console.log('Zoko API Response Headers:', Object.fromEntries(response.headers.entries()))
-        
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('Zoko API Error Response:', errorText)
-          console.error('Zoko API Error Status:', response.status, response.statusText)
-          
-          let error
-          try {
-            const errorJson = JSON.parse(errorText)
-            error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}: ${response.statusText}`
-          } catch {
-            error = `HTTP ${response.status}: ${response.statusText} - ${errorText}`
-          }
-          
-          // Add specific error messages for common issues
-          if (response.status === 401) {
-            error += ' (Invalid API key or unauthorized access)'
-          } else if (response.status === 404) {
-            error += ' (Phone number not found or invalid phone number ID)'
-          } else if (response.status === 403) {
-            error += ' (Access forbidden - check API permissions)'
-          }
-          
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: error
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          )
-        }
-
-        result = await response.json()
-        console.log('Zuko API Success Response:', result)
-        
-        return new Response(
-          JSON.stringify({
-            success: true,
-            phoneNumber: result.display_phone_number || `+${config.phoneNumberId}`,
-            data: result
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
 
       case 'send_message':
         // Send WhatsApp message
@@ -147,12 +149,54 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify(data.message),
           })
-        } catch (fetchError: any) {
-          console.error('Send message fetch error:', fetchError)
+          
+          console.log('Send message response status:', response.status)
+          
+          if (!response.ok) {
+            console.error(`Send message fetch failed: ${response.status} ${response.statusText}`)
+            const errorText = await response.text()
+            console.error('Zoko API Send Message Error:', errorText)
+            
+            let error
+            try {
+              const errorJson = JSON.parse(errorText)
+              error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}: ${response.statusText}`
+            } catch {
+              error = `HTTP ${response.status}: ${response.statusText} - ${errorText}`
+            }
+            
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: error
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            )
+          }
+
+          result = await response.json()
+          console.log('Zoko send message response:', result)
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              messageId: result.messages?.[0]?.id,
+              data: result
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          )
+          
+        } catch (error: any) {
+          console.error('Send message fetch error:', error.message || error)
           return new Response(
             JSON.stringify({
               success: false,
-              error: `Network error while sending message: ${fetchError.message}`
+              error: `Network error while sending message: ${error.message || 'Unknown error'}`
             }),
             {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -160,44 +204,6 @@ Deno.serve(async (req) => {
             }
           )
         }
-
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('Zoko API Send Message Error:', errorText)
-          
-          let error
-          try {
-            const errorJson = JSON.parse(errorText)
-            error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}: ${response.statusText}`
-          } catch {
-            error = `HTTP ${response.status}: ${response.statusText} - ${errorText}`
-          }
-          
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: error
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          )
-        }
-
-        result = await response.json()
-        console.log('Zoko send message response:', result)
-
-        return new Response(
-          JSON.stringify({
-            success: true,
-            messageId: result.messages?.[0]?.id,
-            data: result
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
 
       case 'get_analytics':
         // Get message analytics
@@ -212,45 +218,49 @@ Deno.serve(async (req) => {
               'Accept': 'application/json'
             },
           })
-        } catch (fetchError: any) {
-          console.error('Analytics fetch error:', fetchError)
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: `Network error while fetching analytics: ${fetchError.message}`
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          )
-        }
-
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('Zoko API Analytics Error:', errorText)
-          return new Response(
-            JSON.stringify({
-              success: false,
-              error: `Failed to fetch message analytics: ${response.status} ${response.statusText}`
-            }),
-            {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
-            }
-          )
-        }
-
-        result = await response.json()
-        return new Response(
-          JSON.stringify({
-            success: true,
-            data: result
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          
+          console.log('Analytics response status:', response.status)
+          
+          if (!response.ok) {
+            console.error(`Analytics fetch failed: ${response.status} ${response.statusText}`)
+            const errorText = await response.text()
+            console.error('Zoko API Analytics Error:', errorText)
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: `Failed to fetch message analytics: ${response.status} ${response.statusText}`
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200
+              }
+            )
           }
-        )
+
+          result = await response.json()
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: result
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          )
+          
+        } catch (error: any) {
+          console.error('Analytics fetch error:', error.message || error)
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: `Network error while fetching analytics: ${error.message || 'Unknown error'}`
+            }),
+            {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 200
+            }
+          )
+        }
 
       default:
         return new Response(
@@ -277,7 +287,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: `Internal server error: ${error.message}`
+        error: `Internal server error: ${error.message || 'Unknown error'}`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
