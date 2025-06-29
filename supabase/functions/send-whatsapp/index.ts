@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
         type: "template",
         templateId: "01",
         channel: "whatsapp",
-        to: formattedPhone,
+        recipient: formattedPhone,
         language: "ar",
         templateData: {
           params: [guestName || "الضيف الكريم"]
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       whatsappPayload = {
         type: "text",
         channel: "whatsapp",
-        to: formattedPhone,
+        recipient: formattedPhone,
         message: message
       };
     }
