@@ -88,11 +88,16 @@ class ZokoWhatsAppService {
   }
 
   /**
-   * Call Zoko API - use proxy in development, edge function in production
+   * Call Zoko API - try proxy first, then edge function as fallback
    */
   private async callZokoAPI(action: string, data?: any): Promise<any> {
     if (this.isDevelopment) {
-      return this.callZokoDirectly(action, data);
+      try {
+        return await this.callZokoDirectly(action, data);
+      } catch (error) {
+        console.warn('Proxy failed, falling back to edge function:', error);
+        return await this.callEdgeFunction(action, data);
+      }
     } else {
       return this.callEdgeFunction(action, data);
     }
@@ -196,6 +201,12 @@ class ZokoWhatsAppService {
       }
     } catch (error: any) {
       console.error('Direct Zoko API call failed:', error);
+      
+      // If it's a proxy error, throw it to trigger fallback
+      if (error.message?.includes('proxy') || error.message?.includes('HTML')) {
+        throw error;
+      }
+      
       return {
         success: false,
         error: error.message || 'Failed to connect to Zoko API'
@@ -204,18 +215,18 @@ class ZokoWhatsAppService {
   }
 
   /**
-   * Call Supabase Edge Function (for production)
+   * Call Supabase Edge Function (for production or as fallback)
    */
   private async callEdgeFunction(action: string, data?: any): Promise<any> {
     try {
-      const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zoko-api`;
+      const edgeFunctionUrl = `https://cqsdxzziodtprpsyrrgj.supabase.co/functions/v1/zoko-api`;
       
       console.log(`Making Zoko API call via edge function: ${action}`);
       
       const response = await fetch(edgeFunctionUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxc2R4enppb2R0cHJwc3lycmdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3OTM0OTksImV4cCI6MjA2NjM2OTQ5OX0.bC6J6qjdZGN9V6nuE1c_CM_FwXocZIYUKb80Ggb9zn0`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ action, data }),

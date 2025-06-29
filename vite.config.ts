@@ -19,6 +19,15 @@ export default defineConfig(({ command }) => ({
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log('Proxying request:', req.method, req.url, '-> https://api.zoko.io' + proxyReq.path);
+            // Ensure proper headers are set
+            proxyReq.setHeader('Accept', 'application/json');
+            proxyReq.setHeader('Content-Type', 'application/json');
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Proxy response:', proxyRes.statusCode, proxyRes.headers['content-type']);
+          });
+          proxy.on('error', (err, req, res) => {
+            console.error('Proxy error:', err);
           });
         }
       }
