@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [fullName, setFullName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,7 +26,7 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const guestId = await confirmAttendance(fullName, phoneNumber.trim() || undefined);
+      const guestId = await confirmAttendance(fullName);
       navigate(`/confirmation/${guestId}`);
     } catch (error) {
       toast({
@@ -100,22 +99,6 @@ const Index = () => {
                   height: '52.8px'
                 }}
                 dir="rtl"
-              />
-            </div>
-
-            {/* Phone Number Input */}
-            <div className="space-y-2">
-              <Input
-                type="tel"
-                placeholder="رقم الهاتف (اختياري للتنبيهات)"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md shadow-xl focus:bg-white/30 focus:border-white/60 transition-all rounded-xl"
-                style={{ 
-                  fontSize: '16px',
-                  height: '52.8px'
-                }}
-                dir="ltr"
               />
             </div>
 
