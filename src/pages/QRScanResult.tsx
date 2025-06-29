@@ -1,15 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import GlassCard from '@/components/GlassCard';
-import ApologyDialog from '@/components/ApologyDialog';
 import VideoBackground from '@/components/VideoBackground';
-import { getGuestByInvitationId, Guest } from '@/services/firebase';
+import { getGuestByInvitationId, Guest, apologizeForAttendance } from '@/services/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 const QRScanResult = () => {
   const { invitationId } = useParams<{ invitationId: string }>();
   const [guest, setGuest] = useState<Guest | null>(null);
   const [loading, setLoading] = useState(true);
+  const [apologizing, setApologizing] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,8 +35,26 @@ const QRScanResult = () => {
     fetchGuest();
   }, [invitationId, toast]);
 
-  const handleApologySuccess = () => {
-    setGuest(prev => prev ? { ...prev, status: 'apologized' } : null);
+  const handleApology = async () => {
+    if (!invitationId) return;
+    
+    setApologizing(true);
+    try {
+      await apologizeForAttendance(invitationId);
+      setGuest(prev => prev ? { ...prev, status: 'apologized' } : null);
+      toast({
+        title: "تم الإعتذار",
+        description: "تم تسجيل اعتذارك بنجاح",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء تسجيل الاعتذار",
+        variant: "destructive"
+      });
+    } finally {
+      setApologizing(false);
+    }
   };
 
   const handleVideoError = () => {
@@ -137,7 +157,7 @@ const QRScanResult = () => {
                     alt="موقع الخريطة" 
                     className="h-10"
                     style={{ 
-                      width: '84.8px', // 35% more than original width (48px * 1.35 = 64.8px)
+                      width: '84.8px',
                       filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.8))'
                     }}
                   />
@@ -147,12 +167,16 @@ const QRScanResult = () => {
             )}
 
             {/* Apology Button - reduced spacing */}
-            {guest.status !== 'apologized' && invitationId && (
+            {guest.status !== 'apologized' && (
               <div className="space-y-2">
-                <ApologyDialog 
-                  invitationId={invitationId} 
-                  onApologySuccess={handleApologySuccess}
-                />
+                <Button
+                  onClick={handleApology}
+                  disabled={apologizing}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  dir="rtl"
+                >
+                  {apologizing ? 'جاري المعالجة...' : 'اعتذار عن الحضور'}
+                </Button>
               </div>
             )}
 
