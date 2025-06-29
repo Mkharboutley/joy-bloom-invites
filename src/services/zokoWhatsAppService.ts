@@ -109,21 +109,25 @@ class ZokoWhatsAppService {
 
       switch (action) {
         case 'test_connection':
+          // Use the proxy path instead of direct API call
           url = `/api/zoko/v2/phone_numbers/${this.config.phoneNumberId}`;
           method = 'GET';
           break;
         case 'send_message':
-          url = `/api/zoko/v2/whatsapp/business_accounts/${this.config.businessAccountId}/messages`;
+          // Use the proxy path for sending messages
+          url = `/api/zoko/v2/messages`;
           method = 'POST';
           body = JSON.stringify(data.message);
           break;
         case 'get_analytics':
-          url = `/api/zoko/v2/whatsapp/messages/${data.messageId}`;
+          url = `/api/zoko/v2/messages/${data.messageId}`;
           method = 'GET';
           break;
         default:
           throw new Error(`Unknown action: ${action}`);
       }
+
+      console.log(`Making Zoko API call via proxy: ${method} ${url}`);
 
       const response = await fetch(url, {
         method,
@@ -136,17 +140,19 @@ class ZokoWhatsAppService {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('Zoko API Error Response:', errorText);
         throw new Error(`Zoko API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('Zoko API Success Response:', result);
 
       // Format response based on action
       switch (action) {
         case 'test_connection':
           return {
             success: true,
-            phoneNumber: result.data?.phone_number || this.config.phoneNumberId,
+            phoneNumber: result.display_phone_number || `+${this.config.phoneNumberId}`,
             data: result
           };
         case 'send_message':
@@ -176,6 +182,8 @@ class ZokoWhatsAppService {
   private async callEdgeFunction(action: string, data?: any): Promise<any> {
     try {
       const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zoko-api`;
+      
+      console.log(`Making Zoko API call via edge function: ${action}`);
       
       const response = await fetch(edgeFunctionUrl, {
         method: 'POST',
