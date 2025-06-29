@@ -88,15 +88,90 @@ class ZokoWhatsAppService {
   }
 
   /**
-   * Call Zoko API through Edge Function (always use this to avoid CORS issues)
+   * Call Zoko API - use proxy in development, edge function in production
    */
   private async callZokoAPI(action: string, data?: any): Promise<any> {
-    // Always use Edge Function to avoid CORS issues in both development and production
-    return this.callEdgeFunction(action, data);
+    if (this.isDevelopment) {
+      return this.callZokoDirectly(action, data);
+    } else {
+      return this.callEdgeFunction(action, data);
+    }
   }
 
   /**
-   * Call Supabase Edge Function (for all environments)
+   * Call Zoko API directly through Vite proxy (development only)
+   */
+  private async callZokoDirectly(action: string, data?: any): Promise<any> {
+    try {
+      let url = '';
+      let method = 'GET';
+      let body = null;
+
+      switch (action) {
+        case 'test_connection':
+          url = '/api/zoko/v2/whatsapp/accounts';
+          method = 'GET';
+          break;
+        case 'send_message':
+          url = `/api/zoko/v2/whatsapp/business_accounts/${this.config.businessAccountId}/messages`;
+          method = 'POST';
+          body = JSON.stringify(data.message);
+          break;
+        case 'get_analytics':
+          url = `/api/zoko/v2/whatsapp/messages/${data.messageId}`;
+          method = 'GET';
+          break;
+        default:
+          throw new Error(`Unknown action: ${action}`);
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Zoko API error: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json();
+
+      // Format response based on action
+      switch (action) {
+        case 'test_connection':
+          return {
+            success: true,
+            phoneNumber: result.data?.[0]?.phone_number || this.config.phoneNumberId,
+            data: result
+          };
+        case 'send_message':
+          return {
+            success: true,
+            messageId: result.messages?.[0]?.id,
+            data: result
+          };
+        default:
+          return {
+            success: true,
+            data: result
+          };
+      }
+    } catch (error: any) {
+      console.error('Direct Zoko API call failed:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to connect to Zoko API'
+      };
+    }
+  }
+
+  /**
+   * Call Supabase Edge Function (for production)
    */
   private async callEdgeFunction(action: string, data?: any): Promise<any> {
     try {
