@@ -40,8 +40,6 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
     
     try {
-      console.log('Sending WhatsApp message', { useTemplate, phoneNumber, guestName });
-      
       const { data, error } = await supabase.functions.invoke('send-whatsapp', {
         body: {
           phoneNumber: phoneNumber.trim(),
@@ -53,9 +51,6 @@ const WhatsAppMessaging = () => {
       });
 
       if (error) {
-        console.error('Error sending message:', error);
-        
-        // Check if it's the template message error
         if (error.message?.includes('Template message required')) {
           toast({
             title: "مطلوب قالب رسالة",
@@ -72,20 +67,17 @@ const WhatsAppMessaging = () => {
         return;
       }
 
-      console.log('Message sent successfully:', data);
       toast({
         title: "تم الإرسال",
         description: useTemplate ? "تم إرسال القالب بنجاح عبر الواتساب" : "تم إرسال الرسالة بنجاح عبر الواتساب",
       });
 
-      // Clear form
       setPhoneNumber('');
       setMessage('');
       setGuestName('');
       setUseTemplate(false);
       
     } catch (error) {
-      console.error('Error:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء إرسال الرسالة",
@@ -94,11 +86,6 @@ const WhatsAppMessaging = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const insertTemplate = (template: string) => {
-    setMessage(template);
-    setUseTemplate(false);
   };
 
   const templates = [
@@ -125,7 +112,6 @@ const WhatsAppMessaging = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Template Toggle */}
         <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
           <label className="flex items-center gap-2 text-blue-100 cursor-pointer" dir="rtl">
             <input
@@ -140,40 +126,34 @@ const WhatsAppMessaging = () => {
         </div>
 
         <form onSubmit={handleSendMessage} className="space-y-4">
-          <div>
-            <Input
-              type="tel"
-              placeholder="رقم الهاتف (مع رمز البلد)"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
-              dir="ltr"
-            />
-          </div>
+          <Input
+            type="tel"
+            placeholder="رقم الهاتف (مع رمز البلد)"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+            dir="ltr"
+          />
 
           {useTemplate && (
-            <div>
-              <Input
-                type="text"
-                placeholder="اسم الضيف (اختياري)"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
-                dir="rtl"
-              />
-            </div>
+            <Input
+              type="text"
+              placeholder="اسم الضيف (اختياري)"
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value)}
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+              dir="rtl"
+            />
           )}
           
           {!useTemplate && (
-            <div>
-              <Textarea
-                placeholder="اكتب رسالتك هنا..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-white/70 min-h-[100px]"
-                dir="rtl"
-              />
-            </div>
+            <Textarea
+              placeholder="اكتب رسالتك هنا..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/70 min-h-[100px]"
+              dir="rtl"
+            />
           )}
 
           <Button
@@ -201,7 +181,7 @@ const WhatsAppMessaging = () => {
                   key={index}
                   variant="outline"
                   size="sm"
-                  onClick={() => insertTemplate(template.content)}
+                  onClick={() => setMessage(template.content)}
                   className="bg-white/10 border-white/30 text-white hover:bg-white/20 justify-start"
                   dir="rtl"
                 >
@@ -212,7 +192,6 @@ const WhatsAppMessaging = () => {
           </div>
         )}
 
-        {/* Info about template */}
         <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 flex items-start gap-2">
           <AlertTriangle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
           <div className="text-green-100 text-sm" dir="rtl">

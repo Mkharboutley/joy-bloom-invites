@@ -1,3 +1,4 @@
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,7 +65,6 @@ export const confirmAttendance = async (fullName: string, phoneNumber?: string):
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
     
-    // Send WhatsApp confirmation if phone number provided
     if (phoneNumber) {
       const confirmationMessage = `🎉 أهلاً ${fullName}!\n\nتم تأكيد حضوركم لحفل زفافنا.\n\n📅 التاريخ: ٤ يوليو ٢٠٢٥\n📍 المكان: فندق إرث\n\nرقم الدعوة: ${invitationId}\n\nبحضوركم تكتمل فرحتنا ❤️`;
       
@@ -91,7 +91,6 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
         apologyTimestamp: serverTimestamp()
       });
 
-      // Send WhatsApp apology acknowledgment if phone number available
       if (guestData.phoneNumber) {
         const apologyMessage = `شكراً لك ${guestData.fullName}\n\nتم استلام اعتذاركم عن حضور حفل الزفاف.\n\nنتفهم ظروفكم ونقدر تواصلكم معنا.\n\nنتمنى لكم كل الخير 🤲`;
         
