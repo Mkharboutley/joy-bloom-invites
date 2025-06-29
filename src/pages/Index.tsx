@@ -74,7 +74,7 @@ const Index = () => {
               <img 
                 src="/Untitled.png" 
                 alt="Wedding Header" 
-                className="w-full max-w-xs mx-auto wedding-logo-glow"
+                className="w-full max-w-xs mx-auto"
               />
             </div>
 

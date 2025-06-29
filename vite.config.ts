@@ -8,16 +8,6 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    proxy: {
-      '/api/zoko': {
-        target: 'https://api.zoko.io',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/zoko/, ''),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; ZokoProxy/1.0)'
-        }
-      }
-    }
   },
   plugins: [
     react(),
