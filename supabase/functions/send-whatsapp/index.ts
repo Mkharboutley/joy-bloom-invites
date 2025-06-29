@@ -38,13 +38,13 @@ Deno.serve(async (req) => {
     // Format phone number (remove any non-digits and ensure it starts with country code)
     const formattedPhone = phoneNumber.replace(/\D/g, '');
     
-    // Use the exact Zoko API endpoint
-    const apiUrl = 'https://chat.zoko.io/v2/message';
+    // Use the exact Zoko API endpoint - corrected URL
+    const apiUrl = 'https://api.zoko.io/v2/messages';
     
     let whatsappPayload;
 
     if (useTemplate) {
-      // Use the correct Zoko template message structure
+      // Use the exact Zoko template message structure
       whatsappPayload = {
         type: "template",
         templateId: "01_new",
@@ -74,9 +74,8 @@ Deno.serve(async (req) => {
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        'Authorization': `Bearer ${zokoApiKey}`,
         'Content-Type': 'application/json',
-        'apikey': zokoApiKey,
       },
       body: JSON.stringify(whatsappPayload),
     });
