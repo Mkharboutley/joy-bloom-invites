@@ -1,6 +1,6 @@
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
-import NotificationService from './notificationService';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC2GHe8k-8ceL0ikWmkoUUILIyuQCBfWSk",
@@ -36,10 +36,6 @@ export const confirmAttendance = async (fullName: string): Promise<string> => {
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
     
-    // Send notification to admin contacts
-    const notificationService = NotificationService.getInstance();
-    await notificationService.sendConfirmationNotification(fullName, invitationId);
-    
     return docRef.id;
   } catch (error) {
     console.error('Error confirming attendance:', error);
@@ -53,16 +49,10 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
     const guestDoc = querySnapshot.docs.find(doc => doc.data().invitationId === invitationId);
     
     if (guestDoc) {
-      const guestData = guestDoc.data();
-      
       await updateDoc(doc(db, 'guests', guestDoc.id), {
         status: 'apologized',
         apologyTimestamp: serverTimestamp()
       });
-      
-      // Send notification to admin contacts
-      const notificationService = NotificationService.getInstance();
-      await notificationService.sendApologyNotification(guestData.fullName, invitationId);
     } else {
       throw new Error('Guest not found');
     }
