@@ -27,12 +27,25 @@ Deno.serve(async (req) => {
       phoneNumberId: Deno.env.get('VITE_ZOKO_PHONE_NUMBER_ID') || '971552439798',
     }
 
+    // Validate config presence
+    if (!config.apiKey || !config.baseUrl || !config.phoneNumberId) {
+      console.error("Missing Zoko config in environment variables.")
+      console.error("Config status:", {
+        apiKey: config.apiKey ? 'present' : 'missing',
+        baseUrl: config.baseUrl ? 'present' : 'missing',
+        phoneNumberId: config.phoneNumberId ? 'present' : 'missing'
+      })
+    }
+
     console.log('Zoko Edge Function - Action:', action)
     console.log('Zoko Edge Function - Config:', { 
       apiKey: config.apiKey.substring(0, 8) + '...',
       baseUrl: config.baseUrl,
       phoneNumberId: config.phoneNumberId
     })
+
+    // Sanitize baseUrl to prevent malformed URLs
+    const baseUrl = config.baseUrl.replace(/\/+$/, '');
 
     let response: Response
     let result: any
@@ -41,13 +54,17 @@ Deno.serve(async (req) => {
       case 'test_connection':
         // Test connection by getting phone number info
         console.log('Testing Zoko connection...')
-        const testUrl = `${config.baseUrl}/phone_numbers/${config.phoneNumberId}`
+        const testUrl = `${baseUrl}/phone_numbers/${config.phoneNumberId}`
         console.log('Request URL:', testUrl)
         console.log('Request Headers:', {
           'Authorization': `Bearer ${config.apiKey.substring(0, 8)}...`,
           'Content-Type': 'application/json',
           'User-Agent': 'ZokoEdgeFunction/1.0'
         })
+        
+        // Add timeout logic with AbortController
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
         
         try {
           response = await fetch(testUrl, {
@@ -58,8 +75,10 @@ Deno.serve(async (req) => {
               'User-Agent': 'ZokoEdgeFunction/1.0',
               'Accept': 'application/json'
             },
+            signal: controller.signal
           })
           
+          clearTimeout(timeout);
           console.log('Zoko API Response Status:', response.status)
           console.log('Zoko API Response Headers:', Object.fromEntries(response.headers.entries()))
           
@@ -92,7 +111,9 @@ Deno.serve(async (req) => {
               }),
               {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
+                status: response.status === 401 ? 401 : 
+                       response.status === 403 ? 403 : 
+                       response.status === 404 ? 404 : 502
               }
             )
           }
@@ -112,6 +133,7 @@ Deno.serve(async (req) => {
           )
           
         } catch (error: any) {
+          clearTimeout(timeout);
           console.error('Fetch Error:', error.message || error)
           console.error('Error details:', {
             name: error.name,
@@ -120,6 +142,20 @@ Deno.serve(async (req) => {
             stack: error.stack
           })
           
+          // Check if it's a timeout/abort error
+          if (error.name === 'AbortError') {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Request timeout: Zoko API took too long to respond (8 seconds). Please check if Zoko API is accessible.'
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 504
+              }
+            )
+          }
+          
           return new Response(
             JSON.stringify({
               success: false,
@@ -127,7 +163,7 @@ Deno.serve(async (req) => {
             }),
             {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
+              status: 502
             }
           )
         }
@@ -135,8 +171,12 @@ Deno.serve(async (req) => {
       case 'send_message':
         // Send WhatsApp message
         console.log('Sending message via Zoko:', data.message)
-        const sendUrl = `${config.baseUrl}/messages`
+        const sendUrl = `${baseUrl}/messages`
         console.log('Send message URL:', sendUrl)
+        
+        // Add timeout logic for send message
+        const sendController = new AbortController();
+        const sendTimeout = setTimeout(() => sendController.abort(), 10000);
         
         try {
           response = await fetch(sendUrl, {
@@ -148,8 +188,10 @@ Deno.serve(async (req) => {
               'Accept': 'application/json'
             },
             body: JSON.stringify(data.message),
+            signal: sendController.signal
           })
           
+          clearTimeout(sendTimeout);
           console.log('Send message response status:', response.status)
           
           if (!response.ok) {
@@ -172,7 +214,9 @@ Deno.serve(async (req) => {
               }),
               {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
+                status: response.status === 401 ? 401 : 
+                       response.status === 403 ? 403 : 
+                       response.status === 404 ? 404 : 502
               }
             )
           }
@@ -192,7 +236,22 @@ Deno.serve(async (req) => {
           )
           
         } catch (error: any) {
+          clearTimeout(sendTimeout);
           console.error('Send message fetch error:', error.message || error)
+          
+          if (error.name === 'AbortError') {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Request timeout: Message sending took too long (10 seconds)'
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 504
+              }
+            )
+          }
+          
           return new Response(
             JSON.stringify({
               success: false,
@@ -200,14 +259,18 @@ Deno.serve(async (req) => {
             }),
             {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
+              status: 502
             }
           )
         }
 
       case 'get_analytics':
         // Get message analytics
-        const analyticsUrl = `${config.baseUrl}/messages/${data.messageId}`
+        const analyticsUrl = `${baseUrl}/messages/${data.messageId}`
+        
+        // Add timeout logic for analytics
+        const analyticsController = new AbortController();
+        const analyticsTimeout = setTimeout(() => analyticsController.abort(), 8000);
         
         try {
           response = await fetch(analyticsUrl, {
@@ -217,8 +280,10 @@ Deno.serve(async (req) => {
               'User-Agent': 'ZokoEdgeFunction/1.0',
               'Accept': 'application/json'
             },
+            signal: analyticsController.signal
           })
           
+          clearTimeout(analyticsTimeout);
           console.log('Analytics response status:', response.status)
           
           if (!response.ok) {
@@ -232,7 +297,9 @@ Deno.serve(async (req) => {
               }),
               {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
+                status: response.status === 401 ? 401 : 
+                       response.status === 403 ? 403 : 
+                       response.status === 404 ? 404 : 502
               }
             )
           }
@@ -249,7 +316,22 @@ Deno.serve(async (req) => {
           )
           
         } catch (error: any) {
+          clearTimeout(analyticsTimeout);
           console.error('Analytics fetch error:', error.message || error)
+          
+          if (error.name === 'AbortError') {
+            return new Response(
+              JSON.stringify({
+                success: false,
+                error: 'Request timeout: Analytics request took too long (8 seconds)'
+              }),
+              {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 504
+              }
+            )
+          }
+          
           return new Response(
             JSON.stringify({
               success: false,
@@ -257,7 +339,7 @@ Deno.serve(async (req) => {
             }),
             {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 200
+              status: 502
             }
           )
         }
