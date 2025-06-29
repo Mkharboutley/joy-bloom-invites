@@ -109,7 +109,7 @@ class ZokoWhatsAppService {
 
       switch (action) {
         case 'test_connection':
-          url = '/api/zoko/v2/whatsapp/accounts';
+          url = `/api/zoko/v2/phone_numbers/${this.config.phoneNumberId}`;
           method = 'GET';
           break;
         case 'send_message':
@@ -146,7 +146,7 @@ class ZokoWhatsAppService {
         case 'test_connection':
           return {
             success: true,
-            phoneNumber: result.data?.[0]?.phone_number || this.config.phoneNumberId,
+            phoneNumber: result.data?.phone_number || this.config.phoneNumberId,
             data: result
           };
         case 'send_message':
