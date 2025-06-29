@@ -55,7 +55,7 @@ serve(async (req) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'X-API-Key': zokoApiKey, // Zoko uses X-API-Key header
+        'apikey': zokoApiKey, // Zoko uses lowercase 'apikey' header
       },
       body: JSON.stringify(whatsappPayload),
     });
