@@ -11,6 +11,7 @@ interface WhatsAppMessageRequest {
   message: string;
   guestName?: string;
   type: 'confirmation' | 'apology' | 'custom';
+  useTemplate?: boolean;
 }
 
 serve(async (req) => {
@@ -20,7 +21,7 @@ serve(async (req) => {
   }
 
   try {
-    const { phoneNumber, message, guestName, type }: WhatsAppMessageRequest = await req.json();
+    const { phoneNumber, message, guestName, type, useTemplate = false }: WhatsAppMessageRequest = await req.json();
     
     console.log(`Sending WhatsApp message to ${phoneNumber} for ${guestName || 'guest'}`);
 
@@ -40,12 +41,41 @@ serve(async (req) => {
     // Use the exact Zoko API endpoint
     const apiUrl = 'https://chat.zoko.io/v2/message';
     
-    const whatsappPayload = {
-      channel: "whatsapp",
-      recipient: formattedPhone,
-      type: "text",
-      message: message
-    };
+    let whatsappPayload;
+
+    if (useTemplate) {
+      // Use template message for new contacts
+      whatsappPayload = {
+        channel: "whatsapp",
+        recipient: formattedPhone,
+        type: "template",
+        template: {
+          name: "01_new",
+          language: {
+            code: "ar"
+          },
+          components: [
+            {
+              type: "body",
+              parameters: [
+                {
+                  type: "text",
+                  text: guestName || "الضيف الكريم"
+                }
+              ]
+            }
+          ]
+        }
+      };
+    } else {
+      // Use regular text message for existing contacts
+      whatsappPayload = {
+        channel: "whatsapp",
+        recipient: formattedPhone,
+        type: "text",
+        message: message
+      };
+    }
 
     console.log('Sending to Zoko API:', whatsappPayload);
     console.log('API URL:', apiUrl);
@@ -55,7 +85,7 @@ serve(async (req) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'apikey': zokoApiKey, // Zoko uses lowercase 'apikey' header
+        'apikey': zokoApiKey,
       },
       body: JSON.stringify(whatsappPayload),
     });
@@ -66,12 +96,12 @@ serve(async (req) => {
     if (!response.ok) {
       console.error('Zoko API error:', responseData);
       
-      // Handle the specific "new customer" error
+      // Handle the specific "new customer" error - suggest using template
       if (response.status === 409 && responseData.message?.includes('template message')) {
         return new Response(
           JSON.stringify({ 
             error: 'Template message required', 
-            message: 'This appears to be a new contact. WhatsApp requires approved template messages for first contact. Please create and approve message templates in your Zoko dashboard first.',
+            message: 'This appears to be a new contact. Try using the template message option.',
             details: responseData,
             requiresTemplate: true
           }),

@@ -6,21 +6,32 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { MessageCircle, Send, AlertTriangle } from 'lucide-react';
+import { MessageCircle, Send, AlertTriangle, Mail } from 'lucide-react';
 
 const WhatsAppMessaging = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [message, setMessage] = useState('');
+  const [guestName, setGuestName] = useState('');
+  const [useTemplate, setUseTemplate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!phoneNumber.trim() || !message.trim()) {
+    if (!phoneNumber.trim()) {
       toast({
         title: "خطأ",
-        description: "الرجاء إدخال رقم الهاتف والرسالة",
+        description: "الرجاء إدخال رقم الهاتف",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!useTemplate && !message.trim()) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إدخال الرسالة أو استخدام القالب",
         variant: "destructive"
       });
       return;
@@ -29,13 +40,15 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
     
     try {
-      console.log('Sending custom WhatsApp message');
+      console.log('Sending WhatsApp message', { useTemplate, phoneNumber, guestName });
       
       const { data, error } = await supabase.functions.invoke('send-whatsapp', {
         body: {
           phoneNumber: phoneNumber.trim(),
           message: message.trim(),
-          type: 'custom'
+          guestName: guestName.trim() || undefined,
+          type: 'custom',
+          useTemplate: useTemplate
         }
       });
 
@@ -43,10 +56,10 @@ const WhatsAppMessaging = () => {
         console.error('Error sending message:', error);
         
         // Check if it's the template message error
-        if (error.message?.includes('Edge Function returned a non-2xx status code')) {
+        if (error.message?.includes('Template message required')) {
           toast({
-            title: "مطلوب قالب رسالة معتمد",
-            description: "يبدو أن هذا رقم جديد. الواتساب يتطلب قوالب رسائل معتمدة للتواصل الأول. يرجى إنشاء قوالب رسائل في لوحة تحكم Zoko أولاً.",
+            title: "مطلوب قالب رسالة",
+            description: "هذا رقم جديد. جرب استخدام خيار القالب المعتمد.",
             variant: "destructive"
           });
         } else {
@@ -62,12 +75,14 @@ const WhatsAppMessaging = () => {
       console.log('Message sent successfully:', data);
       toast({
         title: "تم الإرسال",
-        description: "تم إرسال الرسالة بنجاح عبر الواتساب",
+        description: useTemplate ? "تم إرسال القالب بنجاح عبر الواتساب" : "تم إرسال الرسالة بنجاح عبر الواتساب",
       });
 
       // Clear form
       setPhoneNumber('');
       setMessage('');
+      setGuestName('');
+      setUseTemplate(false);
       
     } catch (error) {
       console.error('Error:', error);
@@ -83,6 +98,7 @@ const WhatsAppMessaging = () => {
 
   const insertTemplate = (template: string) => {
     setMessage(template);
+    setUseTemplate(false);
   };
 
   const templates = [
@@ -109,13 +125,18 @@ const WhatsAppMessaging = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Template Message Warning */}
-        <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 flex items-start gap-2">
-          <AlertTriangle className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
-          <div className="text-yellow-100 text-sm" dir="rtl">
-            <p className="font-medium mb-1">تنبيه مهم:</p>
-            <p>للأرقام الجديدة، يتطلب الواتساب استخدام قوالب رسائل معتمدة للتواصل الأول. يرجى إنشاء قوالب في لوحة تحكم Zoko.</p>
-          </div>
+        {/* Template Toggle */}
+        <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
+          <label className="flex items-center gap-2 text-blue-100 cursor-pointer" dir="rtl">
+            <input
+              type="checkbox"
+              checked={useTemplate}
+              onChange={(e) => setUseTemplate(e.target.checked)}
+              className="rounded"
+            />
+            <Mail className="w-4 h-4" />
+            <span>استخدام القالب المعتمد (01_new) للأرقام الجديدة</span>
+          </label>
         </div>
 
         <form onSubmit={handleSendMessage} className="space-y-4">
@@ -129,16 +150,31 @@ const WhatsAppMessaging = () => {
               dir="ltr"
             />
           </div>
+
+          {useTemplate && (
+            <div>
+              <Input
+                type="text"
+                placeholder="اسم الضيف (اختياري)"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                dir="rtl"
+              />
+            </div>
+          )}
           
-          <div>
-            <Textarea
-              placeholder="اكتب رسالتك هنا..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="bg-white/20 border-white/30 text-white placeholder:text-white/70 min-h-[100px]"
-              dir="rtl"
-            />
-          </div>
+          {!useTemplate && (
+            <div>
+              <Textarea
+                placeholder="اكتب رسالتك هنا..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/70 min-h-[100px]"
+                dir="rtl"
+              />
+            </div>
+          )}
 
           <Button
             type="submit"
@@ -150,27 +186,38 @@ const WhatsAppMessaging = () => {
             ) : (
               <>
                 <Send className="w-4 h-4 ml-2" />
-                إرسال عبر الواتساب
+                {useTemplate ? "إرسال القالب المعتمد" : "إرسال عبر الواتساب"}
               </>
             )}
           </Button>
         </form>
 
-        <div className="space-y-2">
-          <h4 className="text-white text-sm font-medium" dir="rtl">قوالب الرسائل:</h4>
-          <div className="grid gap-2">
-            {templates.map((template, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                onClick={() => insertTemplate(template.content)}
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20 justify-start"
-                dir="rtl"
-              >
-                {template.name}
-              </Button>
-            ))}
+        {!useTemplate && (
+          <div className="space-y-2">
+            <h4 className="text-white text-sm font-medium" dir="rtl">قوالب الرسائل:</h4>
+            <div className="grid gap-2">
+              {templates.map((template, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertTemplate(template.content)}
+                  className="bg-white/10 border-white/30 text-white hover:bg-white/20 justify-start"
+                  dir="rtl"
+                >
+                  {template.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Info about template */}
+        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+          <div className="text-green-100 text-sm" dir="rtl">
+            <p className="font-medium mb-1">معلومة:</p>
+            <p>القالب المعتمد (01_new) يُستخدم للأرقام الجديدة التي لم تتفاعل معك من قبل. الرسائل العادية تعمل مع الأرقام الموجودة.</p>
           </div>
         </div>
       </CardContent>
