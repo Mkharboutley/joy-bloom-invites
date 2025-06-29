@@ -39,17 +39,22 @@ serve(async (req) => {
     // Format phone number (remove any non-digits and ensure it starts with country code)
     const formattedPhone = phoneNumber.replace(/\D/g, '');
     
+    // Construct the proper Zoho WhatsApp API URL
+    const apiUrl = `${zohoBaseUrl.replace(/\/$/, '')}/messages`;
+    
     const whatsappPayload = {
+      messaging_product: "whatsapp",
       to: formattedPhone,
-      type: 'text',
+      type: "text",
       text: {
         body: message
       }
     };
 
     console.log('Sending to Zoho WhatsApp API:', whatsappPayload);
+    console.log('API URL:', apiUrl);
 
-    const response = await fetch(`${zohoBaseUrl}/messages`, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${zohoApiKey}`,
