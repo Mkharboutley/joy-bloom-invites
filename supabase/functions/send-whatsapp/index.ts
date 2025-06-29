@@ -24,13 +24,12 @@ serve(async (req) => {
     
     console.log(`Sending WhatsApp message to ${phoneNumber} for ${guestName || 'guest'}`);
 
-    const zohoApiKey = Deno.env.get('ZOHO_WHATSAPP_API_KEY');
-    const zohoBaseUrl = Deno.env.get('ZOHO_WHATSAPP_BASE_URL');
+    const zokoApiKey = Deno.env.get('ZOKO_API_KEY');
 
-    if (!zohoApiKey || !zohoBaseUrl) {
-      console.error('Missing Zoho WhatsApp credentials');
+    if (!zokoApiKey) {
+      console.error('Missing Zoko API key');
       return new Response(
-        JSON.stringify({ error: 'Missing Zoho WhatsApp credentials' }),
+        JSON.stringify({ error: 'Missing Zoko API key' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -38,8 +37,8 @@ serve(async (req) => {
     // Format phone number (remove any non-digits and ensure it starts with country code)
     const formattedPhone = phoneNumber.replace(/\D/g, '');
     
-    // Construct the proper Zoho API URL
-    const apiUrl = `${zohoBaseUrl.replace(/\/$/, '')}/message`;
+    // Use the exact Zoko API endpoint
+    const apiUrl = 'https://chat.zoko.io/v2/message';
     
     const whatsappPayload = {
       channel: "whatsapp",
@@ -48,7 +47,7 @@ serve(async (req) => {
       message: message
     };
 
-    console.log('Sending to Zoho WhatsApp API:', whatsappPayload);
+    console.log('Sending to Zoko API:', whatsappPayload);
     console.log('API URL:', apiUrl);
 
     const response = await fetch(apiUrl, {
@@ -56,16 +55,16 @@ serve(async (req) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${zohoApiKey}`,
+        'X-API-Key': zokoApiKey, // Zoko uses X-API-Key header
       },
       body: JSON.stringify(whatsappPayload),
     });
 
     const responseData = await response.json();
-    console.log('Zoho WhatsApp API response:', responseData);
+    console.log('Zoko API response:', responseData);
 
     if (!response.ok) {
-      console.error('Zoho WhatsApp API error:', responseData);
+      console.error('Zoko API error:', responseData);
       return new Response(
         JSON.stringify({ error: 'Failed to send WhatsApp message', details: responseData }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
