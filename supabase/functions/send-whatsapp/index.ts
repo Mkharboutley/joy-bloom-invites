@@ -26,9 +26,8 @@ serve(async (req) => {
 
     const zohoApiKey = Deno.env.get('ZOHO_WHATSAPP_API_KEY');
     const zohoBaseUrl = Deno.env.get('ZOHO_WHATSAPP_BASE_URL');
-    const zohoPhoneNumber = Deno.env.get('ZOHO_WHATSAPP_PHONE_NUMBER');
 
-    if (!zohoApiKey || !zohoBaseUrl || !zohoPhoneNumber) {
+    if (!zohoApiKey || !zohoBaseUrl) {
       console.error('Missing Zoho WhatsApp credentials');
       return new Response(
         JSON.stringify({ error: 'Missing Zoho WhatsApp credentials' }),
@@ -39,16 +38,14 @@ serve(async (req) => {
     // Format phone number (remove any non-digits and ensure it starts with country code)
     const formattedPhone = phoneNumber.replace(/\D/g, '');
     
-    // Construct the proper Zoho WhatsApp API URL
-    const apiUrl = `${zohoBaseUrl.replace(/\/$/, '')}/messages`;
+    // Construct the proper Zoho API URL
+    const apiUrl = `${zohoBaseUrl.replace(/\/$/, '')}/message`;
     
     const whatsappPayload = {
-      messaging_product: "whatsapp",
-      to: formattedPhone,
+      channel: "whatsapp",
+      recipient: formattedPhone,
       type: "text",
-      text: {
-        body: message
-      }
+      message: message
     };
 
     console.log('Sending to Zoho WhatsApp API:', whatsappPayload);
@@ -57,8 +54,9 @@ serve(async (req) => {
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${zohoApiKey}`,
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${zohoApiKey}`,
       },
       body: JSON.stringify(whatsappPayload),
     });
@@ -77,7 +75,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        messageId: responseData.messages?.[0]?.id || responseData.id,
+        messageId: responseData.message_id || responseData.id,
         status: 'sent'
       }),
       { 
