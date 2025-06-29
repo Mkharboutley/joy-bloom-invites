@@ -24,6 +24,7 @@ serve(async (req) => {
     const { phoneNumber, message, guestName, type, useTemplate = false }: WhatsAppMessageRequest = await req.json();
     
     console.log(`Sending WhatsApp message to ${phoneNumber} for ${guestName || 'guest'}`);
+    console.log(`Use template: ${useTemplate}`);
 
     const zokoApiKey = Deno.env.get('ZOKO_API_KEY');
 
@@ -44,12 +45,11 @@ serve(async (req) => {
     let whatsappPayload;
 
     if (useTemplate) {
-      // Use template message for new contacts - Using Arabic language
+      // Try a different template structure - maybe without templateId field
       whatsappPayload = {
         channel: "whatsapp",
         recipient: formattedPhone,
         type: "template",
-        templateId: "01_new",
         template: {
           name: "01_new",
           language: {
@@ -78,8 +78,11 @@ serve(async (req) => {
       };
     }
 
-    console.log('Sending to Zoko API:', JSON.stringify(whatsappPayload, null, 2));
+    console.log('=== DEBUG: Full payload being sent to Zoko ===');
+    console.log(JSON.stringify(whatsappPayload, null, 2));
+    console.log('=== END DEBUG ===');
     console.log('API URL:', apiUrl);
+    console.log('API Key (first 10 chars):', zokoApiKey.substring(0, 10) + '...');
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -92,7 +95,10 @@ serve(async (req) => {
     });
 
     const responseData = await response.json();
-    console.log('Zoko API response:', responseData);
+    console.log('=== ZOKO API RESPONSE ===');
+    console.log('Status:', response.status);
+    console.log('Response:', JSON.stringify(responseData, null, 2));
+    console.log('=== END RESPONSE ===');
 
     if (!response.ok) {
       console.error('Zoko API error:', responseData);
@@ -107,6 +113,19 @@ serve(async (req) => {
             requiresTemplate: true
           }),
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // For 404 template errors, provide more specific guidance
+      if (response.status === 404 && responseData.message?.includes('template not found')) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Template not found', 
+            message: 'The template "01_new" with Arabic language was not found. Please check your Zoko dashboard to ensure the template exists and is approved.',
+            details: responseData,
+            suggestion: 'Try using regular text message instead of template'
+          }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
