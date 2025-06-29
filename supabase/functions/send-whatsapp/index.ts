@@ -45,35 +45,21 @@ serve(async (req) => {
     let whatsappPayload;
 
     if (useTemplate) {
-      // Use template message structure exactly as Zoko expects
+      // Use the correct Zoko template message structure
       whatsappPayload = {
-        channel: "whatsapp",
-        recipient: formattedPhone,
         type: "template",
-        template: {
-          name: "01_new",
-          language: {
-            code: "ar"
-          },
-          components: [
-            {
-              type: "body",
-              parameters: [
-                {
-                  type: "text",
-                  text: guestName || "الضيف الكريم"
-                }
-              ]
-            }
-          ]
+        templateId: "01", // This must match your approved template ID in Zoko
+        to: formattedPhone,
+        language: "ar",
+        templateData: {
+          params: [guestName || "الضيف الكريم"]
         }
       };
     } else {
       // Use regular text message for existing contacts
       whatsappPayload = {
-        channel: "whatsapp",
-        recipient: formattedPhone,
         type: "text",
+        to: formattedPhone,
         message: message
       };
     }
@@ -89,7 +75,7 @@ serve(async (req) => {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'apikey': zokoApiKey, // Changed from Authorization to apikey
+        'apikey': zokoApiKey,
       },
       body: JSON.stringify(whatsappPayload),
     });
@@ -121,9 +107,9 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             error: 'Template not found', 
-            message: 'The template "01_new" with Arabic language was not found. Please check your Zoko dashboard to ensure the template exists and is approved.',
+            message: 'The template "01" with Arabic language was not found. Please check your Zoko dashboard to ensure the template exists and is approved.',
             details: responseData,
-            suggestion: 'Try using regular text message instead of template'
+            suggestion: 'Verify template ID "01" exists and is approved in your Zoko dashboard'
           }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
