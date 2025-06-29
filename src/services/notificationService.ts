@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { subscribeToGuests } from './firebase';
-import ZokoWhatsAppService from './zokoWhatsAppService';
+import ZokoWhatsAppService from './zoko/zokoWhatsAppService';
 
 interface NotificationContact {
   id: string;

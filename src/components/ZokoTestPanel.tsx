@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, Phone, Send, TestTube, Users, CheckCircle, XCircle, Wifi } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import ZokoWhatsAppService from '@/services/zokoWhatsAppService';
+import ZokoWhatsAppService from '@/services/zoko/zokoWhatsAppService';
 
 const ZokoTestPanel = () => {
   const [testPhone, setTestPhone] = useState('');

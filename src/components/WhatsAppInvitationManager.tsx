@@ -14,7 +14,7 @@ import { AlertCircle, MessageSquare, Phone, Plus, Send, Trash2, Upload, Users } 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationService from '@/services/notificationService';
-import ZokoWhatsAppService from '@/services/zokoWhatsAppService';
+import ZokoWhatsAppService from '@/services/zoko/zokoWhatsAppService';
 
 interface WhatsAppContact {
   id: string;
