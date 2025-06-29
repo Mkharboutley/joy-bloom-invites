@@ -44,11 +44,12 @@ serve(async (req) => {
     let whatsappPayload;
 
     if (useTemplate) {
-      // Use template message for new contacts
+      // Use template message for new contacts - FIXED: Added templateId
       whatsappPayload = {
         channel: "whatsapp",
         recipient: formattedPhone,
         type: "template",
+        templateId: "01_new", // This was missing - now added!
         template: {
           name: "01_new",
           language: {
