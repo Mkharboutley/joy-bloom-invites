@@ -65,6 +65,20 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error('Zoko API error:', responseData);
+      
+      // Handle the specific "new customer" error
+      if (response.status === 409 && responseData.message?.includes('template message')) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Template message required', 
+            message: 'This appears to be a new contact. WhatsApp requires approved template messages for first contact. Please create and approve message templates in your Zoko dashboard first.',
+            details: responseData,
+            requiresTemplate: true
+          }),
+          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'Failed to send WhatsApp message', details: responseData }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

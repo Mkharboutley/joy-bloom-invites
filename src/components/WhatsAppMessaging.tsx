@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send, AlertTriangle } from 'lucide-react';
 
 const WhatsAppMessaging = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -41,11 +41,21 @@ const WhatsAppMessaging = () => {
 
       if (error) {
         console.error('Error sending message:', error);
-        toast({
-          title: "خطأ في الإرسال",
-          description: "فشل في إرسال الرسالة، يرجى المحاولة مرة أخرى",
-          variant: "destructive"
-        });
+        
+        // Check if it's the template message error
+        if (error.message?.includes('Edge Function returned a non-2xx status code')) {
+          toast({
+            title: "مطلوب قالب رسالة معتمد",
+            description: "يبدو أن هذا رقم جديد. الواتساب يتطلب قوالب رسائل معتمدة للتواصل الأول. يرجى إنشاء قوالب رسائل في لوحة تحكم Zoko أولاً.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "خطأ في الإرسال",
+            description: "فشل في إرسال الرسالة، يرجى المحاولة مرة أخرى",
+            variant: "destructive"
+          });
+        }
         return;
       }
 
@@ -99,6 +109,15 @@ const WhatsAppMessaging = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Template Message Warning */}
+        <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+          <div className="text-yellow-100 text-sm" dir="rtl">
+            <p className="font-medium mb-1">تنبيه مهم:</p>
+            <p>للأرقام الجديدة، يتطلب الواتساب استخدام قوالب رسائل معتمدة للتواصل الأول. يرجى إنشاء قوالب في لوحة تحكم Zoko.</p>
+          </div>
+        </div>
+
         <form onSubmit={handleSendMessage} className="space-y-4">
           <div>
             <Input
