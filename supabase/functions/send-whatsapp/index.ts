@@ -1,4 +1,5 @@
 
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -46,7 +47,7 @@ Deno.serve(async (req) => {
       // Use the correct Zoko template message structure
       whatsappPayload = {
         type: "template",
-        templateId: "01",
+        templateId: "01_new",
         channel: "whatsapp",
         recipient: formattedPhone,
         language: "ar",
@@ -107,9 +108,9 @@ Deno.serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             error: 'Template not found', 
-            message: 'The template "01" with Arabic language was not found. Please check your Zoko dashboard to ensure the template exists and is approved.',
+            message: 'The template "01_new" with Arabic language was not found. Please check your Zoko dashboard to ensure the template exists and is approved.',
             details: responseData,
-            suggestion: 'Verify template ID "01" exists and is approved in your Zoko dashboard'
+            suggestion: 'Verify template ID "01_new" exists and is approved in your Zoko dashboard'
           }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -144,3 +145,4 @@ Deno.serve(async (req) => {
     );
   }
 });
+
