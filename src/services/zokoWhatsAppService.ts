@@ -88,119 +88,15 @@ class ZokoWhatsAppService {
   }
 
   /**
-   * Call Zoko API directly or through Edge Function
+   * Call Zoko API through Edge Function (always use this to avoid CORS issues)
    */
   private async callZokoAPI(action: string, data?: any): Promise<any> {
-    if (this.isDevelopment) {
-      // In development, call Zoko API directly with CORS proxy
-      return this.callZokoDirectly(action, data);
-    } else {
-      // In production, use Supabase Edge Function
-      return this.callEdgeFunction(action, data);
-    }
+    // Always use Edge Function to avoid CORS issues in both development and production
+    return this.callEdgeFunction(action, data);
   }
 
   /**
-   * Call Zoko API directly (for development)
-   */
-  private async callZokoDirectly(action: string, data?: any): Promise<any> {
-    try {
-      let url: string;
-      let options: RequestInit;
-
-      switch (action) {
-        case 'test_connection':
-          url = `${this.config.baseUrl}/phone_numbers/${this.config.phoneNumberId}`;
-          options = {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${this.config.apiKey}`,
-              'Content-Type': 'application/json',
-            },
-          };
-          break;
-
-        case 'send_message':
-          url = `${this.config.baseUrl}/messages`;
-          options = {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${this.config.apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data.message),
-          };
-          break;
-
-        case 'get_analytics':
-          url = `${this.config.baseUrl}/messages/${data.messageId}`;
-          options = {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${this.config.apiKey}`,
-            },
-          };
-          break;
-
-        default:
-          throw new Error('Invalid action');
-      }
-
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error('Zoko API Error:', result);
-        return {
-          success: false,
-          error: result.error?.message || result.message || `HTTP ${response.status}: ${response.statusText}`
-        };
-      }
-
-      // Format response based on action
-      switch (action) {
-        case 'test_connection':
-          return {
-            success: true,
-            phoneNumber: result.display_phone_number || `+${this.config.phoneNumberId}`
-          };
-
-        case 'send_message':
-          return {
-            success: true,
-            messageId: result.messages?.[0]?.id
-          };
-
-        case 'get_analytics':
-          return {
-            success: true,
-            data: result
-          };
-
-        default:
-          return { success: true, data: result };
-      }
-
-    } catch (error: any) {
-      console.error('Direct Zoko API call failed:', error);
-      
-      // Handle CORS errors in development
-      if (error.message.includes('CORS') || error.message.includes('fetch')) {
-        return {
-          success: false,
-          error: 'CORS error - API call blocked by browser. In development, this is expected. The function will work in production with proper CORS setup.'
-        };
-      }
-      
-      return {
-        success: false,
-        error: error.message || 'Network error - failed to connect to Zoko API'
-      };
-    }
-  }
-
-  /**
-   * Call Supabase Edge Function (for production)
+   * Call Supabase Edge Function (for all environments)
    */
   private async callEdgeFunction(action: string, data?: any): Promise<any> {
     try {
@@ -216,13 +112,17 @@ class ZokoWhatsAppService {
       });
 
       if (!response.ok) {
-        throw new Error(`Edge function error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Edge function error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       return await response.json();
     } catch (error: any) {
       console.error('Edge function call failed:', error);
-      throw error;
+      return {
+        success: false,
+        error: error.message || 'Failed to connect to Zoko API via Edge Function'
+      };
     }
   }
 
