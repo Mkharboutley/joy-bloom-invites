@@ -48,7 +48,8 @@ serve(async (req) => {
       // Use the correct Zoko template message structure
       whatsappPayload = {
         type: "template",
-        templateId: "01", // This must match your approved template ID in Zoko
+        templateId: "01",
+        channel: "whatsapp",
         to: formattedPhone,
         language: "ar",
         templateData: {
@@ -59,6 +60,7 @@ serve(async (req) => {
       // Use regular text message for existing contacts
       whatsappPayload = {
         type: "text",
+        channel: "whatsapp",
         to: formattedPhone,
         message: message
       };
