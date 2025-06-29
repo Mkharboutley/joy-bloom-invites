@@ -57,11 +57,18 @@ class ZokoWhatsAppService {
 
   private constructor() {
     this.config = {
-      apiKey: import.meta.env.VITE_ZOKO_API_KEY || '',
+      apiKey: import.meta.env.VITE_ZOKO_API_KEY || 'fb6eb899-2760-405e-9dd0-c64282cad3ad',
       baseUrl: import.meta.env.VITE_ZOKO_BASE_URL || 'https://api.zoko.io/v2',
-      phoneNumberId: import.meta.env.VITE_ZOKO_PHONE_NUMBER_ID || '',
-      businessAccountId: import.meta.env.VITE_ZOKO_BUSINESS_ACCOUNT_ID || '',
+      phoneNumberId: import.meta.env.VITE_ZOKO_PHONE_NUMBER_ID || '971552439798',
+      businessAccountId: import.meta.env.VITE_ZOKO_BUSINESS_ACCOUNT_ID || '127123111032763',
     };
+
+    console.log('Zoko Config:', {
+      apiKey: this.config.apiKey ? `${this.config.apiKey.substring(0, 8)}...` : 'NOT SET',
+      baseUrl: this.config.baseUrl,
+      phoneNumberId: this.config.phoneNumberId,
+      businessAccountId: this.config.businessAccountId
+    });
 
     if (!this.config.apiKey || !this.config.phoneNumberId) {
       console.warn('Zoko credentials not found. Please set VITE_ZOKO_API_KEY and VITE_ZOKO_PHONE_NUMBER_ID');
@@ -80,6 +87,8 @@ class ZokoWhatsAppService {
    */
   async sendMessage(message: ZokoMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
+      console.log('Sending Zoko message:', message);
+      
       const response = await fetch(`${this.config.baseUrl}/messages`, {
         method: 'POST',
         headers: {
@@ -90,12 +99,13 @@ class ZokoWhatsAppService {
       });
 
       const result = await response.json();
+      console.log('Zoko API Response:', result);
 
       if (!response.ok) {
         console.error('Zoko API Error:', result);
         return {
           success: false,
-          error: result.error?.message || result.message || 'Failed to send message'
+          error: result.error?.message || result.message || `HTTP ${response.status}: ${response.statusText}`
         };
       }
 
@@ -108,7 +118,7 @@ class ZokoWhatsAppService {
       console.error('Error sending Zoko message:', error);
       return {
         success: false,
-        error: error.message || 'Failed to send message'
+        error: error.message || 'Network error - failed to send message'
       };
     }
   }
@@ -189,7 +199,7 @@ _للاستفسارات، يرجى الرد على هذه الرسالة_`
 • تم تأكيد الحضور بنجاح
 • يمكن مراجعة التفاصيل في لوحة التحكم
 
-_تم الإرسال تلقائياً من نظام إدارة الدعوات_`
+_تم الإرسال تلقائياً من نظام إدارة الدعوات عبر Zoko_`
       }
     };
 
@@ -218,7 +228,7 @@ _تم الإرسال تلقائياً من نظام إدارة الدعوات_`
 • تم تسجيل الاعتذار
 • يمكن مراجعة التفاصيل في لوحة التحكم
 
-_تم الإرسال تلقائياً من نظام إدارة الدعوات_`
+_تم الإرسال تلقائياً من نظام إدارة الدعوات عبر Zoko_`
       }
     };
 
@@ -466,8 +476,18 @@ ${window.location.origin}
     // Remove all non-digit characters and any whatsapp: prefix
     let cleaned = phoneNumber.replace(/\D/g, '').replace('whatsapp:', '');
     
-    // Add country code if missing (assuming Saudi Arabia +966)
-    if (!cleaned.startsWith('966') && cleaned.length === 9) {
+    // If it starts with 971 (UAE), keep as is
+    if (cleaned.startsWith('971')) {
+      return cleaned;
+    }
+    
+    // Add UAE country code if missing and number looks like UAE mobile
+    if (cleaned.length === 9 && (cleaned.startsWith('5') || cleaned.startsWith('50') || cleaned.startsWith('52') || cleaned.startsWith('54') || cleaned.startsWith('55') || cleaned.startsWith('56'))) {
+      cleaned = '971' + cleaned;
+    }
+    
+    // Add Saudi country code if missing and number looks like Saudi mobile
+    if (cleaned.length === 9 && cleaned.startsWith('5')) {
       cleaned = '966' + cleaned;
     }
     
@@ -480,30 +500,51 @@ ${window.location.origin}
    */
   async testConnection(): Promise<{ success: boolean; error?: string; phoneNumber?: string }> {
     try {
+      console.log('Testing Zoko connection...');
+      console.log('API Key:', this.config.apiKey ? `${this.config.apiKey.substring(0, 8)}...` : 'NOT SET');
+      console.log('Phone Number ID:', this.config.phoneNumberId);
+      
+      // Try to get phone number info
       const response = await fetch(`${this.config.baseUrl}/phone_numbers/${this.config.phoneNumberId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json',
         },
       });
 
+      console.log('Zoko API Response Status:', response.status);
+      
       if (!response.ok) {
-        const error = await response.json();
+        const errorText = await response.text();
+        console.error('Zoko API Error Response:', errorText);
+        
+        let error;
+        try {
+          const errorJson = JSON.parse(errorText);
+          error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}`;
+        } catch {
+          error = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        
         return {
           success: false,
-          error: error.error?.message || 'Failed to connect to Zoko API'
+          error: error
         };
       }
 
       const result = await response.json();
+      console.log('Zoko API Success Response:', result);
+      
       return {
         success: true,
-        phoneNumber: result.display_phone_number
+        phoneNumber: result.display_phone_number || `+${this.config.phoneNumberId}`
       };
     } catch (error: any) {
+      console.error('Zoko connection test failed:', error);
       return {
         success: false,
-        error: error.message || 'Connection failed'
+        error: error.message || 'Network error - could not connect to Zoko API'
       };
     }
   }
