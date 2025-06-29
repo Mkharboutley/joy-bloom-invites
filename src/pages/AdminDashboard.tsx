@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AttendanceStatusView from '@/components/AttendanceStatusView';
+import WhatsAppMessaging from '@/components/WhatsAppMessaging';
 
 const AdminDashboard = () => {
   return (
@@ -33,7 +34,10 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Admin Dashboard Content */}
-          <AttendanceStatusView />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AttendanceStatusView />
+            <WhatsAppMessaging />
+          </div>
         </div>
       </div>
     </div>

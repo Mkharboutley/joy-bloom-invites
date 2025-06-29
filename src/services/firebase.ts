@@ -1,6 +1,6 @@
-
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { supabase } from '@/integrations/supabase/client';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC2GHe8k-8ceL0ikWmkoUUILIyuQCBfWSk",
@@ -22,19 +22,54 @@ export interface Guest {
   invitationId: string;
   status?: 'confirmed' | 'apologized';
   apologyTimestamp?: any;
+  phoneNumber?: string;
 }
 
-export const confirmAttendance = async (fullName: string): Promise<string> => {
+const sendWhatsAppNotification = async (phoneNumber: string, message: string, guestName: string, type: 'confirmation' | 'apology') => {
+  try {
+    console.log(`Sending WhatsApp notification to ${guestName} at ${phoneNumber}`);
+    
+    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+      body: {
+        phoneNumber,
+        message,
+        guestName,
+        type
+      }
+    });
+
+    if (error) {
+      console.error('Error sending WhatsApp message:', error);
+      return false;
+    }
+
+    console.log('WhatsApp message sent successfully:', data);
+    return true;
+  } catch (error) {
+    console.error('Error in WhatsApp notification:', error);
+    return false;
+  }
+};
+
+export const confirmAttendance = async (fullName: string, phoneNumber?: string): Promise<string> => {
   try {
     const invitationId = generateInvitationId();
     const guestData = {
       fullName,
       confirmationTimestamp: serverTimestamp(),
       invitationId,
-      status: 'confirmed'
+      status: 'confirmed',
+      ...(phoneNumber && { phoneNumber })
     };
     
     const docRef = await addDoc(collection(db, 'guests'), guestData);
+    
+    // Send WhatsApp confirmation if phone number provided
+    if (phoneNumber) {
+      const confirmationMessage = `🎉 أهلاً ${fullName}!\n\nتم تأكيد حضوركم لحفل زفافنا.\n\n📅 التاريخ: ٤ يوليو ٢٠٢٥\n📍 المكان: فندق إرث\n\nرقم الدعوة: ${invitationId}\n\nبحضوركم تكتمل فرحتنا ❤️`;
+      
+      await sendWhatsAppNotification(phoneNumber, confirmationMessage, fullName, 'confirmation');
+    }
     
     return docRef.id;
   } catch (error) {
@@ -49,10 +84,19 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
     const guestDoc = querySnapshot.docs.find(doc => doc.data().invitationId === invitationId);
     
     if (guestDoc) {
+      const guestData = guestDoc.data();
+      
       await updateDoc(doc(db, 'guests', guestDoc.id), {
         status: 'apologized',
         apologyTimestamp: serverTimestamp()
       });
+
+      // Send WhatsApp apology acknowledgment if phone number available
+      if (guestData.phoneNumber) {
+        const apologyMessage = `شكراً لك ${guestData.fullName}\n\nتم استلام اعتذاركم عن حضور حفل الزفاف.\n\nنتفهم ظروفكم ونقدر تواصلكم معنا.\n\nنتمنى لكم كل الخير 🤲`;
+        
+        await sendWhatsAppNotification(guestData.phoneNumber, apologyMessage, guestData.fullName, 'apology');
+      }
     } else {
       throw new Error('Guest not found');
     }

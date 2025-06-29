@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -25,7 +27,7 @@ const Index = () => {
 
     setIsLoading(true);
     try {
-      const guestId = await confirmAttendance(fullName);
+      const guestId = await confirmAttendance(fullName, phoneNumber.trim() || undefined);
       navigate(`/confirmation/${guestId}`);
     } catch (error) {
       toast({
@@ -94,10 +96,26 @@ const Index = () => {
                 onChange={(e) => setFullName(e.target.value)}
                 className="text-right text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md shadow-xl focus:bg-white/30 focus:border-white/60 transition-all rounded-xl"
                 style={{ 
-                  fontSize: '16px', // Increased from 14px (text-sm) to 16px (14px * 1.15 ≈ 16px)
-                  height: '52.8px' // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
+                  fontSize: '16px',
+                  height: '52.8px'
                 }}
                 dir="rtl"
+              />
+            </div>
+
+            {/* Phone Number Input */}
+            <div className="space-y-2">
+              <Input
+                type="tel"
+                placeholder="رقم الهاتف (اختياري للتنبيهات)"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="text-center bg-white/25 border-white/40 text-white placeholder:text-white/50 backdrop-blur-md shadow-xl focus:bg-white/30 focus:border-white/60 transition-all rounded-xl"
+                style={{ 
+                  fontSize: '16px',
+                  height: '52.8px'
+                }}
+                dir="ltr"
               />
             </div>
 
@@ -107,9 +125,9 @@ const Index = () => {
               disabled={isLoading}
               className="w-full font-medium py-3 rounded-xl text-lg transform hover:scale-105 transition-all duration-200"
               style={{
-                height: '52.8px', // Increased from 48px (h-12) to 52.8px (48px * 1.1 = 52.8px)
-                boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.3)', // Added 0.2px glow
-                filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))' // Additional subtle glow
+                height: '52.8px',
+                boxShadow: '0 0 0.2px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.3)',
+                filter: 'drop-shadow(0 0 0.2px rgba(255, 255, 255, 0.9))'
               }}
               size="lg"
             >
