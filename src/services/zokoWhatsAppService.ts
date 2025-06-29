@@ -54,6 +54,7 @@ interface ZokoWebhook {
 class ZokoWhatsAppService {
   private static instance: ZokoWhatsAppService;
   private config: ZokoConfig;
+  private edgeFunctionUrl: string;
 
   private constructor() {
     this.config = {
@@ -63,11 +64,15 @@ class ZokoWhatsAppService {
       businessAccountId: import.meta.env.VITE_ZOKO_BUSINESS_ACCOUNT_ID || '127123111032763',
     };
 
+    // Use Supabase Edge Function as proxy to avoid CORS issues
+    this.edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/zoko-api`;
+
     console.log('Zoko Config:', {
       apiKey: this.config.apiKey ? `${this.config.apiKey.substring(0, 8)}...` : 'NOT SET',
       baseUrl: this.config.baseUrl,
       phoneNumberId: this.config.phoneNumberId,
-      businessAccountId: this.config.businessAccountId
+      businessAccountId: this.config.businessAccountId,
+      edgeFunctionUrl: this.edgeFunctionUrl
     });
 
     if (!this.config.apiKey || !this.config.phoneNumberId) {
@@ -83,37 +88,41 @@ class ZokoWhatsAppService {
   }
 
   /**
-   * Send WhatsApp message via Zoko API
+   * Call Supabase Edge Function to interact with Zoko API
+   */
+  private async callEdgeFunction(action: string, data?: any): Promise<any> {
+    try {
+      const response = await fetch(this.edgeFunctionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action, data }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Edge function error: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error: any) {
+      console.error('Edge function call failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send WhatsApp message via Zoko API through Edge Function
    */
   async sendMessage(message: ZokoMessage): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
-      console.log('Sending Zoko message:', message);
+      console.log('Sending Zoko message via Edge Function:', message);
       
-      const response = await fetch(`${this.config.baseUrl}/messages`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(message),
-      });
-
-      const result = await response.json();
-      console.log('Zoko API Response:', result);
-
-      if (!response.ok) {
-        console.error('Zoko API Error:', result);
-        return {
-          success: false,
-          error: result.error?.message || result.message || `HTTP ${response.status}: ${response.statusText}`
-        };
-      }
-
-      console.log('Zoko message sent successfully:', result.messages?.[0]?.id);
-      return {
-        success: true,
-        messageId: result.messages?.[0]?.id
-      };
+      const result = await this.callEdgeFunction('send_message', { message });
+      
+      console.log('Zoko API Response via Edge Function:', result);
+      return result;
     } catch (error: any) {
       console.error('Error sending Zoko message:', error);
       return {
@@ -440,18 +449,8 @@ ${window.location.origin}
    */
   async getMessageAnalytics(messageId: string): Promise<any> {
     try {
-      const response = await fetch(`${this.config.baseUrl}/messages/${messageId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch message analytics');
-      }
-
-      return await response.json();
+      const result = await this.callEdgeFunction('get_analytics', { messageId });
+      return result.success ? result.data : null;
     } catch (error) {
       console.error('Error fetching message analytics:', error);
       return null;
@@ -496,50 +495,16 @@ ${window.location.origin}
   }
 
   /**
-   * Test connection to Zoko API
+   * Test connection to Zoko API via Edge Function
    */
   async testConnection(): Promise<{ success: boolean; error?: string; phoneNumber?: string }> {
     try {
-      console.log('Testing Zoko connection...');
-      console.log('API Key:', this.config.apiKey ? `${this.config.apiKey.substring(0, 8)}...` : 'NOT SET');
-      console.log('Phone Number ID:', this.config.phoneNumberId);
+      console.log('Testing Zoko connection via Edge Function...');
       
-      // Try to get phone number info
-      const response = await fetch(`${this.config.baseUrl}/phone_numbers/${this.config.phoneNumberId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      console.log('Zoko API Response Status:', response.status);
+      const result = await this.callEdgeFunction('test_connection');
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Zoko API Error Response:', errorText);
-        
-        let error;
-        try {
-          const errorJson = JSON.parse(errorText);
-          error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}`;
-        } catch {
-          error = `HTTP ${response.status}: ${response.statusText}`;
-        }
-        
-        return {
-          success: false,
-          error: error
-        };
-      }
-
-      const result = await response.json();
-      console.log('Zoko API Success Response:', result);
-      
-      return {
-        success: true,
-        phoneNumber: result.display_phone_number || `+${this.config.phoneNumberId}`
-      };
+      console.log('Zoko connection test result:', result);
+      return result;
     } catch (error: any) {
       console.error('Zoko connection test failed:', error);
       return {
