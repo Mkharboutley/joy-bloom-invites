@@ -53,7 +53,7 @@ serve(async (req) => {
         template: {
           name: "01_new",
           language: {
-            code: "ar"  // Using Arabic language as shown in your template
+            code: "ar"
           },
           components: [
             {
