@@ -1,28 +1,33 @@
+
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ command }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      // Proxy Zoko API requests in development
+      '/api/zoko': {
+        target: 'https://api.zoko.io',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/zoko/, ''),
+        headers: {
+          'User-Agent': 'ZokoWebhookService/1.0'
+        }
+      }
+    }
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+    ...(command === 'serve' ? [componentTagger()] : []),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Ensure static files are served correctly
-  publicDir: 'public',
-  build: {
-    // Ensure proper asset handling
-    assetsDir: 'assets',
-  }
 }));

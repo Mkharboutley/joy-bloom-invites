@@ -109,12 +109,10 @@ class ZokoWhatsAppService {
 
       switch (action) {
         case 'test_connection':
-          // Use the proxy path instead of direct API call
           url = `/api/zoko/v2/phone_numbers/${this.config.phoneNumberId}`;
           method = 'GET';
           break;
         case 'send_message':
-          // Use the proxy path for sending messages
           url = `/api/zoko/v2/messages`;
           method = 'POST';
           body = JSON.stringify(data.message);
@@ -138,10 +136,28 @@ class ZokoWhatsAppService {
         body,
       });
 
+      // Check if response is HTML (indicates proxy failure)
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        throw new Error('Proxy configuration error - received HTML instead of JSON. Check Vite proxy setup.');
+      }
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Zoko API Error Response:', errorText);
-        throw new Error(`Zoko API error: ${response.status} ${response.statusText} - ${errorText}`);
+        
+        let error;
+        try {
+          const errorJson = JSON.parse(errorText);
+          error = errorJson.error?.message || errorJson.message || `HTTP ${response.status}`;
+        } catch {
+          error = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        
+        return {
+          success: false,
+          error: error
+        };
       }
 
       const result = await response.json();
