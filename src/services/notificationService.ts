@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { subscribeToGuests } from './firebase';
-import TwilioWhatsAppService from './twilioWhatsAppService';
+import ZokoWhatsAppService from './zokoWhatsAppService';
 
 interface NotificationContact {
   id: string;
@@ -15,10 +15,10 @@ class NotificationService {
   private static instance: NotificationService;
   private contacts: NotificationContact[] = [];
   private isListening = false;
-  private twilioWhatsApp: TwilioWhatsAppService;
+  private zokoWhatsApp: ZokoWhatsAppService;
 
   private constructor() {
-    this.twilioWhatsApp = TwilioWhatsAppService.getInstance();
+    this.zokoWhatsApp = ZokoWhatsAppService.getInstance();
     this.loadContacts();
     this.startGuestListener();
   }
@@ -88,7 +88,7 @@ class NotificationService {
           guestName,
           guestId,
           notificationType,
-          contact.notification_type === 'sms' ? contact.phone_number! : contact.email!,
+          contact.notification_type === 'whatsapp' ? contact.phone_number! : contact.email!,
           contact.notification_type,
           success ? 'sent' : 'failed'
         );
@@ -101,7 +101,7 @@ class NotificationService {
           guestName,
           guestId,
           notificationType,
-          contact.notification_type === 'sms' ? contact.phone_number! : contact.email!,
+          contact.notification_type === 'whatsapp' ? contact.phone_number! : contact.email!,
           contact.notification_type,
           'failed'
         );
@@ -110,11 +110,11 @@ class NotificationService {
   }
 
   private async sendToContact(contact: NotificationContact, message: string): Promise<boolean> {
-    // Send notifications using Twilio WhatsApp for SMS and WhatsApp
+    // Send notifications using Zoko WhatsApp for WhatsApp and SMS
     switch (contact.notification_type) {
       case 'sms':
       case 'whatsapp':
-        return this.sendWhatsAppMessage(contact.phone_number!, message);
+        return this.sendZokoMessage(contact.phone_number!, message);
       case 'email':
         return this.sendEmail(contact.email!, message);
       case 'push':
@@ -124,17 +124,18 @@ class NotificationService {
     }
   }
 
-  private async sendWhatsAppMessage(phoneNumber: string, message: string): Promise<boolean> {
+  private async sendZokoMessage(phoneNumber: string, message: string): Promise<boolean> {
     try {
-      const formattedNumber = TwilioWhatsAppService.formatPhoneNumber(phoneNumber);
-      const result = await this.twilioWhatsApp.sendMessage({
-        to: formattedNumber,
-        body: message
+      const result = await this.zokoWhatsApp.sendMessage({
+        messaging_product: 'whatsapp',
+        to: this.zokoWhatsApp.formatPhoneNumber(phoneNumber),
+        type: 'text',
+        text: { body: message }
       });
       
       return result.success;
     } catch (error) {
-      console.error('Error sending WhatsApp message:', error);
+      console.error('Error sending Zoko message:', error);
       return false;
     }
   }
@@ -186,15 +187,27 @@ class NotificationService {
   }
 
   public async sendConfirmationNotification(guestName: string, guestId: string) {
-    // Send WhatsApp notification to admin contacts
-    const message = `🎉 تأكيد حضور جديد!\n\nالضيف: ${guestName}\nرقم الدعوة: ${guestId}\nالوقت: ${new Date().toLocaleString('ar-SA')}`;
+    // Send WhatsApp notification to admin contacts using Zoko
+    const message = `🎉 تأكيد حضور جديد!
+
+الضيف: ${guestName}
+رقم الدعوة: ${guestId}
+الوقت: ${new Date().toLocaleString('ar-SA')}
+
+تم الإرسال عبر Zoko WhatsApp Business API ✅`;
     
     await this.sendNotification(guestName, guestId, 'confirmation', message);
   }
 
   public async sendApologyNotification(guestName: string, guestId: string) {
-    // Send WhatsApp notification to admin contacts
-    const message = `😔 اعتذار عن الحضور\n\nالضيف: ${guestName}\nرقم الدعوة: ${guestId}\nالوقت: ${new Date().toLocaleString('ar-SA')}`;
+    // Send WhatsApp notification to admin contacts using Zoko
+    const message = `😔 اعتذار عن الحضور
+
+الضيف: ${guestName}
+رقم الدعوة: ${guestId}
+الوقت: ${new Date().toLocaleString('ar-SA')}
+
+تم الإرسال عبر Zoko WhatsApp Business API ✅`;
     
     await this.sendNotification(guestName, guestId, 'apology', message);
   }
@@ -202,7 +215,13 @@ class NotificationService {
   public async sendDailySummary() {
     // This would be called by a scheduled job
     // Implementation would fetch current stats and send summary
-    const message = `📊 ملخص يومي للحضور\n\nتاريخ: ${new Date().toLocaleDateString('ar-SA')}\n\n[سيتم إضافة الإحصائيات هنا]`;
+    const message = `📊 ملخص يومي للحضور
+
+تاريخ: ${new Date().toLocaleDateString('ar-SA')}
+
+[سيتم إضافة الإحصائيات هنا]
+
+تم الإرسال عبر Zoko WhatsApp Business API ✅`;
     
     await this.sendNotification('النظام', 'daily-summary', 'summary', message);
   }
@@ -211,21 +230,21 @@ class NotificationService {
     await this.loadContacts();
   }
 
-  // New methods for bulk invitation sending
+  // New methods for bulk invitation sending using Zoko
   public async sendBulkInvitations(
     contacts: Array<{ name: string; phoneNumber: string }>,
     mediaUrl?: string,
     onProgress?: (sent: number, total: number) => void
   ) {
-    return await this.twilioWhatsApp.sendBulkInvitations(contacts, mediaUrl, onProgress);
+    return await this.zokoWhatsApp.sendBulkInvitations(contacts, mediaUrl, onProgress);
   }
 
   public async sendWeddingInvitation(phoneNumber: string, guestName: string, mediaUrl?: string) {
-    return await this.twilioWhatsApp.sendWeddingInvitation(phoneNumber, guestName, mediaUrl);
+    return await this.zokoWhatsApp.sendWeddingInvitation(phoneNumber, guestName, mediaUrl);
   }
 
-  public async handleIncomingWhatsAppMessage(webhookData: any) {
-    return await this.twilioWhatsApp.handleIncomingMessage(webhookData);
+  public async handleIncomingZokoMessage(webhookData: any) {
+    return await this.zokoWhatsApp.handleWebhook(webhookData);
   }
 }
 

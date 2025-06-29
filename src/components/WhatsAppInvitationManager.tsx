@@ -14,7 +14,7 @@ import { AlertCircle, MessageSquare, Phone, Plus, Send, Trash2, Upload, Users } 
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import NotificationService from '@/services/notificationService';
-import TwilioWhatsAppService from '@/services/twilioWhatsAppService';
+import ZokoWhatsAppService from '@/services/zokoWhatsAppService';
 
 interface WhatsAppContact {
   id: string;
@@ -101,7 +101,7 @@ const WhatsAppInvitationManager = () => {
       return;
     }
 
-    if (!TwilioWhatsAppService.validatePhoneNumber(newContact.phone_number)) {
+    if (!ZokoWhatsAppService.validatePhoneNumber(newContact.phone_number)) {
       toast({
         title: "خطأ",
         description: "رقم الهاتف غير صحيح",
@@ -111,7 +111,8 @@ const WhatsAppInvitationManager = () => {
     }
 
     try {
-      const formattedPhone = TwilioWhatsAppService.formatPhoneNumber(newContact.phone_number);
+      const zokoService = ZokoWhatsAppService.getInstance();
+      const formattedPhone = zokoService.formatPhoneNumber(newContact.phone_number);
       
       const { error } = await supabase
         .from('whatsapp_contacts')
@@ -154,6 +155,7 @@ const WhatsAppInvitationManager = () => {
     try {
       const lines = bulkContacts.split('\n').filter(line => line.trim());
       const contactsToAdd = [];
+      const zokoService = ZokoWhatsAppService.getInstance();
 
       for (const line of lines) {
         const parts = line.split(',').map(part => part.trim());
@@ -161,10 +163,10 @@ const WhatsAppInvitationManager = () => {
           const name = parts[0];
           const phone = parts[1];
           
-          if (TwilioWhatsAppService.validatePhoneNumber(phone)) {
+          if (ZokoWhatsAppService.validatePhoneNumber(phone)) {
             contactsToAdd.push({
               name,
-              phone_number: TwilioWhatsAppService.formatPhoneNumber(phone),
+              phone_number: zokoService.formatPhoneNumber(phone),
               source: 'bulk'
             });
           }
@@ -288,7 +290,7 @@ const WhatsAppInvitationManager = () => {
 
       toast({
         title: "تم الإرسال",
-        description: `تم إرسال ${result.successful} دعوة بنجاح، فشل ${result.failed} دعوة`
+        description: `تم إرسال ${result.successful} دعوة بنجاح عبر Zoko، فشل ${result.failed} دعوة`
       });
 
       fetchContacts();
@@ -402,8 +404,11 @@ const WhatsAppInvitationManager = () => {
                             value={newContact.phone_number}
                             onChange={(e) => setNewContact({...newContact, phone_number: e.target.value})}
                             className="bg-white/20 border-white/30 text-white"
-                            placeholder="+966xxxxxxxxx"
+                            placeholder="966501234567"
                           />
+                          <p className="text-white/60 text-xs mt-1">
+                            مثال: 966501234567 (بدون + أو whatsapp:)
+                          </p>
                         </div>
 
                         <Button onClick={addContact} className="w-full">
@@ -426,7 +431,7 @@ const WhatsAppInvitationManager = () => {
                     value={bulkContacts}
                     onChange={(e) => setBulkContacts(e.target.value)}
                     className="bg-white/20 border-white/30 text-white mb-2"
-                    placeholder="أحمد محمد، +966501234567&#10;فاطمة علي، +966507654321"
+                    placeholder="أحمد محمد، 966501234567&#10;فاطمة علي، 966507654321"
                     rows={4}
                   />
                   <Button onClick={addBulkContacts} size="sm">
@@ -526,7 +531,7 @@ const WhatsAppInvitationManager = () => {
           <Card className="bg-white/10 backdrop-blur-md border-white/20">
             <CardHeader>
               <CardTitle className="text-white text-center" dir="rtl">
-                إرسال دعوات WhatsApp
+                إرسال دعوات WhatsApp عبر Zoko
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6" dir="rtl">
@@ -568,7 +573,7 @@ const WhatsAppInvitationManager = () => {
               {isSending && (
                 <div className="space-y-2">
                   <div className="flex justify-between text-white text-sm">
-                    <span>جاري الإرسال...</span>
+                    <span>جاري الإرسال عبر Zoko...</span>
                     <span>{Math.round(sendingProgress)}%</span>
                   </div>
                   <Progress value={sendingProgress} className="w-full" />
@@ -582,7 +587,7 @@ const WhatsAppInvitationManager = () => {
                 className="w-full bg-green-600 hover:bg-green-700 h-12"
               >
                 {isSending ? (
-                  <>جاري الإرسال...</>
+                  <>جاري الإرسال عبر Zoko...</>
                 ) : (
                   <>
                     <Send className="w-4 h-4 ml-2" />
@@ -592,15 +597,16 @@ const WhatsAppInvitationManager = () => {
               </Button>
 
               {/* Warning */}
-              <div className="flex items-start gap-2 p-3 bg-yellow-500/20 rounded-lg border border-yellow-400/30">
-                <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <div className="text-yellow-200 text-sm">
-                  <p className="font-semibold mb-1">تنبيه مهم:</p>
+              <div className="flex items-start gap-2 p-3 bg-green-500/20 rounded-lg border border-green-400/30">
+                <AlertCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                <div className="text-green-200 text-sm">
+                  <p className="font-semibold mb-1">✅ Zoko WhatsApp Business API:</p>
                   <ul className="space-y-1 text-xs">
-                    <li>• تأكد من صحة أرقام الهواتف قبل الإرسال</li>
-                    <li>• سيتم إرسال الدعوات عبر Twilio WhatsApp API</li>
-                    <li>• قد تستغرق العملية بعض الوقت للأعداد الكبيرة</li>
-                    <li>• تأكد من وجود رصيد كافي في حساب Twilio</li>
+                    <li>• أرقام الهواتف يجب أن تكون بصيغة: 966501234567</li>
+                    <li>• سيتم إرسال الدعوات عبر Zoko Business API</li>
+                    <li>• معدل الإرسال: 80 رسالة في الدقيقة</li>
+                    <li>• تتبع حالة التسليم متاح</li>
+                    <li>• الردود التلقائية مُفعلة</li>
                   </ul>
                 </div>
               </div>
