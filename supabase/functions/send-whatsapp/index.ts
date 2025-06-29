@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -44,16 +45,16 @@ serve(async (req) => {
     let whatsappPayload;
 
     if (useTemplate) {
-      // Use template message for new contacts - FIXED: Added templateId
+      // Use template message for new contacts - FIXED: Using Arabic language
       whatsappPayload = {
         channel: "whatsapp",
         recipient: formattedPhone,
         type: "template",
-        templateId: "01_new", // This was missing - now added!
+        templateId: "01_new",
         template: {
           name: "01_new",
           language: {
-            code: "ar"
+            code: "ar"  // Changed from "en" to "ar" for Arabic
           },
           components: [
             {
@@ -139,3 +140,4 @@ serve(async (req) => {
     );
   }
 });
+
