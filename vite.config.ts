@@ -14,9 +14,12 @@ export default defineConfig(({ command }) => ({
       '/api/zoko': {
         target: 'https://api.zoko.io',
         changeOrigin: true,
+        secure: true,
         rewrite: (path) => path.replace(/^\/api\/zoko/, ''),
-        headers: {
-          'User-Agent': 'ZokoWebhookService/1.0'
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Proxying request:', req.method, req.url, '-> https://api.zoko.io' + proxyReq.path);
+          });
         }
       }
     }

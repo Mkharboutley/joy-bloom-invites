@@ -126,19 +126,30 @@ class ZokoWhatsAppService {
       }
 
       console.log(`Making Zoko API call via proxy: ${method} ${url}`);
+      console.log('Request headers:', {
+        'Authorization': `Bearer ${this.config.apiKey.substring(0, 8)}...`,
+        'Content-Type': 'application/json'
+      });
 
       const response = await fetch(url, {
         method,
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body,
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       // Check if response is HTML (indicates proxy failure)
       const contentType = response.headers.get('content-type');
+      console.log('Content-Type:', contentType);
+      
       if (contentType && contentType.includes('text/html')) {
+        console.error('Received HTML instead of JSON - proxy configuration error');
         throw new Error('Proxy configuration error - received HTML instead of JSON. Check Vite proxy setup.');
       }
 
