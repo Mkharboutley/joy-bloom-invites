@@ -11,51 +11,33 @@ const WhatsAppMessaging = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Format phone number for international use
-  const formatPhoneNumber = (input: string): string | null => {
-    // Remove all non-digit characters except +
-    const cleaned = input.replace(/[^\d+]/g, '');
-    
-    // If it starts with +, keep it as is
-    if (cleaned.startsWith('+')) {
+  // ✅ UAE number formatter
+  const formatUAEPhone = (input: string): string | null => {
+    const cleaned = input.replace(/\s+/g, '').replace(/-/g, '');
+
+    if (/^009715\d{8}$/.test(cleaned)) {
+      return `+${cleaned.substring(2)}`;
+    }
+
+    if (/^\+9715\d{8}$/.test(cleaned)) {
       return cleaned;
     }
-    
-    // If it starts with 00, replace with +
-    if (cleaned.startsWith('00')) {
-      return '+' + cleaned.substring(2);
+
+    if (/^05\d{8}$/.test(cleaned)) {
+      return `+971${cleaned.substring(1)}`;
     }
-    
-    // If it's a local number (starts with 0), assume it's UAE and add +971
-    if (cleaned.startsWith('0')) {
-      return '+971' + cleaned.substring(1);
-    }
-    
-    // If it doesn't start with + or 0, assume it needs country code
-    if (cleaned.length >= 8) {
-      return '+971' + cleaned;
-    }
-    
+
     return null;
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formattedPhone = formatPhoneNumber(phoneNumber);
+    const formattedPhone = formatUAEPhone(phoneNumber);
     if (!formattedPhone) {
       toast({
         title: 'رقم غير صالح',
-        description: 'يرجى إدخال رقم هاتف صحيح',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (!guestName.trim()) {
-      toast({
-        title: 'اسم مطلوب',
-        description: 'يرجى إدخال اسم الضيف',
+        description: 'يرجى إدخال رقم إماراتي صحيح بالصيغة 05xxxxxxxx أو +9715xxx أو 009715xxx',
         variant: 'destructive'
       });
       return;
@@ -64,29 +46,15 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
 
     try {
-      // Get Supabase URL from environment variables
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const payload = new URLSearchParams({
+        phone: formattedPhone,
+        name: guestName || 'ضيف'
+      });
 
-      if (!supabaseUrl || !supabaseAnonKey) {
-        toast({
-          title: 'خطأ في الإعداد',
-          description: 'متغيرات Supabase غير مُعرّفة',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
+      const response = await fetch('https://wedding-messaging-7974.twil.io/send-invite', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phone: formattedPhone,
-          name: guestName.trim()
-        })
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: payload
       });
 
       const result = await response.json();
@@ -102,13 +70,12 @@ const WhatsAppMessaging = () => {
 
       toast({
         title: 'تم الإرسال',
-        description: `تم إرسال الدعوة إلى ${guestName}`
+        description: `تم إرسال الدعوة إلى ${guestName || 'الضيف'}`
       });
 
       setPhoneNumber('');
       setGuestName('');
     } catch (error) {
-      console.error('Error sending WhatsApp message:', error);
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء الإرسال',
@@ -124,14 +91,14 @@ const WhatsAppMessaging = () => {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2" dir="rtl">
           <MessageCircle className="w-5 h-5" />
-          إرسال دعوة واتساب (Twilio)
+          إرسال دعوة واتساب (قالب رسمي)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSendMessage} className="space-y-4">
           <Input
             type="tel"
-            placeholder="رقم الهاتف (مع رمز البلد)"
+            placeholder="رقم الهاتف (05xxxxxxxx أو +9715xxx أو 009715xxx)"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
@@ -139,12 +106,11 @@ const WhatsAppMessaging = () => {
           />
           <Input
             type="text"
-            placeholder="اسم الضيف"
+            placeholder="اسم الضيف (اختياري)"
             value={guestName}
             onChange={(e) => setGuestName(e.target.value)}
             className="bg-white/20 border-white/30 text-white placeholder:text-white/70"
             dir="rtl"
-            required
           />
           <Button
             type="submit"
@@ -154,7 +120,7 @@ const WhatsAppMessaging = () => {
             {isLoading ? 'جاري الإرسال...' : (
               <>
                 <Send className="w-4 h-4 ml-2" />
-                إرسال الدعوة
+                إرسال القالب الآن
               </>
             )}
           </Button>
@@ -165,8 +131,7 @@ const WhatsAppMessaging = () => {
           <div className="text-green-100 text-sm" dir="rtl">
             <p className="font-medium mb-1">معلومة:</p>
             <p>
-              يتم الإرسال عبر Supabase Edge Function لتجنب مشاكل CORS. 
-              تأكد من إعداد متغيرات البيئة في Supabase.
+              يتم استخدام قالب واتساب رسمي. تأكد أن الرقم المسجل فعّال على واتساب وأنه لم يمضِ أكثر من 24 ساعة على آخر تفاعل.
             </p>
           </div>
         </div>
