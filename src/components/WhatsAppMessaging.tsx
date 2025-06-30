@@ -1,9 +1,16 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { MessageCircle, Send, AlertTriangle } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  'https://wedding-f09cd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlZGRpbmctZjA5Y2QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNTU4NzE3NiwiZXhwIjoyMDUxMTYzMTc2fQ.gM8gJfGGnm6OZ9LKQ1fwpMvH1KYf_5JKUcIGRLfWyzs'
+);
 
 const WhatsAppMessaging = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -46,23 +53,29 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
 
     try {
-      const payload = new URLSearchParams({
-        phone: formattedPhone,
-        name: guestName || 'ضيف'
+      console.log('Calling Supabase edge function...');
+      
+      const { data, error } = await supabase.functions.invoke('send-whatsapp', {
+        body: {
+          phone: formattedPhone,
+          name: guestName || 'ضيف'
+        }
       });
 
-      const response = await fetch('https://wedding-messaging-7974.twil.io/send-invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: payload
-      });
+      if (error) {
+        console.error('Supabase function error:', error);
+        toast({
+          title: 'خطأ في الإرسال',
+          description: 'حدث خطأ أثناء الاتصال بالخدمة',
+          variant: 'destructive'
+        });
+        return;
+      }
 
-      const result = await response.json();
-
-      if (result.status !== 'success') {
+      if (data.status !== 'success') {
         toast({
           title: 'فشل الإرسال',
-          description: result.message || 'لم يتم إرسال الرسالة',
+          description: data.message || 'لم يتم إرسال الرسالة',
           variant: 'destructive'
         });
         return;
@@ -70,15 +83,16 @@ const WhatsAppMessaging = () => {
 
       toast({
         title: 'تم الإرسال',
-        description: `تم إرسال الدعوة إلى ${guestName || 'الضيف'}`
+        description: data.message || `تم إرسال الدعوة إلى ${guestName || 'الضيف'}`
       });
 
       setPhoneNumber('');
       setGuestName('');
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         title: 'خطأ',
-        description: 'حدث خطأ أثناء الإرسال',
+        description: 'حدث خطأ غير متوقع',
         variant: 'destructive'
       });
     } finally {
@@ -91,7 +105,7 @@ const WhatsAppMessaging = () => {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2" dir="rtl">
           <MessageCircle className="w-5 h-5" />
-          إرسال دعوة واتساب (قالب رسمي)
+          إرسال دعوة واتساب (عبر Supabase Edge Function)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -120,18 +134,18 @@ const WhatsAppMessaging = () => {
             {isLoading ? 'جاري الإرسال...' : (
               <>
                 <Send className="w-4 h-4 ml-2" />
-                إرسال القالب الآن
+                إرسال عبر Supabase
               </>
             )}
           </Button>
         </form>
 
-        <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 flex items-start gap-2">
-          <AlertTriangle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-          <div className="text-green-100 text-sm" dir="rtl">
-            <p className="font-medium mb-1">معلومة:</p>
+        <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="text-blue-100 text-sm" dir="rtl">
+            <p className="font-medium mb-1">تحديث:</p>
             <p>
-              يتم استخدام قالب واتساب رسمي. تأكد أن الرقم المسجل فعّال على واتساب وأنه لم يمضِ أكثر من 24 ساعة على آخر تفاعل.
+              تم حل مشكلة CORS! الآن يتم الإرسال عبر Supabase Edge Function الذي يتولى التعامل مع Twilio API بشكل آمن.
             </p>
           </div>
         </div>

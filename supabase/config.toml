@@ -1,0 +1,5 @@
+
+project_id = "wedding-f09cd"
+
+[functions.send-whatsapp]
+verify_jwt = false
