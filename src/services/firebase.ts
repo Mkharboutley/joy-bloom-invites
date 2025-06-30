@@ -1,7 +1,5 @@
-
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, doc, getDoc, getDocs, onSnapshot, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { supabase } from '@/integrations/supabase/client';
 
 const firebaseConfig = {
   apiKey: "AIzaSyC2GHe8k-8ceL0ikWmkoUUILIyuQCBfWSk",
@@ -30,20 +28,37 @@ const sendWhatsAppNotification = async (phoneNumber: string, message: string, gu
   try {
     console.log(`Sending WhatsApp notification to ${guestName} at ${phoneNumber}`);
     
-    const { data, error } = await supabase.functions.invoke('send-whatsapp', {
-      body: {
-        phoneNumber,
-        message,
-        guestName,
-        type
-      }
-    });
-
-    if (error) {
-      console.error('Error sending WhatsApp message:', error);
+    const zokoApiKey = import.meta.env.VITE_ZOKO_API_KEY;
+    if (!zokoApiKey) {
+      console.error('Missing Zoko API key');
       return false;
     }
 
+    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    const formattedPhone = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+
+    const whatsappPayload = {
+      type: 'text',
+      channel: 'whatsapp',
+      recipient: formattedPhone,
+      message
+    };
+
+    const response = await fetch('https://chat.zoko.io/v2/message', {
+      method: 'POST',
+      headers: {
+        'apikey': zokoApiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(whatsappPayload)
+    });
+
+    if (!response.ok) {
+      console.error('Error sending WhatsApp message:', await response.text());
+      return false;
+    }
+
+    const data = await response.json();
     console.log('WhatsApp message sent successfully:', data);
     return true;
   } catch (error) {

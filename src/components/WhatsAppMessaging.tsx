@@ -1,11 +1,9 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { MessageCircle, Send, AlertTriangle, Mail } from 'lucide-react';
 
 const WhatsAppMessaging = () => {
@@ -40,18 +38,45 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('send-whatsapp', {
-        body: {
-          phoneNumber: phoneNumber.trim(),
-          message: message.trim(),
-          guestName: guestName.trim() || undefined,
-          type: 'custom',
-          useTemplate: useTemplate
-        }
+      // Direct Zoko API call
+      const zokoApiKey = import.meta.env.VITE_ZOKO_API_KEY;
+      const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+      const formattedPhone = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+
+      let whatsappPayload;
+
+      if (useTemplate) {
+        whatsappPayload = {
+          type: 'template',
+          templateId: '01_new',
+          channel: 'whatsapp',
+          recipient: formattedPhone,
+          language: 'ar',
+          templateData: {
+            params: [guestName || 'الضيف الكريم']
+          }
+        };
+      } else {
+        whatsappPayload = {
+          type: 'text',
+          channel: 'whatsapp',
+          recipient: formattedPhone,
+          message
+        };
+      }
+
+      const response = await fetch('https://chat.zoko.io/v2/message', {
+        method: 'POST',
+        headers: {
+          'apikey': zokoApiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(whatsappPayload)
       });
 
-      if (error) {
-        if (error.message?.includes('Template message required')) {
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.error?.includes('Template message required')) {
           toast({
             title: "مطلوب قالب رسالة",
             description: "هذا رقم جديد. جرب استخدام خيار القالب المعتمد.",
