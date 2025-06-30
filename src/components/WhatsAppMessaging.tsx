@@ -5,12 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { MessageCircle, Send, AlertTriangle } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  'https://wedding-f09cd.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlZGRpbmctZjA5Y2QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNTU4NzE3NiwiZXhwIjoyMDUxMTYzMTc2fQ.gM8gJfGGnm6OZ9LKQ1fwpMvH1KYf_5JKUcIGRLfWyzs'
-);
 
 const WhatsAppMessaging = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -37,6 +31,61 @@ const WhatsAppMessaging = () => {
     return null;
   };
 
+  const sendWhatsAppMessage = async (phoneNumber: string, guestName: string) => {
+    try {
+      console.log(`Sending WhatsApp message to ${guestName} at ${phoneNumber}`);
+      
+      const twilioAccountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
+      const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+      const twilioWhatsAppNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
+      
+      if (!twilioAccountSid || !twilioAuthToken || !twilioWhatsAppNumber) {
+        console.error('Missing Twilio credentials');
+        throw new Error('Twilio credentials not configured');
+      }
+
+      const whatsappPhone = `whatsapp:${phoneNumber}`;
+
+      const message = `🎉 أهلاً ${guestName}!
+
+تم إرسال دعوة حفل زفافنا إليكم.
+
+📅 التاريخ: ٤ يوليو ٢٠٢٥
+🕰️ الوقت: ٨:٣٠ مساءً
+📍 المكان: فندق إرث
+
+بحضوركم تكتمل فرحتنا ❤️`;
+
+      const twilioPayload = new URLSearchParams({
+        From: twilioWhatsAppNumber,
+        To: whatsappPhone,
+        Body: message
+      });
+
+      const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: twilioPayload
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error sending WhatsApp message:', errorData);
+        throw new Error(errorData.message || 'Failed to send message');
+      }
+
+      const data = await response.json();
+      console.log('WhatsApp message sent successfully:', data);
+      return true;
+    } catch (error) {
+      console.error('Error in WhatsApp message:', error);
+      throw error;
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -53,46 +102,20 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
 
     try {
-      console.log('Calling Supabase edge function...');
+      await sendWhatsAppMessage(formattedPhone, guestName || 'ضيف');
       
-      const { data, error } = await supabase.functions.invoke('send-whatsapp', {
-        body: {
-          phone: formattedPhone,
-          name: guestName || 'ضيف'
-        }
-      });
-
-      if (error) {
-        console.error('Supabase function error:', error);
-        toast({
-          title: 'خطأ في الإرسال',
-          description: 'حدث خطأ أثناء الاتصال بالخدمة',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      if (data.status !== 'success') {
-        toast({
-          title: 'فشل الإرسال',
-          description: data.message || 'لم يتم إرسال الرسالة',
-          variant: 'destructive'
-        });
-        return;
-      }
-
       toast({
         title: 'تم الإرسال',
-        description: data.message || `تم إرسال الدعوة إلى ${guestName || 'الضيف'}`
+        description: `تم إرسال الدعوة إلى ${guestName || 'الضيف'} بنجاح`
       });
 
       setPhoneNumber('');
       setGuestName('');
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('Error sending message:', error);
       toast({
-        title: 'خطأ',
-        description: 'حدث خطأ غير متوقع',
+        title: 'خطأ في الإرسال',
+        description: 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.',
         variant: 'destructive'
       });
     } finally {
@@ -105,7 +128,7 @@ const WhatsAppMessaging = () => {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2" dir="rtl">
           <MessageCircle className="w-5 h-5" />
-          إرسال دعوة واتساب (عبر Supabase Edge Function)
+          إرسال دعوة واتساب
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -134,18 +157,20 @@ const WhatsAppMessaging = () => {
             {isLoading ? 'جاري الإرسال...' : (
               <>
                 <Send className="w-4 h-4 ml-2" />
-                إرسال عبر Supabase
+                إرسال الدعوة
               </>
             )}
           </Button>
         </form>
 
-        <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 flex items-start gap-2">
-          <AlertTriangle className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="text-blue-100 text-sm" dir="rtl">
-            <p className="font-medium mb-1">تحديث:</p>
+        <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+          <div className="text-orange-100 text-sm" dir="rtl">
+            <p className="font-medium mb-1">ملاحظة:</p>
             <p>
-              تم حل مشكلة CORS! الآن يتم الإرسال عبر Supabase Edge Function الذي يتولى التعامل مع Twilio API بشكل آمن.
+              تأكد من إعداد متغيرات البيئة لـ Twilio في ملف .env الخاص بك:
+              <br />
+              VITE_TWILIO_ACCOUNT_SID, VITE_TWILIO_AUTH_TOKEN, VITE_TWILIO_WHATSAPP_NUMBER
             </p>
           </div>
         </div>
