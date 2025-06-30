@@ -28,33 +28,37 @@ const sendWhatsAppNotification = async (phoneNumber: string, message: string, gu
   try {
     console.log(`Sending WhatsApp notification to ${guestName} at ${phoneNumber}`);
     
-    const zokoApiKey = import.meta.env.VITE_ZOKO_API_KEY;
-    if (!zokoApiKey) {
-      console.error('Missing Zoko API key');
+    const twilioAccountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
+    const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+    const twilioWhatsAppNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
+    
+    if (!twilioAccountSid || !twilioAuthToken || !twilioWhatsAppNumber) {
+      console.error('Missing Twilio credentials');
       return false;
     }
 
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     const formattedPhone = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+    const whatsappPhone = `whatsapp:${formattedPhone}`;
 
-    const whatsappPayload = {
-      type: 'text',
-      channel: 'whatsapp',
-      recipient: formattedPhone,
-      message
-    };
+    const twilioPayload = new URLSearchParams({
+      From: twilioWhatsAppNumber,
+      To: whatsappPhone,
+      Body: message
+    });
 
-    const response = await fetch('https://chat.zoko.io/v2/message', {
+    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
       method: 'POST',
       headers: {
-        'apikey': zokoApiKey,
-        'Content-Type': 'application/json'
+        'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: JSON.stringify(whatsappPayload)
+      body: twilioPayload
     });
 
     if (!response.ok) {
-      console.error('Error sending WhatsApp message:', await response.text());
+      const errorData = await response.json();
+      console.error('Error sending WhatsApp message:', errorData);
       return false;
     }
 
@@ -81,7 +85,17 @@ export const confirmAttendance = async (fullName: string, phoneNumber?: string):
     const docRef = await addDoc(collection(db, 'guests'), guestData);
     
     if (phoneNumber) {
-      const confirmationMessage = `🎉 أهلاً ${fullName}!\n\nتم تأكيد حضوركم لحفل زفافنا.\n\n📅 التاريخ: ٤ يوليو ٢٠٢٥\n📍 المكان: فندق إرث\n\nرقم الدعوة: ${invitationId}\n\nبحضوركم تكتمل فرحتنا ❤️`;
+      const confirmationMessage = `🎉 أهلاً ${fullName}!
+
+تم تأكيد حضوركم لحفل زفافنا.
+
+📅 التاريخ: ٤ يوليو ٢٠٢٥
+🕰️ الوقت: ٨:٣٠ مساءً
+📍 المكان: فندق إرث
+
+رقم الدعوة: ${invitationId}
+
+بحضوركم تكتمل فرحتنا ❤️`;
       
       await sendWhatsAppNotification(phoneNumber, confirmationMessage, fullName, 'confirmation');
     }
@@ -107,7 +121,13 @@ export const apologizeForAttendance = async (invitationId: string): Promise<void
       });
 
       if (guestData.phoneNumber) {
-        const apologyMessage = `شكراً لك ${guestData.fullName}\n\nتم استلام اعتذاركم عن حضور حفل الزفاف.\n\nنتفهم ظروفكم ونقدر تواصلكم معنا.\n\nنتمنى لكم كل الخير 🤲`;
+        const apologyMessage = `شكراً لك ${guestData.fullName}
+
+تم استلام اعتذاركم عن حضور حفل الزفاف.
+
+نتفهم ظروفكم ونقدر تواصلكم معنا.
+
+نتمنى لكم كل الخير 🤲`;
         
         await sendWhatsAppNotification(guestData.phoneNumber, apologyMessage, guestData.fullName, 'apology');
       }

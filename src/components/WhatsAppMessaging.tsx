@@ -38,59 +38,58 @@ const WhatsAppMessaging = () => {
     setIsLoading(true);
     
     try {
-      // Direct Zoko API call
-      const zokoApiKey = import.meta.env.VITE_ZOKO_API_KEY;
+      // Direct Twilio API call
+      const twilioAccountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
+      const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+      const twilioWhatsAppNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER; // e.g., "whatsapp:+14155238886"
+      
       const cleaned = phoneNumber.replace(/[^\d+]/g, '');
       const formattedPhone = cleaned.startsWith('+') ? cleaned : '+' + cleaned;
+      const whatsappPhone = `whatsapp:${formattedPhone}`;
 
-      let whatsappPayload;
-
+      let messageBody;
       if (useTemplate) {
-        whatsappPayload = {
-          type: 'template',
-          templateId: '01_new',
-          channel: 'whatsapp',
-          recipient: formattedPhone,
-          language: 'ar',
-          templateData: {
-            params: [guestName || 'الضيف الكريم']
-          }
-        };
+        messageBody = `🎉 مرحباً ${guestName || 'الضيف الكريم'}!
+
+تم تأكيد حضوركم لحفل زفافنا.
+
+📅 التاريخ: ٤ يوليو ٢٠٢٥
+🕰️ الوقت: ٨:٣٠ مساءً
+📍 المكان: فندق إرث
+
+بحضوركم تكتمل فرحتنا ❤️`;
       } else {
-        whatsappPayload = {
-          type: 'text',
-          channel: 'whatsapp',
-          recipient: formattedPhone,
-          message
-        };
+        messageBody = message;
       }
 
-      const response = await fetch('https://chat.zoko.io/v2/message', {
+      const twilioPayload = new URLSearchParams({
+        From: twilioWhatsAppNumber,
+        To: whatsappPhone,
+        Body: messageBody
+      });
+
+      const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
         method: 'POST',
         headers: {
-          'apikey': zokoApiKey,
-          'Content-Type': 'application/json'
+          'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify(whatsappPayload)
+        body: twilioPayload
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        if (errorData.error?.includes('Template message required')) {
-          toast({
-            title: "مطلوب قالب رسالة",
-            description: "هذا رقم جديد. جرب استخدام خيار القالب المعتمد.",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "خطأ في الإرسال",
-            description: "فشل في إرسال الرسالة، يرجى المحاولة مرة أخرى",
-            variant: "destructive"
-          });
-        }
+        console.error('Twilio API Error:', errorData);
+        toast({
+          title: "خطأ في الإرسال",
+          description: errorData.message || "فشل في إرسال الرسالة، يرجى المحاولة مرة أخرى",
+          variant: "destructive"
+        });
         return;
       }
+
+      const result = await response.json();
+      console.log('Twilio message sent successfully:', result);
 
       toast({
         title: "تم الإرسال",
@@ -103,6 +102,7 @@ const WhatsAppMessaging = () => {
       setUseTemplate(false);
       
     } catch (error) {
+      console.error('Error sending WhatsApp message:', error);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء إرسال الرسالة",
@@ -116,7 +116,7 @@ const WhatsAppMessaging = () => {
   const templates = [
     {
       name: "تذكير بالحفل",
-      content: "🎉 تذكير بحفل زفافنا\n\n📅 التاريخ: ٤ يوليو ٢٠٢٥\n📍 المكان: فندق إرث\n🕕 الوقت: ٦:٠٠ مساءً\n\nننتظر حضوركم بفارغ الصبر ❤️"
+      content: "🎉 تذكير بحفل زفافنا\n\n📅 التاريخ: ٤ يوليو ٢٠٢٥\n📍 المكان: فندق إرث\n🕕 الوقت: ٨:٣٠ مساءً\n\nننتظر حضوركم بفارغ الصبر ❤️"
     },
     {
       name: "طلب تأكيد الحضور",
@@ -133,7 +133,7 @@ const WhatsAppMessaging = () => {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2" dir="rtl">
           <MessageCircle className="w-5 h-5" />
-          إرسال رسائل واتساب
+          إرسال رسائل واتساب (Twilio)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -146,7 +146,7 @@ const WhatsAppMessaging = () => {
               className="rounded"
             />
             <Mail className="w-4 h-4" />
-            <span>استخدام القالب المعتمد (01_new) للأرقام الجديدة</span>
+            <span>استخدام قالب الدعوة الافتراضي</span>
           </label>
         </div>
 
@@ -191,7 +191,7 @@ const WhatsAppMessaging = () => {
             ) : (
               <>
                 <Send className="w-4 h-4 ml-2" />
-                {useTemplate ? "إرسال القالب المعتمد" : "إرسال عبر الواتساب"}
+                {useTemplate ? "إرسال القالب" : "إرسال عبر الواتساب"}
               </>
             )}
           </Button>
@@ -221,7 +221,7 @@ const WhatsAppMessaging = () => {
           <AlertTriangle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
           <div className="text-green-100 text-sm" dir="rtl">
             <p className="font-medium mb-1">معلومة:</p>
-            <p>القالب المعتمد (01_new) يُستخدم للأرقام الجديدة التي لم تتفاعل معك من قبل. الرسائل العادية تعمل مع الأرقام الموجودة.</p>
+            <p>يتم الإرسال عبر Twilio WhatsApp Business API. تأكد من إعداد المتغيرات البيئية بشكل صحيح.</p>
           </div>
         </div>
       </CardContent>
