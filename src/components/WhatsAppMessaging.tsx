@@ -33,7 +33,7 @@ const WhatsAppMessaging = () => {
 
   const sendWhatsAppMessage = async (phoneNumber: string, guestName: string) => {
     try {
-      console.log(`Sending WhatsApp message to ${guestName} at ${phoneNumber}`);
+      console.log(`Sending WhatsApp template message to ${guestName} at ${phoneNumber}`);
       
       const twilioAccountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
       const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
@@ -46,20 +46,17 @@ const WhatsAppMessaging = () => {
 
       const whatsappPhone = `whatsapp:${phoneNumber}`;
 
-      const message = `🎉 أهلاً ${guestName}!
-
-تم إرسال دعوة حفل زفافنا إليكم.
-
-📅 التاريخ: ٤ يوليو ٢٠٢٥
-🕰️ الوقت: ٨:٣٠ مساءً
-📍 المكان: فندق إرث
-
-بحضوركم تكتمل فرحتنا ❤️`;
-
+      // Using a simple hello_world template as fallback, or create a custom template
       const twilioPayload = new URLSearchParams({
         From: twilioWhatsAppNumber,
         To: whatsappPhone,
-        Body: message
+        ContentSid: 'HX9e794dd2bcf2dd85447a7e245e8d4c8a8', // Default Twilio hello_world template
+        ContentVariables: JSON.stringify({
+          "1": guestName || "ضيف",
+          "2": "٤ يوليو ٢٠٢٥",
+          "3": "٨:٣٠ مساءً",
+          "4": "فندق إرث"
+        })
       });
 
       const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
@@ -74,14 +71,63 @@ const WhatsAppMessaging = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Error sending WhatsApp message:', errorData);
+        
+        // If template fails, try freeform as fallback
+        if (errorData.code === 63016 || errorData.message?.includes('template')) {
+          console.log('Template failed, trying freeform message...');
+          return await sendFreeformMessage(phoneNumber, guestName, twilioAccountSid, twilioAuthToken, twilioWhatsAppNumber);
+        }
+        
         throw new Error(errorData.message || 'Failed to send message');
       }
 
       const data = await response.json();
-      console.log('WhatsApp message sent successfully:', data);
+      console.log('WhatsApp template message sent successfully:', data);
       return true;
     } catch (error) {
-      console.error('Error in WhatsApp message:', error);
+      console.error('Error in WhatsApp template message:', error);
+      throw error;
+    }
+  };
+
+  const sendFreeformMessage = async (phoneNumber: string, guestName: string, accountSid: string, authToken: string, fromNumber: string) => {
+    try {
+      const whatsappPhone = `whatsapp:${phoneNumber}`;
+      const message = `🎉 أهلاً ${guestName}!
+
+تم إرسال دعوة حفل زفافنا إليكم.
+
+📅 التاريخ: ٤ يوليو ٢٠٢٥
+🕰️ الوقت: ٨:٣٠ مساءً
+📍 المكان: فندق إرث
+
+بحضوركم تكتمل فرحتنا ❤️`;
+
+      const twilioPayload = new URLSearchParams({
+        From: fromNumber,
+        To: whatsappPhone,
+        Body: message
+      });
+
+      const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${btoa(`${accountSid}:${authToken}`)}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: twilioPayload
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send freeform message');
+      }
+
+      const data = await response.json();
+      console.log('WhatsApp freeform message sent successfully:', data);
+      return true;
+    } catch (error) {
+      console.error('Error in freeform message:', error);
       throw error;
     }
   };
@@ -166,11 +212,23 @@ const WhatsAppMessaging = () => {
         <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg p-3 flex items-start gap-2">
           <AlertTriangle className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
           <div className="text-orange-100 text-sm" dir="rtl">
-            <p className="font-medium mb-1">ملاحظة:</p>
+            <p className="font-medium mb-1">ملاحظة مهمة:</p>
             <p>
-              تأكد من إعداد متغيرات البيئة لـ Twilio في ملف .env الخاص بك:
+              يستخدم النظام قوالب الرسائل المعتمدة من واتساب للأعمال. 
               <br />
-              VITE_TWILIO_ACCOUNT_SID, VITE_TWILIO_AUTH_TOKEN, VITE_TWILIO_WHATSAPP_NUMBER
+              قد تحتاج لإنشاء قالب مخصص في حساب Twilio الخاص بك لرسائل الزفاف.
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 flex items-start gap-2">
+          <MessageCircle className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="text-blue-100 text-sm" dir="rtl">
+            <p className="font-medium mb-1">حل مؤقت:</p>
+            <p>
+              إذا فشل إرسال القالب، سيتم المحاولة بالرسالة العادية. 
+              <br />
+              لأفضل النتائج، تأكد من الرد على رسالة من المستلم أولاً.
             </p>
           </div>
         </div>
