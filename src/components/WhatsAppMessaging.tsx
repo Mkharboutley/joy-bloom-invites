@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,11 +32,16 @@ const WhatsAppMessaging = () => {
 
   const sendWhatsAppMessage = async (phoneNumber: string, guestName: string) => {
     try {
+      console.log(`=== TWILIO DEBUG START ===`);
       console.log(`Sending WhatsApp template message to ${guestName} at ${phoneNumber}`);
       
       const twilioAccountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
       const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
       const twilioWhatsAppNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
+      
+      console.log(`Twilio Account SID: ${twilioAccountSid}`);
+      console.log(`Twilio WhatsApp Number: ${twilioWhatsAppNumber}`);
+      console.log(`Target Phone Number: ${phoneNumber}`);
       
       if (!twilioAccountSid || !twilioAuthToken || !twilioWhatsAppNumber) {
         console.error('Missing Twilio credentials');
@@ -45,6 +49,7 @@ const WhatsAppMessaging = () => {
       }
 
       const whatsappPhone = `whatsapp:${phoneNumber}`;
+      console.log(`Final WhatsApp Phone Format: ${whatsappPhone}`);
 
       // Using a simple hello_world template as fallback, or create a custom template
       const twilioPayload = new URLSearchParams({
@@ -59,6 +64,8 @@ const WhatsAppMessaging = () => {
         })
       });
 
+      console.log(`Payload being sent:`, Object.fromEntries(twilioPayload));
+
       const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
         method: 'POST',
         headers: {
@@ -68,9 +75,17 @@ const WhatsAppMessaging = () => {
         body: twilioPayload
       });
 
+      console.log(`Response Status: ${response.status}`);
+      console.log(`Response Status Text: ${response.statusText}`);
+
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error sending WhatsApp message:', errorData);
+        console.error('=== TWILIO ERROR RESPONSE ===');
+        console.error('Full Error Data:', errorData);
+        console.error('Error Code:', errorData.code);
+        console.error('Error Message:', errorData.message);
+        console.error('Error More Info:', errorData.more_info);
+        console.error('=== END TWILIO ERROR ===');
         
         // If template fails, try freeform as fallback
         if (errorData.code === 63016 || errorData.message?.includes('template')) {
@@ -82,17 +97,26 @@ const WhatsAppMessaging = () => {
       }
 
       const data = await response.json();
+      console.log('=== TWILIO SUCCESS RESPONSE ===');
       console.log('WhatsApp template message sent successfully:', data);
+      console.log('Message SID:', data.sid);
+      console.log('Message Status:', data.status);
+      console.log('=== END TWILIO SUCCESS ===');
       return true;
     } catch (error) {
+      console.error('=== TWILIO CATCH ERROR ===');
       console.error('Error in WhatsApp template message:', error);
+      console.error('=== END TWILIO CATCH ERROR ===');
       throw error;
     }
   };
 
   const sendFreeformMessage = async (phoneNumber: string, guestName: string, accountSid: string, authToken: string, fromNumber: string) => {
     try {
+      console.log(`=== FREEFORM MESSAGE ATTEMPT ===`);
       const whatsappPhone = `whatsapp:${phoneNumber}`;
+      console.log(`Freeform WhatsApp Phone Format: ${whatsappPhone}`);
+      
       const message = `🎉 أهلاً ${guestName}!
 
 تم إرسال دعوة حفل زفافنا إليكم.
@@ -109,6 +133,8 @@ const WhatsAppMessaging = () => {
         Body: message
       });
 
+      console.log(`Freeform Payload:`, Object.fromEntries(twilioPayload));
+
       const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {
         method: 'POST',
         headers: {
@@ -118,16 +144,25 @@ const WhatsAppMessaging = () => {
         body: twilioPayload
       });
 
+      console.log(`Freeform Response Status: ${response.status}`);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('=== FREEFORM ERROR ===');
+        console.error('Freeform Error Data:', errorData);
+        console.error('=== END FREEFORM ERROR ===');
         throw new Error(errorData.message || 'Failed to send freeform message');
       }
 
       const data = await response.json();
+      console.log('=== FREEFORM SUCCESS ===');
       console.log('WhatsApp freeform message sent successfully:', data);
+      console.log('=== END FREEFORM SUCCESS ===');
       return true;
     } catch (error) {
+      console.error('=== FREEFORM CATCH ERROR ===');
       console.error('Error in freeform message:', error);
+      console.error('=== END FREEFORM CATCH ERROR ===');
       throw error;
     }
   };
@@ -135,8 +170,15 @@ const WhatsAppMessaging = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log(`=== FORM SUBMISSION DEBUG ===`);
+    console.log(`Raw Phone Input: "${phoneNumber}"`);
+    console.log(`Guest Name: "${guestName}"`);
+
     const formattedPhone = formatUAEPhone(phoneNumber);
+    console.log(`Formatted Phone Result: ${formattedPhone}`);
+    
     if (!formattedPhone) {
+      console.error('Phone formatting failed for input:', phoneNumber);
       toast({
         title: 'رقم غير صالح',
         description: 'يرجى إدخال رقم إماراتي صحيح بالصيغة 05xxxxxxxx أو +9715xxx أو 009715xxx',
@@ -145,6 +187,7 @@ const WhatsAppMessaging = () => {
       return;
     }
 
+    console.log(`=== PROCEEDING WITH SEND ===`);
     setIsLoading(true);
 
     try {
